@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import "#db";
-import { userRoute, aiConversationRoute, connectionReqRoute } from "#routes";
+import { userRoutes, aiConversationRoutes, connectionReqRoutes } from "#routes";
 
 import { errorHandler } from "#middlewares";
 const app = express();
@@ -13,9 +13,9 @@ app.use((req, res, next) => {
 app.use(cors());
 
 app.use(express.json());
-app.use("/users", userRoute);
-app.use("/ai-conversations", aiConversationRoute);
-app.use("/connection-requests", connectionReqRoute);
+app.use("/users", userRoutes);
+app.use("/ai-conversations", aiConversationRoutes);
+app.use("/connection-requests", connectionReqRoutes);
 
 app.use("*splat", (req, res) => {
   throw new Error("Not found", { cause: { status: 404 } });

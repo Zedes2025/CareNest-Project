@@ -4,4 +4,6 @@ import { promptSchema } from '#schemas';
 
 const completionRoutes = Router();
 
+completionRoutes.post('/in-memory-chat', validateBody(promptSchema));
+
 export default completionRoutes;

@@ -1,4 +1,19 @@
 import { Router } from "express";
-const aiConversationRoutes = Router();
+import { validateBody } from "#middlewares";
+import { z } from "zod";
 
-export default aiConversationRoutes;
+import { getChats, getChatById, createChat } from "#controllers";
+
+import { chatCreateSchema } from "#schemas";
+import userRoutes from "./UserRoutes";
+import { create } from "domain";
+
+const aiChatRoutes = Router();
+aiChatRoutes
+  .route("/")
+  .get(getChats)
+  .post(validateBody(chatCreateSchema), createChat);
+
+aiChatRoutes.route("/:id").get(getChatById);
+
+export default aiChatRoutes;

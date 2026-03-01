@@ -10,7 +10,7 @@ const messageSchema = z.object({
   content: z.string().min(1, "Message content is required"),
 });
 
-export const chatSchema = z.object({
+export const chatCreateSchema = z.object({
   userId: validObjectId,
   messages: z.array(messageSchema).default([]),
 });

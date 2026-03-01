@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // reusable enums
-export const weekdayEnum = z.enum([
+const weekdayEnum = z.enum([
   "monday",
   "tuesday",
   "wednesday",
@@ -12,7 +12,7 @@ export const weekdayEnum = z.enum([
 ]);
 
 // DailySchedule schema
-export const dailyScheduleSchema = z.object({
+const dailyScheduleSchema = z.object({
   day: weekdayEnum,
   slots: z.array(z.string()).default([]),
 });

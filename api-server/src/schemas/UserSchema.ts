@@ -18,7 +18,7 @@ const dailyScheduleSchema = z.object({
 });
 
 // Main User schema
-export const userSchema = z.object({
+export const userCreateSchema = z.object({
   firstName: z.string().trim().min(1, "Enter a valid name"),
   lastName: z.string().trim().min(1, "Enter a valid last name"),
 
@@ -47,3 +47,5 @@ export const userSchema = z.object({
 
   interests: z.array(z.string()).default([]),
 });
+
+export const userUpdateSchema = userCreateSchema.partial();

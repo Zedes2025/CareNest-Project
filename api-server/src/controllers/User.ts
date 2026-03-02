@@ -96,27 +96,40 @@ export const deleteUser: RequestHandler = async (req, res) => {
 //----------------------------------Details of other usres----------------------------------
 
 // 2. Infer the type from the schema
-type PublicProfileDTO = z.infer<typeof userUpdateSchema>;
+
+export const publicProfileSchema = userUpdateSchema.omit({
+  location: true,
+  birthday: true,
+});
+type PublicProfileDTO = Omit<
+  z.infer<typeof userCreateSchema>,
+  "location" | "birthday"
+>;
 
 export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
   req,
   res,
 ) => {
-  const users = await User.find();
-  res.json(users);
+  const users = await User.find().lean(); // plain objects
+
+  const publicUsers = users.map(
+    ({ location, birthday, ...rest }) => rest satisfies PublicProfileDTO,
+  );
+
+  res.json(publicUsers);
 };
 
-export const getOtherUserById: RequestHandler<
-  { id: string },
-  {},
-  PublicProfileDTO
-> = async (req, res) => {
-  const {
-    params: { id },
-  } = req;
-  if (!isValidObjectId(id))
-    throw new Error("Invalid id", { cause: { status: 400 } });
+export const getOtherUserById: RequestHandler = async (req, res) => {
+  const { id } = req.params;
+
   const user = await User.findById(id).lean();
-  if (!user) throw new Error("User not found", { cause: { status: 404 } });
-  res.json(user);
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  // strip location and birthday
+  const { location, birthday, ...publicUser } = user;
+
+  res.json(publicUser satisfies PublicProfileDTO);
 };

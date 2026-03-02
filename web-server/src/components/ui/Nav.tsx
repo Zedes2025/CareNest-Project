@@ -1,6 +1,10 @@
-import { Link, NavLink, useLocation, useNavigate } from "react-router";
+import { NavLink, useLocation, useNavigate } from "react-router";
 import { useCallback, useMemo } from "react";
 
+//This is all just Placeholder Stuff I asked ChatGPT to use so the Button-logic is already in place
+//Login and Register only visible when logged out
+//Login turns to Logout when logged in
+//Homepage, My Profile and Contacts only visible when logged in
 const TOKEN_KEYS = ["authToken", "accessToken", "jwt", "token"] as const;
 
 function getStoredToken(): string | null {
@@ -23,8 +27,8 @@ function navBtnClass(isActive: boolean) {
     "rounded-xl",
     "normal-case",
     "transition-colors",
-    "hover:text-blue-600",
-    "hover:bg-blue-50",
+    "hover:text-blue-50",
+    "hover:bg-blue-800",
     "focus-visible:outline",
     "focus-visible:outline-2",
     "focus-visible:outline-offset-2",
@@ -44,14 +48,14 @@ export const Nav = () => {
 
   const handleLogout = useCallback(() => {
     // Placeholder logout: remove token(s) and redirect to /login.
-    // Your colleague can later replace this with a Data Router action + API call.
+    // Anitha: This part can later be replaced with Data Router action + API call.
     clearStoredToken();
     navigate("/login", { replace: true });
   }, [navigate]);
 
   return (
     <div className="navbar bg-base-100 border-b border-base-200">
-      {/* Left: AI placeholder */}
+      {/* AI placeholder */}
       <div className="navbar-start">
         <button
           type="button"
@@ -59,14 +63,14 @@ export const Nav = () => {
           aria-label="AI chat placeholder"
           title="AI Chat (placeholder)"
         >
-          AI
+          AI-Chat coming soonTM
         </button>
       </div>
 
       {/* Center: placeholder text */}
       <div className="navbar-center">
         <span className="text-base font-semibold tracking-wide">
-          Placeholder Center Text
+          Connect with your community!
         </span>
       </div>
 

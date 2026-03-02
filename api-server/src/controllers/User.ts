@@ -45,7 +45,7 @@ type UserProfile = z.infer<typeof userUpdateSchema> & {
 export const updateUserProfile: RequestHandler<
   { id: string },
   {},
-  UserProfile
+  z.infer<typeof userUpdateSchema> //UserProfile
 > = async (req, res) => {
   const { id } = req.params;
 
@@ -64,7 +64,6 @@ export const updateUserProfile: RequestHandler<
 
   const userProfile: UserProfile = {
     ...updatedUser,
-    _id: updatedUser._id.toString(),
 
     isProfileComplete: !!(
       updatedUser.firstName &&

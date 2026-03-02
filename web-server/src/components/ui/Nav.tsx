@@ -1,50 +1,127 @@
-import { Link } from "react-router";
+import { Link, NavLink, useLocation, useNavigate } from "react-router";
+import { useCallback, useMemo } from "react";
+
+const TOKEN_KEYS = ["authToken", "accessToken", "jwt", "token"] as const;
+
+function getStoredToken(): string | null {
+  for (const key of TOKEN_KEYS) {
+    const v = localStorage.getItem(key);
+    if (v && v.trim().length > 0) return v;
+  }
+  return null;
+}
+
+function clearStoredToken() {
+  for (const key of TOKEN_KEYS) localStorage.removeItem(key);
+}
+
+function navBtnClass(isActive: boolean) {
+  return [
+    "btn",
+    "btn-ghost",
+    "btn-sm",
+    "rounded-xl",
+    "normal-case",
+    "transition-colors",
+    "hover:text-blue-600",
+    "hover:bg-blue-50",
+    "focus-visible:outline",
+    "focus-visible:outline-2",
+    "focus-visible:outline-offset-2",
+    "focus-visible:outline-blue-600",
+    isActive ? "text-blue-600 font-semibold" : "",
+  ].join(" ");
+}
 
 export const Nav = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Re-evaluate on route changes so it updates after login redirects.
+  const isAuthenticated = useMemo(() => {
+    return Boolean(getStoredToken());
+  }, [location.pathname]);
+
+  const handleLogout = useCallback(() => {
+    // Placeholder logout: remove token(s) and redirect to /login.
+    // Your colleague can later replace this with a Data Router action + API call.
+    clearStoredToken();
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
   return (
-    <div className="navbar bg-base-100 shadow-sm p-0 mb-5">
-      <div className="container flex items-center">
-        <div className="navbar-start lg:hidden flex-1">
-          <Link className="btn mr-2">AI CHAT HERE</Link>
-          <Link className="btn mr-2">AI CHAT HERE</Link>
-        </div>
+    <div className="navbar bg-base-100 border-b border-base-200">
+      {/* Left: AI placeholder */}
+      <div className="navbar-start">
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm rounded-xl hover:text-blue-600 hover:bg-blue-50"
+          aria-label="AI chat placeholder"
+          title="AI Chat (placeholder)"
+        >
+          AI
+        </button>
+      </div>
+
+      {/* Center: placeholder text */}
+      <div className="navbar-center">
+        <span className="text-base font-semibold tracking-wide">
+          Placeholder Center Text
+        </span>
+      </div>
+
+      {/* Right: navigation buttons */}
+      <div className="navbar-end gap-1">
+        {isAuthenticated ? (
+          <>
+            {/* Adjust paths if your router uses different ones */}
+            <NavLink
+              to="/home"
+              className={({ isActive }) => navBtnClass(isActive)}
+            >
+              Home
+            </NavLink>
+
+            <NavLink
+              to="/my-profile"
+              className={({ isActive }) => navBtnClass(isActive)}
+            >
+              My Profile
+            </NavLink>
+
+            <NavLink
+              to="/contact"
+              className={({ isActive }) => navBtnClass(isActive)}
+            >
+              Contacts
+            </NavLink>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="btn btn-ghost btn-sm rounded-xl transition-colors hover:text-blue-600 hover:bg-blue-50"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <NavLink
+              to="/login"
+              className={({ isActive }) => navBtnClass(isActive)}
+            >
+              Login
+            </NavLink>
+
+            <NavLink
+              to="/register"
+              className={({ isActive }) => navBtnClass(isActive)}
+            >
+              Register
+            </NavLink>
+          </>
+        )}
       </div>
     </div>
   );
 };
-
-//     <Link to="/" className="p-0">
-//       <img src="/logo.svg" width="200px" alt="" />
-//     </Link>
-//   </div>
-//   <div className="navbar-end flex-1">
-//     <div className="menu menu-horizontal hidden lg:flex">
-//       <Link className="btn btn-ghost" to="/">
-//         View All Events
-//       </Link>
-//       <Link className="btn btn-ghost" to="/create/event">
-//         Create Event
-//       </Link>
-//     </div>
-
-//     <>
-//       <Link className="btn mr-2" to="/logout">
-//         Logout
-//       </Link>
-//       <div className="w-10 rounded-full overflow-hidden">
-//         <img
-//           alt="Tailwind CSS Navbar component"
-//           src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-//         />
-//       </div>
-//     </>
-
-//     <>
-//       <Link className="btn btn-primary mr-1" to="/signup">
-//         Signup
-//       </Link>
-//       <Link className="btn" to="/login">
-//         Login
-//       </Link>
-//     </>
-//   </div>

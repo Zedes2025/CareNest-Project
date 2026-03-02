@@ -7,3 +7,5 @@ export const router = createBrowserRouter([
     Component: AppLayout,
   },
 ]);
+
+export default router;

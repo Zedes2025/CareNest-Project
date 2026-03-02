@@ -16,6 +16,10 @@
       "development": "./src/config/index.ts",
       "default": "./dist/config/index.js"
     },
+    "#types": {
+      "development": "./src/types/index.ts",
+      "default": "./dist/types/index.js"
+    },
     "#models": {
       "development": "./src/models/index.ts",
       "default": "./dist/models/index.js"
@@ -45,8 +49,10 @@
     "start": "node dist/app.js"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.3",
     "typescript": "^5.8.3"
   },

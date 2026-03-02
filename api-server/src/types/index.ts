@@ -1,38 +1,57 @@
+export type Weekday =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export type TimeSlot = string; // flexible for now, e.g., "morning", "noon", "afternoon"
+
+export interface DailySchedule {
+  day: Weekday;
+  slots: TimeSlot[];
+}
+
 type UserType = {
-  name: string;
+  _id?: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
-  address: string;
-  createdAt?: string;
-  updatedAt?: string;
+
+  birthday: Date;
+  profilePicture: string;
+  Age?: number;
+  //Age?: { type: Number };
+
+  aboutMe: string;
+  location: string;
+  // availableTime: Weekday[];
+  availability: DailySchedule[];
+  servicesOffered: string[];
+  interests: string[];
+
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-type CategoryType = {
-  name: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
+type ConnectionReqType = {};
 
-type ProductType = {
-  name: string;
-  description: string;
-  price: Number;
-  categoryId: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
+// Message type
+interface Message {
+  role: "assistant" | "system" | "user" | "developer";
+  content: string;
+  createdAt: Date;
+}
 
-type OrderProductType = {
-  productId: string;
-  quantity: number;
-};
-
-type OrderType = {
+// Chat type
+interface AIConversationType {
+  _id?: string;
   userId: string;
-  products: OrderProductType[];
-  total: number;
-  createdAt?: string;
-  updatedAt?: string;
-};
+  messages: Message[];
+  createdAt: Date;
+}
 
-export type { UserType, CategoryType, ProductType, OrderType };
+export type { UserType, AIConversationType, ConnectionReqType };

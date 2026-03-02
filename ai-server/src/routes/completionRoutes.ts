@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { validateBody } from '#middleware';
 import { promptSchema } from '#schemas';
-import { createInMemoryChat } from '#controllers';
+import { createAiChat } from '#controllers';
 const completionRoutes = Router();
 
-completionRoutes.post('/chat', validateBody(promptSchema), createInMemoryChat);
+completionRoutes.post('/chat', /*validateBody(promptSchema), */ createAiChat);
 
 export default completionRoutes;

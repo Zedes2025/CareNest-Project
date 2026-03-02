@@ -115,3 +115,5 @@ npm install express cors
 npm i --save-dev @types/cors
 npm i --save-dev @types/express
 npm i mongoose zod jsonwebtoken bcrypt
+npm i --save-dev @types/bcrypt
+npm i --save-dev @types/jsonwebtoken

@@ -22,7 +22,15 @@ const DailyScheduleSchema = new Schema<DailySchedule>(
 );
 
 // Main user schema
-
+const locationSchema = new Schema(
+  {
+    street: { type: String, required: true },
+    houseNumber: { type: String, required: true },
+    city: { type: String, required: true },
+    plz: { type: String, required: true },
+  },
+  { _id: false },
+);
 const userSchema = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
@@ -36,12 +44,12 @@ const userSchema = new Schema(
     },
     password: { type: String, required: true, select: false },
 
-    birthday: { type: Date, required: true },
+    birthday: { type: Date, required: false },
     profilePicture: { type: String, default: "" },
     // Age: { type: Number },
 
     aboutMe: { type: String, default: "" },
-    location: { type: String, required: true },
+    location: { type: locationSchema, required: false },
 
     // availableTime: {
     //   type: [String],

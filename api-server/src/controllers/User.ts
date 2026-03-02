@@ -2,7 +2,7 @@ import { type UserType } from "#types";
 import { User } from "#models";
 import { type RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
-import { userUpdateSchema } from "#schemas";
+import { userCreateSchema, userUpdateSchema } from "#schemas";
 import { z } from "zod";
 
 export const getUsers: RequestHandler = async (req, res) => {
@@ -21,7 +21,11 @@ export const getUserById: RequestHandler = async (req, res) => {
   res.json(user);
 };
 
-export const createUser: RequestHandler = async (req, res) => {
+export const createUser: RequestHandler<
+  {},
+  {},
+  z.infer<typeof userCreateSchema>
+> = async (req, res) => {
   // onlyregistratiom
   if (!req.body)
     throw new Error("First name, last name, and email are required", {

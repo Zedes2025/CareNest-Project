@@ -2,6 +2,8 @@ import { type UserType } from "#types";
 import { User } from "#models";
 import { type RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
+import type { userUpdateSchema } from "#schemas";
+import { z } from "zod";
 
 export const getUsers: RequestHandler = async (req, res) => {
   const users = await User.find();
@@ -20,6 +22,7 @@ export const getUserById: RequestHandler = async (req, res) => {
 };
 
 export const createUser: RequestHandler = async (req, res) => {
+  // onlyregistratiom
   if (!req.body)
     throw new Error("First name, last name, and email are required", {
       cause: { status: 400 },
@@ -30,27 +33,16 @@ export const createUser: RequestHandler = async (req, res) => {
   res.status(201).json(user);
 };
 
-// export const updateUser: RequestHandler = async (req, res) => {
-//   const {
-//     params: { id },
-//     body,
-//   } = req;
-//   if (!isValidObjectId(id))
-//     throw new Error("Invalid id", { cause: { status: 400 } });
-//   const user = await User.findByIdAndUpdate(id, body, { new: true });
-//   if (!user) throw new Error("User not found", { cause: { status: 404 } });
-//   res.json(user);
-// };
-
-// Extend locally inside this controller file
-type UserWithProfile = UserType & {
+type UserProfile = z.infer<typeof userUpdateSchema> & {
+  _id: string;
   isProfileComplete: boolean;
 };
 
-export const updateUserProfile: RequestHandler<{ id: string }> = async (
-  req,
-  res,
-) => {
+export const updateUserProfile: RequestHandler<
+  { id: string },
+  {},
+  UserProfile
+> = async (req, res) => {
   const { id } = req.params;
 
   const updatedUserDoc = await User.findByIdAndUpdate(
@@ -66,7 +58,7 @@ export const updateUserProfile: RequestHandler<{ id: string }> = async (
 
   const updatedUser = updatedUserDoc.toObject();
 
-  const userWithProfile: UserWithProfile = {
+  const userProfile: UserProfile = {
     ...updatedUser,
     _id: updatedUser._id.toString(),
 
@@ -83,7 +75,7 @@ export const updateUserProfile: RequestHandler<{ id: string }> = async (
   };
 
   res.json({
-    ...userWithProfile,
+    ...userProfile,
   });
 };
 

@@ -38,7 +38,7 @@ const userSchema = new Schema(
 
     birthday: { type: Date, required: true },
     profilePicture: { type: String, default: "" },
-    Age: { type: Number },
+    // Age: { type: Number },
 
     aboutMe: { type: String, default: "" },
     location: { type: String, required: true },

@@ -2,7 +2,7 @@ import { type UserType } from "#types";
 import { User } from "#models";
 import { type RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
-import type { userUpdateSchema } from "#schemas";
+import { userUpdateSchema } from "#schemas";
 import { z } from "zod";
 
 export const getUsers: RequestHandler = async (req, res) => {

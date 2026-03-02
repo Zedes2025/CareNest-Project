@@ -28,7 +28,7 @@ export const userCreateSchema = z.object({
   birthday: z.coerce.date(),
 
   profilePicture: z.string().default(""),
-  Age: z.number().optional(),
+  //Age: z.number().optional(),
 
   aboutMe: z.string().min(10, "Tell us more about you"),
   location: z.object({

@@ -1,7 +1,7 @@
 import "#db";
 import cors from "cors";
 import express from "express";
-// import { authRouter } from "#routes";
+import { authRouter } from "#routes";
 import { errorHandler, notFoundHandler } from "#middlewares";
 import { CLIENT_BASE_URL } from "#config";
 
@@ -18,7 +18,7 @@ app.use(
 
 app.use(express.json());
 
-// app.use("/auth", authRouter);
+app.use("/auth", authRouter);
 
 app.use("*splat", notFoundHandler);
 app.use(errorHandler);

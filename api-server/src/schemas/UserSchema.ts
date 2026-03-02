@@ -37,7 +37,7 @@ export const userCreateSchema = z.object({
     city: z.string().min(2),
     plz: z.string().regex(/^\d{5}$/, "PLZ must be 5 digits"),
   }),
-  availableTime: z.array(weekdayEnum).min(1, "Select at least one day"),
+  // availableTime: z.array(weekdayEnum).min(1, "Select at least one day"),
 
   availability: z
     .array(dailyScheduleSchema)

@@ -43,19 +43,19 @@ const userSchema = new Schema(
     aboutMe: { type: String, default: "" },
     location: { type: String, required: true },
 
-    availableTime: {
-      type: [String],
-      enum: [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-      ],
-      default: [],
-    },
+    // availableTime: {
+    //   type: [String],
+    //   enum: [
+    //     "monday",
+    //     "tuesday",
+    //     "wednesday",
+    //     "thursday",
+    //     "friday",
+    //     "saturday",
+    //     "sunday",
+    //   ],
+    //   default: [],
+    // },
 
     availability: { type: [DailyScheduleSchema], default: [] },
 

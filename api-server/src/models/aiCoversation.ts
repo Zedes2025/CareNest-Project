@@ -32,4 +32,4 @@ const chatSchema = new Schema({
   },
 });
 
-export default model("Chat", chatSchema);
+export default model("aiChat", chatSchema);

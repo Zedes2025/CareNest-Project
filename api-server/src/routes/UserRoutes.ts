@@ -7,7 +7,7 @@ import {
   deleteUser,
   getUserById,
   getUsers,
-  updateUser,
+  updateUserProfile,
 } from "#controllers";
 
 import { userCreateSchema, userUpdateSchema } from "#schemas";
@@ -21,7 +21,7 @@ userRoutes
 userRoutes
   .route("/:id")
   .get(getUserById)
-  .put(validateBody(userUpdateSchema), updateUser)
+  .put(validateBody(userUpdateSchema), updateUserProfile)
   .delete(deleteUser);
 
 export default userRoutes;

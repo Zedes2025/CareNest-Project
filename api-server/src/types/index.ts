@@ -24,10 +24,11 @@ type UserType = {
   birthday: Date;
   profilePicture: string;
   Age?: number;
+  //Age?: { type: Number };
 
   aboutMe: string;
   location: string;
-  availableTime: Weekday[];
+  // availableTime: Weekday[];
   availability: DailySchedule[];
   servicesOffered: string[];
   interests: string[];

@@ -1,9 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { loginSchema, type LoginInput } from "../../lib/authSchemas";
+import type { SubmitEventHandler } from "react";
+import * as z from "zod";
 
+//For error message
 type FieldErrors = Partial<Record<keyof LoginInput, string>>;
 
+//Form Data Box
 export const LoginPage = () => {
   const [values, setValues] = useState<LoginInput>({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -14,29 +18,34 @@ export const LoginPage = () => {
     [values],
   );
 
+  //Makesure all fields are filled out
   function onChange<K extends keyof LoginInput>(key: K, v: LoginInput[K]) {
     setValues((prev) => ({ ...prev, [key]: v }));
     setFieldErrors((prev) => ({ ...prev, [key]: "" }));
     setFormMessage("");
   }
 
-  function onSubmit(e: React.FormEvent) {
+  //Clear old Status Message and show new error or success cleanly
+  const onSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     setFormMessage("");
 
+    //run zod validation against current form values
     const parsed = loginSchema.safeParse(values);
     if (!parsed.success) {
-      const fe = parsed.error.flatten().fieldErrors;
+      const fe = z.flattenError(parsed.error).fieldErrors;
+
       setFieldErrors({
         email: fe.email?.[0],
         password: fe.password?.[0],
       });
+
       return;
     }
 
     // Frontend-only placeholder (no auth, no API)
     setFormMessage("Login form submitted (placeholder).");
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-10">

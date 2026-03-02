@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { registerSchema, type RegisterInput } from "../../lib/authSchemas";
 import type { SubmitEventHandler } from "react";
+import * as z from "zod";
 
 //For error message
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>;
@@ -39,13 +40,16 @@ export const RegistrationPage = () => {
     setFormMessage("");
   }
 
+  //Clear old Status Message and show new error or success cleanly
   const onSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     setFormMessage("");
 
+    //run zod validation against current form values
     const parsed = registerSchema.safeParse(values);
     if (!parsed.success) {
-      const fe = parsed.error.flatten().fieldErrors;
+      const fe = z.flattenError(parsed.error).fieldErrors;
+
       setFieldErrors({
         firstName: fe.firstName?.[0],
         lastName: fe.lastName?.[0],
@@ -53,6 +57,7 @@ export const RegistrationPage = () => {
         password: fe.password?.[0],
         confirmPassword: fe.confirmPassword?.[0],
       });
+
       return;
     }
 

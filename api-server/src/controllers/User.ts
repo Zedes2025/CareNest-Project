@@ -10,7 +10,7 @@ export const getUsers: RequestHandler = async (req, res) => {
   res.json(users);
 };
 
-export const getUserById: RequestHandler = async (req, res) => {
+export const getMyProfileById: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
@@ -91,4 +91,32 @@ export const deleteUser: RequestHandler = async (req, res) => {
   const user = await User.findByIdAndDelete(id);
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json({ message: "User deleted" });
+};
+//===========================================================================================================
+//----------------------------------Details of other usres----------------------------------
+
+// 2. Infer the type from the schema
+type PublicProfileDTO = z.infer<typeof userUpdateSchema>;
+
+export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
+  req,
+  res,
+) => {
+  const users = await User.find();
+  res.json(users);
+};
+
+export const getOtherUserById: RequestHandler<
+  { id: string },
+  {},
+  PublicProfileDTO
+> = async (req, res) => {
+  const {
+    params: { id },
+  } = req;
+  if (!isValidObjectId(id))
+    throw new Error("Invalid id", { cause: { status: 400 } });
+  const user = await User.findById(id).lean();
+  if (!user) throw new Error("User not found", { cause: { status: 404 } });
+  res.json(user);
 };

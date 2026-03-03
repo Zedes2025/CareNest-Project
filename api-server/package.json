@@ -49,6 +49,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mongoose": "^8.23.0",
+    "tsconfig-paths": "^4.2.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

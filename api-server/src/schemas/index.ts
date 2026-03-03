@@ -1,2 +1,2 @@
-export { userCreateSchema, userUpdateSchema } from "./UserSchema";
-export { chatCreateSchema } from "./AiConversationSchema";
+export { userCreateSchema, userUpdateSchema } from "./UserSchema.ts";
+export { chatCreateSchema } from "./AiConversationSchema.ts";

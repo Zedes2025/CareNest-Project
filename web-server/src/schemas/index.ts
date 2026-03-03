@@ -30,12 +30,3 @@ export const registerSchema = z
   )
 
   .refine((data) => data.password === data.confirmPassword, { error: "Passwords don't match" });
-
-export const loginSchema = z.object({
-  email: emailSchema,
-  password: basePasswordSchema,
-});
-
-export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1),
-});

@@ -1,11 +1,11 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { AppLayout } from "./components/layout/AppLayout";
-import { HomePage } from "./components/pages/HomePage";
-import { ContactPage } from "./components/pages/ContactPage";
-import { DetailsPage } from "./components/pages/DetailsPage";
-import { MyProfilePage } from "./components/pages/MyProfilePage";
-import { LoginPage } from "./components/pages/LoginPage";
-import { RegistrationPage } from "./components/pages/RegistrationPage";
+import { HomePage } from "./pages/HomePage";
+import { ContactPage } from "./pages/ContactPage";
+import { DetailsPage } from "./pages/DetailsPage";
+import { MyProfilePage } from "./pages/MyProfilePage";
+import LoginPage from "./pages/LoginPage";
+import RegistrationPage from "./pages/RegistrationPage";
 
 export const router = createBrowserRouter([
   {

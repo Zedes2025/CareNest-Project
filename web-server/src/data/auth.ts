@@ -35,7 +35,7 @@ const logout = async (): Promise<SuccessRes> => {
   const refreshToken = localStorage.getItem("refreshToken");
 
   const res = await fetch(`${authServiceURL}/logout`, {
-    method: "POST",
+    method: "DELETE",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-type": "application/json",

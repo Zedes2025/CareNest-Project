@@ -1,16 +1,9 @@
-import type { LoginProps } from "../../types";
 import { Link } from "react-router";
 import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-interface RegisterFormProps {
-  values: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  };
+interface RegisterFormProps extends RegisterFormState {
   fieldErrors: Partial<Record<keyof RegisterFormState, string>>;
   onChange: (field: RegisterFormState, value: string) => void;
   onSubmit: (data: { firstName: string; lastName: string; email: string; password: string; confirmPassword: string }) => void;

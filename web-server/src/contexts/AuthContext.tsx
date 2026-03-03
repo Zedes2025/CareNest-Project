@@ -33,11 +33,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleSignOut = async () => {
-    await logout();
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("accessToken");
-    setSignedIn(false);
-    setUser(null);
+    try {
+      await logout();
+    } finally {
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("accessToken");
+      setSignedIn(false);
+      setUser(null);
+      setCheckSession(false);
+    }
   };
 
   const handleRegister = async (formData: RegisterFormState) => {

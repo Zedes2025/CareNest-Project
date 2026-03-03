@@ -28,7 +28,7 @@ export const userUpdateSchema = z.object({
   //Age: z.number().optional(),
 
   aboutMe: z.string().min(10, "Tell us more about you"),
-  location: z.object({
+  address: z.object({
     street: z.string().min(3),
     houseNumber: z.string().min(1, "Please enter house number"),
     city: z.string().min(2),

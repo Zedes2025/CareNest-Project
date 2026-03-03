@@ -10,7 +10,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_BASE_URL, // for use with credentials, origin(s) need to be specified
+    credentials: true, // sends and receives secure cookies
+    exposedHeaders: ["WWW-Authenticate"], // needed to send the 'refresh trigger''// header setting to "token-expired" is done in errorHandler middleware.
+  }),
+);
 
 app.use(express.json());
 app.use("/users", userRoutes);

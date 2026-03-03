@@ -1,3 +1,4 @@
+import { AuthProvider } from "../../contexts/AuthContext";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { Outlet, useNavigation } from "react-router";
@@ -7,7 +8,7 @@ export const AppLayout = () => {
   const isLoading = navigation.state === "loading";
 
   return (
-    <>
+    <AuthProvider>
       <Header />
       <div className="min-h-dvh">
         {isLoading && (
@@ -22,6 +23,6 @@ export const AppLayout = () => {
         <Outlet />
       </div>
       <Footer />
-    </>
+    </AuthProvider>
   );
 };

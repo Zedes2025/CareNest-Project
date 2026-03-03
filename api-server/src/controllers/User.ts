@@ -2,7 +2,7 @@ import { type UserType } from "#types";
 import { User } from "#models";
 import { type RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
-import type { userUpdateSchema } from "#schemas";
+import { userCreateSchema, userUpdateSchema } from "#schemas";
 import { z } from "zod";
 
 export const getUsers: RequestHandler = async (req, res) => {
@@ -10,7 +10,7 @@ export const getUsers: RequestHandler = async (req, res) => {
   res.json(users);
 };
 
-export const getUserById: RequestHandler = async (req, res) => {
+export const getMyProfileById: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
@@ -21,7 +21,11 @@ export const getUserById: RequestHandler = async (req, res) => {
   res.json(user);
 };
 
-export const createUser: RequestHandler = async (req, res) => {
+export const createUser: RequestHandler<
+  {},
+  {},
+  z.infer<typeof userCreateSchema>
+> = async (req, res) => {
   // onlyregistratiom
   if (!req.body)
     throw new Error("First name, last name, and email are required", {
@@ -41,7 +45,7 @@ type UserProfile = z.infer<typeof userUpdateSchema> & {
 export const updateUserProfile: RequestHandler<
   { id: string },
   {},
-  UserProfile
+  z.infer<typeof userUpdateSchema> //UserProfile
 > = async (req, res) => {
   const { id } = req.params;
 
@@ -60,7 +64,6 @@ export const updateUserProfile: RequestHandler<
 
   const userProfile: UserProfile = {
     ...updatedUser,
-    _id: updatedUser._id.toString(),
 
     isProfileComplete: !!(
       updatedUser.firstName &&
@@ -88,4 +91,45 @@ export const deleteUser: RequestHandler = async (req, res) => {
   const user = await User.findByIdAndDelete(id);
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json({ message: "User deleted" });
+};
+//===========================================================================================================
+//----------------------------------Details of other usres----------------------------------
+
+// 2. Infer the type from the schema
+
+export const publicProfileSchema = userUpdateSchema.omit({
+  location: true,
+  birthday: true,
+});
+type PublicProfileDTO = Omit<
+  z.infer<typeof userCreateSchema>,
+  "location" | "birthday"
+>;
+
+export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
+  req,
+  res,
+) => {
+  const users = await User.find().lean(); // plain objects
+
+  const publicUsers = users.map(
+    ({ location, birthday, ...rest }) => rest satisfies PublicProfileDTO,
+  );
+
+  res.json(publicUsers);
+};
+
+export const getOtherUserById: RequestHandler = async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id).lean();
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  // strip location and birthday
+  const { location, birthday, ...publicUser } = user;
+
+  res.json(publicUser satisfies PublicProfileDTO);
 };

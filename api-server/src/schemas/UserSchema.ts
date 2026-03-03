@@ -18,17 +18,14 @@ const dailyScheduleSchema = z.object({
 });
 
 // Main User schema
-export const userCreateSchema = z.object({
+export const userUpdateSchema = z.object({
   firstName: z.string().trim().min(1, "Enter a valid name"),
   lastName: z.string().trim().min(1, "Enter a valid last name"),
 
-  email: z.email("Enter a valid email").trim().toLowerCase(),
-
-  password: z.string().min(8, "Password must be at least 8 characters long"),
   birthday: z.coerce.date(),
 
   profilePicture: z.string().default(""),
-  Age: z.number().optional(),
+  //Age: z.number().optional(),
 
   aboutMe: z.string().min(10, "Tell us more about you"),
   location: z.object({
@@ -48,4 +45,11 @@ export const userCreateSchema = z.object({
   interests: z.array(z.string()).default([]),
 });
 
-export const userUpdateSchema = userCreateSchema.partial();
+export const userCreateSchema = z.object({
+  firstName: z.string().trim().min(1, "Enter a valid name"),
+  lastName: z.string().trim().min(1, "Enter a valid last name"),
+
+  email: z.email("Enter a valid email").trim().toLowerCase(),
+
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+});

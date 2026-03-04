@@ -19,11 +19,11 @@ import {
   userUpdateSchema,
 } from "../profile/myProfileForm";
 
-import { BasicInfoSection } from "../components/ProfileComponents/BasicInfoSection";
-import { AboutSection } from "../components/ProfileComponents/AboutSection";
-import { LocationSection } from "../components/ProfileComponents/LocationSection";
-import { AvailabilitySection } from "../components/ProfileComponents/AvailabilitySection";
-import { MultiSelectChips } from "../components/ProfileComponents/MultiSelectChips";
+import { BasicInfoSection } from "../components/profilecomponents/BasicInfoSection";
+import { AboutSection } from "../components/profilecomponents/AboutSection";
+import { LocationSection } from "../components/profilecomponents/LocationSection";
+import { AvailabilitySection } from "../components/profilecomponents/AvailabilitySection";
+import { MultiSelectChips } from "../components/profilecomponents/MultiSelectChips";
 
 export const MyProfilePage = () => {
   const { signedIn, user } = useAuth();

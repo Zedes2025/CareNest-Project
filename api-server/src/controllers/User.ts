@@ -70,7 +70,7 @@ export const updateUserProfile: RequestHandler<
       updatedUser.firstName &&
       updatedUser.lastName &&
       updatedUser.birthday &&
-      updatedUser.location &&
+      updatedUser.address &&
       updatedUser.aboutMe &&
       //   updatedUser.availableTime?.length > 0 &&
       updatedUser.availability?.length > 0 &&

@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { login, logout, me, register } from "../data";
 
+interface AuthContextType {
+  signedIn: boolean;
+  user: User | null;
+  handleSignIn: (input: LoginInput) => Promise<void>;
+  handleSignOut: () => Promise<void>;
+  handleRegister: (formData: RegisterFormState) => Promise<void>;
+}
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {

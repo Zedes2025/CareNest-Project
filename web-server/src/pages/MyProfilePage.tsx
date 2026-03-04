@@ -6,7 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 import { SERVICE_OPTIONS, INTEREST_OPTIONS } from "../profile/profileOptions";
 import { type SlotKey, type Weekday } from "../profile/schedule";
-
+// import { issuesFieldErrors } from "../utils";
 import {
   ageFromDateInput,
   countSelectedSlots,
@@ -41,10 +41,10 @@ export const MyProfilePage = () => {
       form.lastName &&
       form.birthday &&
       form.aboutMe &&
-      form.location.street &&
-      form.location.houseNumber &&
-      form.location.city &&
-      form.location.plz
+      form.address.street &&
+      form.address.houseNumber &&
+      form.address.city &&
+      form.address.plz
     );
   }, [form]);
 
@@ -73,9 +73,9 @@ export const MyProfilePage = () => {
 
   function setField(path: string, value: string) {
     setForm((prev) => {
-      if (path.startsWith("location.")) {
-        const k = path.split(".")[1] as keyof FormState["location"];
-        return { ...prev, location: { ...prev.location, [k]: value } };
+      if (path.startsWith("address.")) {
+        const k = path.split(".")[1] as keyof FormState["address"];
+        return { ...prev, address: { ...prev.address, [k]: value } };
       }
       return { ...prev, [path]: value } as FormState;
     });
@@ -124,6 +124,7 @@ export const MyProfilePage = () => {
     const parsed = userUpdateSchema.safeParse(body);
 
     if (!parsed.success) {
+      console.log("Validation Failed:", parsed.error.format());
       setFieldErrors(issuesToFieldErrors(parsed.error));
       setSaving(false);
       return;

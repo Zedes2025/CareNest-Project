@@ -4,6 +4,7 @@ import { login, logout, me, register } from "../data";
 interface AuthContextType {
   signedIn: boolean;
   user: User | null;
+  loading: boolean;
   handleSignIn: (input: LoginInput) => Promise<void>;
   handleSignOut: () => Promise<void>;
   handleRegister: (formData: RegisterFormState) => Promise<void>;
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { accessToken, refreshToken } = await login({ email, password });
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
-    // setSignedIn(true);
+    setSignedIn(true);
     setCheckSession(true);
   };
 
@@ -56,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { accessToken, refreshToken } = await register(formData);
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
-    // setSignedIn(true);
+    setSignedIn(true);
     setCheckSession(true);
   };
 
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         signedIn,
         user,
+        loading: checkSession,
         handleSignIn,
         handleSignOut,
         handleRegister,

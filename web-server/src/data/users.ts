@@ -1,14 +1,6 @@
-const apiServerURL =
-  import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhost:3000";
+const apiServerURL = import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhost:3000";
 
-type Weekday =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
+type Weekday = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
 export type ApiUserProfile = {
   _id: string;
@@ -20,7 +12,7 @@ export type ApiUserProfile = {
   profilePicture?: string;
   aboutMe?: string;
 
-  location?: {
+  address?: {
     street: string;
     houseNumber: string;
     city: string;
@@ -63,10 +55,7 @@ export async function getMyProfileById(id: string): Promise<ApiUserProfile> {
 }
 
 // PUT /users/profile/:id  (requires full body)
-export async function updateMyProfileById(
-  id: string,
-  body: unknown,
-): Promise<ApiUserProfile> {
+export async function updateMyProfileById(id: string, body: unknown): Promise<ApiUserProfile> {
   const res = await fetch(`${apiServerURL}/users/profile/${id}`, {
     method: "PUT",
     headers: withAuthHeaders({ "Content-Type": "application/json" }),

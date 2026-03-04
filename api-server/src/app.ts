@@ -2,26 +2,23 @@ import express from "express";
 import cors from "cors";
 import "#db";
 import { userRoutes, aiChatRoutes, connectionReqRoutes } from "#routes";
-
 import { errorHandler } from "#middlewares";
+
 const app = express();
 const port = process.env.PORT || 1000;
-app.use((req, res, next) => {
-  next();
-});
 
 app.use(
   cors({
     origin: process.env.CLIENT_BASE_URL, // for use with credentials, origin(s) need to be specified
     credentials: true, // sends and receives secure cookies
-    exposedHeaders: ["WWW-Authenticate"], // needed to send the 'refresh trigger''// header setting to "token-expired" is done in errorHandler middleware.
+    exposedHeaders: ["WWW-Authenticate"], // needed to send the 'refresh trigger''
   }),
 );
 
 app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/ai", aiChatRoutes);
-app.use("/connection-requests", connectionReqRoutes);
+app.use("/connectionrequests", connectionReqRoutes);
 
 app.use("*splat", (req, res) => {
   throw new Error("Not found", { cause: { status: 404 } });
@@ -29,6 +26,4 @@ app.use("*splat", (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(port, () =>
-  console.log(`Server is running on port http://localhost:${port}`),
-);
+app.listen(port, () => console.log(`Server is running on port http://localhost:${port}`));

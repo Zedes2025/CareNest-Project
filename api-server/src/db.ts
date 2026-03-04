@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 try {
-  if (!process.env.MONGO_URI) throw new Error("Missing MONGO_URI");
-  await mongoose.connect(process.env.MONGO_URI, {
-    dbName: process.env.DB_NAME,
-  });
-  console.log("MongoDB connected");
+  const mongoURI = process.env.MONGO_URI;
+  if (!mongoURI) throw new Error("No Mongo DB Connection String present");
+  const client = await mongoose.connect(mongoURI, { dbName: process.env.DB_NAME });
+  console.log(`Connected to MongoDB @ ${client.connection.host} - ${client.connection.name}`);
 } catch (error) {
-  console.error("MongoDB connection error:", error);
+  console.log(error);
   process.exit(1);
 }

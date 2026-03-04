@@ -1,37 +1,51 @@
-//import { createChat, getChatHistory } from "@/data";
 //import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
 import Markdown from "react-markdown";
 import { ToastContainer } from "react-toastify";
+import { createChat } from "../data/ai.ts";
+
+interface Message {
+  _id: string;
+  role: "user" | "assistant";
+  content: string;
+}
 
 export default function Chat() {
-  const [messages, setMessages] = useState([
-    { _id: "1", role: "assistant", content: "Hello! I am your AI." },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [chatId, setChatId] = useState<string | null>(null);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt) return;
 
-    // fake user message
-    const userMsg = { _id: crypto.randomUUID(), role: "user", content: prompt };
-    setMessages([...messages, userMsg]);
-    setPrompt("");
+    setLoading(true); // Show loading immediately
 
-    // fake AI response after 1s
-    setLoading(true);
-    setTimeout(() => {
-      const botMsg = {
-        _id: crypto.randomUUID(),
+    const userMsg: Message = {
+      role: "user",
+      content: prompt,
+      _id: crypto.randomUUID(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+
+    //  AI response after 1s
+    try {
+      const res = await createChat({ prompt, chatId });
+      const botMsg: Message = {
         role: "assistant",
-        content: "AI response here.",
+        content: res.completion,
+        _id: crypto.randomUUID(),
       };
       setMessages((prev) => [...prev, botMsg]);
+      setChatId(res.chatId);
+    } catch (err) {
+      console.error(err);
+    } finally {
       setLoading(false);
-    }, 1000);
+      setPrompt("");
+    }
   };
 
   return (

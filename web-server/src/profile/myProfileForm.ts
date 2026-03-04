@@ -8,7 +8,7 @@ export type FormState = {
   birthday: string; // YYYY-MM-DD
   profilePicture: string;
   aboutMe: string;
-  location: {
+  address: {
     street: string;
     houseNumber: string;
     city: string;
@@ -28,15 +28,7 @@ function isSlotKey(value: string): value is SlotKey {
 }
 
 // ---- Zod schema (Frontend-Validation passend zum Backend)
-const weekdayEnum = z.enum([
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
-]);
+const weekdayEnum = z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]);
 
 const dailyScheduleSchema = z.object({
   day: weekdayEnum,
@@ -49,15 +41,13 @@ export const userUpdateSchema = z.object({
   birthday: z.coerce.date(),
   profilePicture: z.string().default(""),
   aboutMe: z.string().min(10, "Tell us more about you"),
-  location: z.object({
+  address: z.object({
     street: z.string().min(3),
     houseNumber: z.string().min(1, "Please enter house number"),
     city: z.string().min(2),
     plz: z.string().regex(/^\d{5}$/, "PLZ must be 5 digits"),
   }),
-  availability: z
-    .array(dailyScheduleSchema)
-    .min(1, "Select at least one availability"),
+  availability: z.array(dailyScheduleSchema).min(1, "Select at least one availability"),
   servicesOffered: z.array(z.string()).min(1, "Add at least one service"),
   interests: z.array(z.string()).default([]),
 });
@@ -89,7 +79,7 @@ export const emptyFormState: FormState = {
   birthday: "",
   profilePicture: "",
   aboutMe: "",
-  location: { street: "", houseNumber: "", city: "", plz: "" },
+  address: { street: "", houseNumber: "", city: "", plz: "" },
   availability: emptyAvailability(),
   servicesOffered: [],
   interests: [],
@@ -143,11 +133,11 @@ export function profileToForm(p: ApiUserProfile): FormState {
     birthday: toDateInputValue(p.birthday ?? null),
     profilePicture: p.profilePicture ?? "",
     aboutMe: p.aboutMe ?? "",
-    location: {
-      street: p.location?.street ?? "",
-      houseNumber: p.location?.houseNumber ?? "",
-      city: p.location?.city ?? "",
-      plz: p.location?.plz ?? "",
+    address: {
+      street: p.address?.street ?? "",
+      houseNumber: p.address?.houseNumber ?? "",
+      city: p.address?.city ?? "",
+      plz: p.address?.plz ?? "",
     },
     availability: avail,
     servicesOffered: p.servicesOffered ?? [],
@@ -167,7 +157,12 @@ export function formToApiBody(f: FormState) {
     birthday: f.birthday,
     profilePicture: f.profilePicture,
     aboutMe: f.aboutMe,
-    location: f.location,
+    address: {
+      street: f.address?.street ?? "",
+      houseNumber: f.address?.houseNumber ?? "",
+      city: f.address?.city ?? "",
+      plz: f.address?.plz ?? "",
+    },
     availability,
     servicesOffered: f.servicesOffered,
     interests: f.interests,

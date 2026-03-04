@@ -1,4 +1,4 @@
-import { authServiceURL } from "../utils";
+import { authServiceURL } from "../utils/index";
 
 type SuccessRes = { message: string };
 type TokenRes = SuccessRes & { accessToken: string; refreshToken: string };

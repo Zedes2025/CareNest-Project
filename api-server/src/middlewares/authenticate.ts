@@ -10,14 +10,10 @@ if (!ACCESS_JWT_SECRET) {
 export const authenticate: RequestHandler = (req, _res, next) => {
   const authHeader = req.header("authorization");
   const accessToken = authHeader && authHeader.split(" ")[1];
-  if (!accessToken)
-    throw new Error("Not authenticated", { cause: { status: 401 } });
+  if (!accessToken) throw new Error("Not authenticated", { cause: { status: 401 } });
 
   try {
-    const decoded = jwt.verify(
-      accessToken,
-      ACCESS_JWT_SECRET,
-    ) as jwt.JwtPayload;
+    const decoded = jwt.verify(accessToken, ACCESS_JWT_SECRET) as jwt.JwtPayload;
 
     if (!decoded.sub)
       throw new Error("Invalid or expired access token", {

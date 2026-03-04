@@ -7,7 +7,7 @@ import { MyProfilePage } from "./pages/MyProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ProtectedLayout from "./components/layout/ProtectedLayout";
-
+import Chat from "./components/Chat";
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,

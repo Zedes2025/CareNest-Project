@@ -2,6 +2,7 @@ import { AuthProvider } from "../../contexts/AuthContext";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { Outlet, useNavigation } from "react-router";
+import { ChatBtn } from "../ui/aiChatBtn";
 
 export const AppLayout = () => {
   const navigation = useNavigation();
@@ -22,6 +23,7 @@ export const AppLayout = () => {
         )}
         <Outlet />
       </div>
+      <ChatBtn />
       <Footer />
     </AuthProvider>
   );

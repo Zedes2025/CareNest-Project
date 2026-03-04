@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import {
   getUsers,
-  createUser,
+  //createUser,
   deleteUser,
   getMyProfileById,
   getAllUsers,
@@ -16,10 +16,8 @@ import { userCreateSchema, userUpdateSchema } from "#schemas";
 
 const userRoutes = Router();
 
-userRoutes
-  .route("/register")
-  .get(getUsers) // just for postman testing, can be removed later
-  .post(authenticate, validateBody(userCreateSchema), createUser);
+userRoutes.route("/register").get(getUsers); // just for postman testing, can be removed later
+//.post(authenticate, validateBody(userCreateSchema), createUser);
 userRoutes
   .route("/profile/:id")
   .get(authenticate, getMyProfileById)

@@ -19,8 +19,8 @@ const dailyScheduleSchema = z.object({
 
 // Main User schema
 export const userUpdateSchema = z.object({
-  firstName: z.string().trim().min(1, "Enter a valid name"),
-  lastName: z.string().trim().min(1, "Enter a valid last name"),
+  firstName: z.string().trim().min(1, "Enter a valid name").optional(),
+  lastName: z.string().trim().min(1, "Enter a valid last name").optional(),
 
   birthday: z.coerce.date(),
 

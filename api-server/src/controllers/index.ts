@@ -4,7 +4,7 @@ export {
   getOtherUserById,
   deleteUser,
   updateUserProfile,
-  createUser,
+  //createUser,
   getUsers,
 } from "./User.ts";
 export { getAiChats, getAiChatById, createAiChat } from "./AiConversation.ts";

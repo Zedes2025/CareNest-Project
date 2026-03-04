@@ -29,10 +29,14 @@ type TokenResBody = SuccessResMessage & {
 
 type MeResBody = SuccessResMessage & { user: UserProfile };
 
-export const register: RequestHandler<{}, TokenResBody, RegisterDTO> = async (req, res) => {
+export const register: RequestHandler<{}, TokenResBody, RegisterDTO> = async (
+  req,
+  res,
+) => {
   const { email, password, firstName, lastName } = req.body;
   const userExists = await User.exists({ email });
-  if (userExists) throw new Error("Email already registered", { cause: { status: 409 } });
+  if (userExists)
+    throw new Error("Email already registered", { cause: { status: 409 } });
 
   const salt = await bcrypt.genSalt(SALT_ROUNDS);
   const hashedPW = await bcrypt.hash(password, salt);
@@ -48,20 +52,25 @@ export const register: RequestHandler<{}, TokenResBody, RegisterDTO> = async (re
   res.status(201).json({ message: "Registered", refreshToken, accessToken });
 };
 
-export const login: RequestHandler<{}, TokenResBody, LoginDTO> = async (req, res) => {
+export const login: RequestHandler<{}, TokenResBody, LoginDTO> = async (
+  req,
+  res,
+) => {
   // get email and password from request body
   const { email, password } = req.body;
   // query the DB to find user with that email
   const user = await User.findOne({ email }).lean();
 
   // if not user is found, throw a 401 error and indicate invalid credentials
-  if (!user) throw new Error("Incorrect credentials", { cause: { status: 401 } });
+  if (!user)
+    throw new Error("Incorrect credentials", { cause: { status: 401 } });
 
   // compare the password to the hashed password in the DB with bcrypt
   const match = await bcrypt.compare(password, user.password);
 
   // if match is false, throw a 401 error and indicate invalid credentials
-  if (!match) throw new Error("Incorrect credentials", { cause: { status: 401 } });
+  if (!match)
+    throw new Error("Incorrect credentials", { cause: { status: 401 } });
 
   // delete all Refresh Tokens in DB where userId is equal to _id of user
   await RefreshToken.deleteMany({ userId: user._id });
@@ -72,14 +81,21 @@ export const login: RequestHandler<{}, TokenResBody, LoginDTO> = async (req, res
   res.json({ message: "Welcome back", refreshToken, accessToken });
 };
 
-export const refresh: RequestHandler<{}, TokenResBody, RefreshTokenDTO> = async (req, res) => {
+export const refresh: RequestHandler<
+  {},
+  TokenResBody,
+  RefreshTokenDTO
+> = async (req, res) => {
   // destructure refreshToken from body of request
   const { refreshToken } = req.body;
 
   // query the DB for the refresh that has a token property that matches the refreshToken
-  const storedToken = await RefreshToken.findOne({ token: refreshToken }).lean();
+  const storedToken = await RefreshToken.findOne({
+    token: refreshToken,
+  }).lean();
   // if not stored token is found, throw a 403
-  if (!storedToken) throw new Error("Please sign in again", { cause: { status: 403 } });
+  if (!storedToken)
+    throw new Error("Please sign in again", { cause: { status: 403 } });
 
   // delete the stored from the DB
   await RefreshToken.findByIdAndDelete(storedToken._id);
@@ -87,15 +103,24 @@ export const refresh: RequestHandler<{}, TokenResBody, RefreshTokenDTO> = async 
   const user = await User.findById(storedToken.userId).lean();
 
   // throw a 403 if no user is found
-  if (!user) throw new Error("User account not found", { cause: { status: 403 } });
+  if (!user)
+    throw new Error("User account not found", { cause: { status: 403 } });
 
   // create new tokens with out util function
   const [newRefreshToken, newAccessToken] = await createTokens(user);
   // rend success message and new tokens in the body of the response
-  res.json({ message: "Refreshed", refreshToken: newRefreshToken, accessToken: newAccessToken });
+  res.json({
+    message: "Refreshed",
+    refreshToken: newRefreshToken,
+    accessToken: newAccessToken,
+  });
 };
 
-export const logout: RequestHandler<{}, SuccessResMessage, RefreshTokenDTO> = async (req, res) => {
+export const logout: RequestHandler<
+  {},
+  SuccessResMessage,
+  RefreshTokenDTO
+> = async (req, res) => {
   // clearing tokens from local storage on the client
   // destructure refreshToken from body of request
   const { refreshToken } = req.body;
@@ -119,11 +144,17 @@ export const me: RequestHandler<{}, MeResBody> = async (req, res, next) => {
 
   try {
     // verify the access token
-    const decoded = jwt.verify(accessToken, ACCESS_JWT_SECRET) as jwt.JwtPayload;
+    const decoded = jwt.verify(
+      accessToken,
+      ACCESS_JWT_SECRET,
+    ) as jwt.JwtPayload;
     console.log("decoded:\n", decoded);
 
     // if decoded.sub if falsy, throw a 401 error and indicate Invalid or expired token
-    if (!decoded.sub) throw new Error("Invalid or expired access token", { cause: { status: 401 } });
+    if (!decoded.sub)
+      throw new Error("Invalid or expired access token", {
+        cause: { status: 401 },
+      });
 
     // query the DB to find user by id that matches decoded.sub
     const user = await User.findById(decoded.sub).select("-password").lean();

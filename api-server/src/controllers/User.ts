@@ -21,21 +21,22 @@ export const getMyProfileById: RequestHandler = async (req, res) => {
   res.json(user);
 };
 
-export const createUser: RequestHandler<
-  {},
-  {},
-  z.infer<typeof userCreateSchema>
-> = async (req, res) => {
-  // onlyregistratiom
-  if (!req.body)
-    throw new Error("First name, last name, and email are required", {
-      cause: { status: 400 },
-    });
-  const { firstName, lastName, email, password } = req.body;
+//register:  auth server provides this, so no need to implement here. This is just for testing with postman, can be removed later
+// export const createUser: RequestHandler<
+//   {},
+//   {},
+//   z.infer<typeof userCreateSchema>
+// > = async (req, res) => {
+//   // onlyregistratiom
+//   if (!req.body)
+//     throw new Error("First name, last name, and email are required", {
+//       cause: { status: 400 },
+//     });
+//   const { firstName, lastName, email, password } = req.body;
 
-  const user = await User.create({ firstName, lastName, email, password });
-  res.status(201).json(user);
-};
+//   const user = await User.create({ firstName, lastName, email, password });
+//   res.status(201).json(user);
+// };
 
 type UserProfile = z.infer<typeof userUpdateSchema> & {
   _id: string;
@@ -69,7 +70,7 @@ export const updateUserProfile: RequestHandler<
       updatedUser.firstName &&
       updatedUser.lastName &&
       updatedUser.birthday &&
-      updatedUser.location &&
+      updatedUser.address &&
       updatedUser.aboutMe &&
       //   updatedUser.availableTime?.length > 0 &&
       updatedUser.availability?.length > 0 &&
@@ -98,12 +99,12 @@ export const deleteUser: RequestHandler = async (req, res) => {
 // 2. Infer the type from the schema
 
 export const publicProfileSchema = userUpdateSchema.omit({
-  location: true,
+  address: true,
   birthday: true,
 });
 type PublicProfileDTO = Omit<
   z.infer<typeof userCreateSchema>,
-  "location" | "birthday"
+  "address" | "birthday"
 >;
 
 export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
@@ -113,7 +114,7 @@ export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
   const users = await User.find().lean(); // plain objects
 
   const publicUsers = users.map(
-    ({ location, birthday, ...rest }) => rest satisfies PublicProfileDTO,
+    ({ address, birthday, ...rest }) => rest satisfies PublicProfileDTO,
   );
 
   res.json(publicUsers);
@@ -128,8 +129,8 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
     return;
   }
 
-  // strip location and birthday
-  const { location, birthday, ...publicUser } = user;
+  // strip address and birthday
+  const { address, birthday, ...publicUser } = user;
 
   res.json(publicUser satisfies PublicProfileDTO);
 };

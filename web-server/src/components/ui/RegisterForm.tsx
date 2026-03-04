@@ -3,15 +3,17 @@ import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-interface RegisterFormProps extends RegisterFormState {
-  fieldErrors: Partial<Record<keyof RegisterFormState, string>>;
-  onChange: (field: RegisterFormState, value: string) => void;
-  onSubmit: (data: { firstName: string; lastName: string; email: string; password: string; confirmPassword: string }) => void;
+interface RegisterFormProps {
+  // fieldErrors: Partial<Record<keyof RegisterFormState, string>>;
+  // // onChange: (field: RegisterFormState, value: string) => void;
+  onSubmit: (data: RegisterFormState) => void;
+  loading?: boolean;
+  error?: string;
 }
 //For error message
 type FieldErrors = Partial<Record<keyof RegisterFormState, string>>;
 
-export default function RegisterForm({ onSubmit }: RegisterFormProps) {
+export default function RegisterForm({ onSubmit, loading = false, error = "" }: RegisterFormProps) {
   const [values, setValues] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",

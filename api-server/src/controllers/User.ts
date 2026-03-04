@@ -99,12 +99,12 @@ export const deleteUser: RequestHandler = async (req, res) => {
 // 2. Infer the type from the schema
 
 export const publicProfileSchema = userUpdateSchema.omit({
-  location: true,
+  address: true,
   birthday: true,
 });
 type PublicProfileDTO = Omit<
   z.infer<typeof userCreateSchema>,
-  "location" | "birthday"
+  "address" | "birthday"
 >;
 
 export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
@@ -114,7 +114,7 @@ export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
   const users = await User.find().lean(); // plain objects
 
   const publicUsers = users.map(
-    ({ location, birthday, ...rest }) => rest satisfies PublicProfileDTO,
+    ({ address, birthday, ...rest }) => rest satisfies PublicProfileDTO,
   );
 
   res.json(publicUsers);
@@ -129,8 +129,8 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
     return;
   }
 
-  // strip location and birthday
-  const { location, birthday, ...publicUser } = user;
+  // strip address and birthday
+  const { address, birthday, ...publicUser } = user;
 
   res.json(publicUser satisfies PublicProfileDTO);
 };

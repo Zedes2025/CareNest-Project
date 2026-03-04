@@ -27,7 +27,8 @@ type UserType = {
   //Age?: { type: Number };
 
   aboutMe: string;
-  location: string;
+
+  address: Record<string, any>;
   // availableTime: Weekday[];
   availability: DailySchedule[];
   servicesOffered: string[];

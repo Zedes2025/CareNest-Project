@@ -11,6 +11,6 @@ const messageSchema = z.object({
 });
 
 export const chatCreateSchema = z.object({
-  userId: validObjectId,
+  userId: validObjectId, // :z.string().refine((val) => isValidObjectId(val),"Invalid userId"),
   messages: z.array(messageSchema).default([]),
 });

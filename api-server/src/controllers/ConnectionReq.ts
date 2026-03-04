@@ -1,14 +1,15 @@
 import { ConnectionReq } from "#models";
 import { type RequestHandler } from "express";
-import { connectionReqInputSchema, connectionReqSchema } from "#schemas/ConnectionReqSchema";
+import { connectionReqInputSchema, connectionReqSchema } from "#schemas";
 import { z } from "zod";
 
 type connectionInputDTO = z.infer<typeof connectionReqInputSchema>;
 type connectionDTO = z.infer<typeof connectionReqSchema>;
 type Idparams = { id: string };
+type GetConnectionReqRes = connectionDTO[] | { message: string };
 
-const sendConnectionRequest: RequestHandler<{}, connectionDTO | { message: string }, connectionInputDTO> = async (req, res): Promise<void> => {
-  const { fromUserId, toUserId, status, message } = req.body;
+const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
+  const { fromUserId, toUserId, message } = req.body;
   if (fromUserId === toUserId) {
     throw new Error("You cannot send a request to yourself", { cause: { status: 400 } });
   }
@@ -39,15 +40,25 @@ const sendConnectionRequest: RequestHandler<{}, connectionDTO | { message: strin
   res.status(201).json({ message: "Connection request sent successfully" });
 };
 
-const getConnectionRequest: RequestHandler<Idparams, connectionDTO> = async (req, res) => {
+const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
   const { id } = req.params;
-  const myReq = await ConnectionReq.findById(id);
-  if (!myReq) throw new Error("There are no requests", { cause: { status: 404 } });
-  res.json({
-    ...myReq.toObject(),
-    fromUserId: myReq.fromUserId.toString(),
-    toUserId: myReq.toUserId.toString(),
-  });
+
+  // 1. Fetch the data
+  const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName").exec();
+
+  // 2. Check if the array is empty
+  if (!myReqs || myReqs.length === 0) {
+    res.status(404).json({ message: "No requests found for this user" });
+    return;
+  }
+
+  // 3. Return the array (Convert to plain objects with string IDs)
+  //   const formattedReqs = myReqs.map((req) => ({
+  //     ...req.toObject(),
+  //     fromUserId: req.fromUserId.toString(),
+  //     toUserId: req.toUserId.toString(),
+  //   }));
+  res.json(myReqs);
 };
 
 export { sendConnectionRequest, getConnectionRequest };

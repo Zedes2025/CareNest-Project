@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { sendConnectionRequest } from "#controllers";
+import { sendConnectionRequest, getConnectionRequest } from "#controllers";
 const connectionReqRoutes = Router();
 
-connectionReqRoutes.route("/").get().post(sendConnectionRequest);
+connectionReqRoutes.route("/").post(sendConnectionRequest);
 // connectionReqRoutes.route("/").get().post(sendConnectionRequest).put().delete();
-// connectionReqRoutes.route("/:id").get().delete();
+connectionReqRoutes.route("/:id").get(getConnectionRequest);
 
 export default connectionReqRoutes;

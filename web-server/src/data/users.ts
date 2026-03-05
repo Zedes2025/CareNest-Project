@@ -20,6 +20,8 @@ export type ApiUserProfile = {
   profilePicture?: string;
   aboutMe?: string;
 
+  city?: string | null;
+
   address?: {
     street: string;
     houseNumber: string;
@@ -80,7 +82,7 @@ export async function updateMyProfileById(
 }
 
 // Public endpoints currently without authenticate.
-const SEND_AUTH_HEADER_FOR_PUBLIC = false;
+const SEND_AUTH_HEADER_FOR_PUBLIC = true;
 
 function maybeAuthHeaders(headers?: HeadersInit): HeadersInit | undefined {
   return SEND_AUTH_HEADER_FOR_PUBLIC ? withAuthHeaders(headers) : headers;

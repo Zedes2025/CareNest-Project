@@ -32,7 +32,7 @@ function availabilityMap(user: ApiUserProfile): Record<string, Set<string>> {
 export const ProfileDetailCard = ({ user, children }: Props) => {
   const hasImage = Boolean(user.profilePicture);
   const age = computeAge(user.birthday);
-  const city = user.address?.city ?? null;
+  const city = user.city ?? user.address?.city ?? null;
   const services = user.servicesOffered ?? [];
   const interests = user.interests ?? [];
   const avail = availabilityMap(user);
@@ -67,7 +67,7 @@ export const ProfileDetailCard = ({ user, children }: Props) => {
             </span>
           </h1>
 
-          <div className="mt-1 opacity-70">{city ? city : "City -"}</div>
+          <div className="mt-1 opacity-70">{city ?? "City -"}</div>
         </div>
 
         <div className="mt-6">

@@ -37,7 +37,7 @@ export const ProfileCard = ({ user }: Props) => {
           {user.firstName} {user.lastName}
         </h3>
 
-        {/* City currently not sent via backend */}
+        <div className="mt-1 text-sm opacity-70">{user.city ?? "City -"}</div>
 
         <div className="mt-2 flex flex-wrap justify-center gap-2">
           {servicesPreview.map((s) => (

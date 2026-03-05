@@ -1,9 +1,16 @@
+interface NotificationCardProps {
+  username: string;
+  avatarUrl: string;
+  onAction: (action: "accept" | "decline" | "view") => void;
+  mode?: "pending" | "previous";
+}
+
 export const NotificationCard = ({
   username,
   avatarUrl,
   onAction,
   mode = "pending", // "pending" or "previous"
-}) => {
+}: NotificationCardProps) => {
   return (
     <div className="card w-96 bg-base-100 card-xs shadow-sm border mb-4">
       <div className="card-body p-4">

@@ -2,8 +2,15 @@ import { useEffect, useState } from "react";
 import { NotificationCard } from "../components/contactcomponents/notifCard";
 
 export const ContactPage = () => {
-  const [pending, setPending] = useState([]);
-  const [previous, setPrevious] = useState([]);
+  interface Notification {
+    id: string;
+    username: string;
+    avatarUrl: string;
+    action?: string;
+  }
+
+  const [pending, setPending] = useState<Notification[]>([]);
+  const [previous, setPrevious] = useState<Notification[]>([]);
 
   useEffect(() => {
     /*
@@ -15,13 +22,13 @@ when the user clicks on accept or decline, we need to send a fetch req to update
 
     const data = [
       {
-        id: 1,
+        id: "1",
         username: "John Doe",
         avatarUrl:
           "https://img.daisyui.com/images/profile/demo/yellingcat@192.webp",
       },
       {
-        id: 2,
+        id: "2",
         username: "Jane Smith",
         avatarUrl:
           "https://img.daisyui.com/images/profile/demo/yellingcat@192.webp",
@@ -30,7 +37,7 @@ when the user clicks on accept or decline, we need to send a fetch req to update
     setPending(data);
   }, []);
 
-  const handleAction = (id, action) => {
+  const handleAction = (id: string, action: string) => {
     const card = pending.find((n) => n.id === id);
     if (!card) return;
 

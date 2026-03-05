@@ -4,6 +4,7 @@ import { getPublicUsers, type ApiUserProfile } from "../data";
 import { DAYS, SLOTS } from "../profile/schedule";
 import { SERVICE_OPTIONS } from "../profile/profileOptions";
 import { ProfileCard } from "../components/ui/ProfileCard";
+import { useAuth } from "../contexts/AuthContext";
 
 type HomeLoaderData = { users: ApiUserProfile[]; error?: string };
 
@@ -51,6 +52,9 @@ function matchesService(user: ApiUserProfile, service: string): boolean {
 export const HomePage = () => {
   const data = useLoaderData() as HomeLoaderData;
 
+  const { user } = useAuth();
+  const myId = user?._id;
+
   const [cityQuery, setCityQuery] = useState("");
   const [dayFilter, setDayFilter] = useState("");
   const [slotFilter, setSlotFilter] = useState("");
@@ -75,6 +79,7 @@ export const HomePage = () => {
 
   const filtered = useMemo(() => {
     return (data.users ?? [])
+      .filter((u) => (myId ? u._id !== myId : true)) // <- eigenes Profil ausblenden
       .filter((u) => {
         const q = cityQuery.trim().toLowerCase();
         if (!q) return true;
@@ -82,7 +87,7 @@ export const HomePage = () => {
       })
       .filter((u) => matchesAvailability(u, dayFilter, slotFilter))
       .filter((u) => matchesService(u, serviceFilter));
-  }, [data.users, cityQuery, dayFilter, slotFilter, serviceFilter]);
+  }, [data.users, myId, cityQuery, dayFilter, slotFilter, serviceFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 

@@ -17,12 +17,29 @@ export async function homeLoader(): Promise<HomeLoaderData> {
   }
 }
 
-function matchesTime(user: ApiUserProfile, value: string): boolean {
-  if (!value) return true;
-  const [day, slot] = value.split(":");
-  if (!day || !slot) return true;
+function matchesAvailability(
+  user: ApiUserProfile,
+  day: string,
+  slot: string,
+): boolean {
+  const availability = user.availability ?? [];
 
-  const entry = (user.availability ?? []).find((a) => a.day === day);
+  // nothing selected
+  if (!day && !slot) return true;
+
+  // day only: user must have at least 1 slot on that day
+  if (day && !slot) {
+    const entry = availability.find((a) => a.day === day);
+    return (entry?.slots?.length ?? 0) > 0;
+  }
+
+  // slot only: user must have that slot on ANY day
+  if (!day && slot) {
+    return availability.some((a) => (a.slots ?? []).includes(slot));
+  }
+
+  // both selected: user must have that slot on that day
+  const entry = availability.find((a) => a.day === day);
   return Boolean(entry?.slots?.includes(slot));
 }
 
@@ -35,26 +52,12 @@ export const HomePage = () => {
   const data = useLoaderData() as HomeLoaderData;
 
   const [cityQuery, setCityQuery] = useState("");
-  const [timeFilter, setTimeFilter] = useState("");
+  const [dayFilter, setDayFilter] = useState("");
+  const [slotFilter, setSlotFilter] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
 
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 25;
-
-  const timeOptions = useMemo(() => {
-    const opts: { value: string; label: string }[] = [
-      { value: "", label: "Any time" },
-    ];
-    for (const d of DAYS) {
-      for (const s of SLOTS) {
-        opts.push({
-          value: `${d.key}:${s.key}`,
-          label: `${d.label} ${s.label}`,
-        });
-      }
-    }
-    return opts;
-  }, []);
 
   const cityOptions = useMemo(() => {
     const set = new Set<string>();
@@ -77,15 +80,15 @@ export const HomePage = () => {
         if (!q) return true;
         return (u.city ?? "").toLowerCase().includes(q);
       })
-      .filter((u) => matchesTime(u, timeFilter))
+      .filter((u) => matchesAvailability(u, dayFilter, slotFilter))
       .filter((u) => matchesService(u, serviceFilter));
-  }, [data.users, cityQuery, timeFilter, serviceFilter]);
+  }, [data.users, cityQuery, dayFilter, slotFilter, serviceFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 
   useEffect(() => {
     setPage(1);
-  }, [cityQuery, timeFilter, serviceFilter]);
+  }, [cityQuery, dayFilter, slotFilter, serviceFilter]);
 
   const pageUsers = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
@@ -132,17 +135,34 @@ export const HomePage = () => {
             <label className="label">
               <span className="label-text">Times available</span>
             </label>
-            <select
-              className="select select-bordered w-full"
-              value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value)}
-            >
-              {timeOptions.map((o) => (
-                <option key={o.value || "any"} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <select
+                className="select select-bordered w-full"
+                value={dayFilter}
+                onChange={(e) => setDayFilter(e.target.value)}
+              >
+                <option value="">Any day</option>
+                {DAYS.map((d) => (
+                  <option key={d.key} value={d.key}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="select select-bordered w-full"
+                value={slotFilter}
+                onChange={(e) => setSlotFilter(e.target.value)}
+              >
+                <option value="">Any time</option>
+                {SLOTS.map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Services */}
@@ -212,193 +232,3 @@ export const HomePage = () => {
     </div>
   );
 };
-
-// import { useEffect, useMemo, useState } from "react";
-// import { useLoaderData } from "react-router";
-// import { getPublicUsers, type ApiUserProfile } from "../data";
-// import { ProfileCard } from "../components/ui/ProfileCard";
-
-// type HomeLoaderData = { users: ApiUserProfile[]; error?: string };
-
-// export async function homeLoader(): Promise<HomeLoaderData> {
-//   try {
-//     const users = await getPublicUsers();
-//     return { users };
-//   } catch (e) {
-//     const msg = e instanceof Error ? e.message : "Failed to load users.";
-//     return { users: [], error: msg };
-//   }
-// }
-
-// function matchesTime(user: ApiUserProfile, value: string): boolean {
-//   if (!value) return true;
-//   const [day, slot] = value.split(":");
-//   if (!day || !slot) return true;
-
-//   const entry = (user.availability ?? []).find((a) => a.day === day);
-//   return Boolean(entry?.slots?.includes(slot));
-// }
-
-// function matchesService(user: ApiUserProfile, service: string): boolean {
-//   if (!service) return true;
-//   return (user.servicesOffered ?? []).includes(service);
-// }
-
-// export const HomePage = () => {
-//   const data = useLoaderData() as HomeLoaderData;
-
-//   const [cityQuery, setCityQuery] = useState(""); // backend liefert city derzeit nicht
-//   const [timeFilter, setTimeFilter] = useState("");
-//   const [serviceFilter, setServiceFilter] = useState("");
-
-//   const [page, setPage] = useState(1);
-//   const PAGE_SIZE = 25;
-
-//   const timeOptions = useMemo(() => {
-//     const opts: { value: string; label: string }[] = [
-//       { value: "", label: "Any time" },
-//     ];
-//     for (const d of DAYS) {
-//       for (const s of SLOTS) {
-//         opts.push({
-//           value: `${d.key}:${s.key}`,
-//           label: `${d.label} ${s.label}`,
-//         });
-//       }
-//     }
-//     return opts;
-//   }, []);
-
-//   const filtered = useMemo(() => {
-//     // City filter ist aktuell nicht möglich -> wird ignoriert, UI bleibt disabled
-//     return (data.users ?? [])
-//       .filter((u) => matchesTime(u, timeFilter))
-//       .filter((u) => matchesService(u, serviceFilter));
-//   }, [data.users, timeFilter, serviceFilter]);
-
-//   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-
-//   useEffect(() => {
-//     setPage(1);
-//   }, [timeFilter, serviceFilter, cityQuery]);
-
-//   const pageUsers = useMemo(() => {
-//     const start = (page - 1) * PAGE_SIZE;
-//     return filtered.slice(start, start + PAGE_SIZE);
-//   }, [filtered, page]);
-
-//   const canPrev = page > 1;
-//   const canNext = page < pageCount;
-
-//   return (
-//     <div className="container mx-auto px-4 py-10">
-//       <div className="mx-auto max-w-6xl">
-//         <h1 className="text-center text-3xl font-semibold">Placeholdertitle</h1>
-//         <p className="mt-3 text-center opacity-70">Placeholdertext</p>
-
-//         {data.error && (
-//           <div className="alert alert-error mt-6" role="alert">
-//             <span>{data.error}</span>
-//           </div>
-//         )}
-
-//         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-//           {/* City filter (disabled until backend delivers city) */}
-//           <div className="form-control">
-//             <label className="label">
-//               <span className="label-text">City</span>
-//             </label>
-//             <input
-//               className="input input-bordered w-full"
-//               value={cityQuery}
-//               onChange={(e) => setCityQuery(e.target.value)}
-//               placeholder="City (not available yet)"
-//               disabled
-//             />
-//           </div>
-
-//           {/* Times available */}
-//           <div className="form-control">
-//             <label className="label">
-//               <span className="label-text">Times available</span>
-//             </label>
-//             <select
-//               className="select select-bordered w-full"
-//               value={timeFilter}
-//               onChange={(e) => setTimeFilter(e.target.value)}
-//             >
-//               {timeOptions.map((o) => (
-//                 <option key={o.value || "any"} value={o.value}>
-//                   {o.label}
-//                 </option>
-//               ))}
-//             </select>
-//           </div>
-
-//           {/* Services */}
-//           <div className="form-control">
-//             <label className="label">
-//               <span className="label-text">Services</span>
-//             </label>
-//             <select
-//               className="select select-bordered w-full"
-//               value={serviceFilter}
-//               onChange={(e) => setServiceFilter(e.target.value)}
-//             >
-//               <option value="">Any service</option>
-//               {SERVICE_OPTIONS.map((s) => (
-//                 <option key={s} value={s}>
-//                   {s}
-//                 </option>
-//               ))}
-//             </select>
-//           </div>
-//         </div>
-
-//         <div className="mt-6 flex items-center justify-between gap-4">
-//           <div className="opacity-70">
-//             Showing <span className="font-semibold">{pageUsers.length}</span> of{" "}
-//             <span className="font-semibold">{filtered.length}</span> results
-//           </div>
-
-//           <div className="join">
-//             <button
-//               className="btn join-item"
-//               onClick={() => setPage((p) => Math.max(1, p - 1))}
-//               disabled={!canPrev}
-//               type="button"
-//             >
-//               Prev
-//             </button>
-//             <button
-//               className="btn join-item btn-ghost pointer-events-none"
-//               type="button"
-//             >
-//               Page {page} / {pageCount}
-//             </button>
-//             <button
-//               className="btn join-item"
-//               onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-//               disabled={!canNext}
-//               type="button"
-//             >
-//               Next
-//             </button>
-//           </div>
-//         </div>
-
-//         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-//           {pageUsers.map((u) => (
-//             <ProfileCard key={u._id} user={u} />
-//           ))}
-//         </div>
-
-//         {filtered.length === 0 && !data.error && (
-//           <div className="mt-10 text-center opacity-70">
-//             No profiles match your filters.
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };

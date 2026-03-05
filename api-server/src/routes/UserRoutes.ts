@@ -24,7 +24,7 @@ userRoutes
   .put(authenticate, validateBody(userUpdateSchema), updateUserProfile)
   .delete(authenticate, deleteUser);
 
-userRoutes.route("/all").get(getAllUsers);
-userRoutes.route("/:id").get(getOtherUserById);
+userRoutes.route("/all").get(authenticate, getAllUsers);
+userRoutes.route("/:id").get(authenticate, getOtherUserById);
 
 export default userRoutes;

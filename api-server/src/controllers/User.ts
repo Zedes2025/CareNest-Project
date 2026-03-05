@@ -136,9 +136,14 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
     res.status(404).json({ message: "User not found" });
     return;
   }
+  const city = user.address?.city ?? null;
 
-  // strip address and birthday
-  const { address, ...publicUser } = user;
+  const { address, ...rest } = user;
+
+  const publicUser = {
+    ...rest,
+    city,
+  } satisfies PublicProfileDTO;
 
   res.json(publicUser satisfies PublicProfileDTO);
 };

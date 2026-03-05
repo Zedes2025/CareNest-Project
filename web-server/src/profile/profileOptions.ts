@@ -2,14 +2,14 @@ export const SERVICE_OPTIONS = [
   "Walking the dog",
   "Helping with groceries",
   "Babysitting",
-  "Reading stories for kids",
+  "Reading stories",
   "Gardening",
   "Car sharing",
   "Cooking together",
   "Having a chat",
   "Dancing",
   "Jogging",
-  "Going for a walk together",
+  "Going for a walk",
   "Legal advice",
 ] as const;
 

@@ -36,8 +36,6 @@ export const Nav = () => {
   };
   return (
     <div className="navbar bg-base-100 border-b border-base-200">
-      {/* AI placeholder */}
-
       {/* Center: placeholder text */}
       <div className="navbar-center">
         <span className="text-base font-semibold tracking-wide">

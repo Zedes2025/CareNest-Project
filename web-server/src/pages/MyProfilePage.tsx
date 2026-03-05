@@ -7,7 +7,17 @@ import { useAuth } from "../contexts/AuthContext";
 import { SERVICE_OPTIONS, INTEREST_OPTIONS } from "../profile/profileOptions";
 import { type SlotKey, type Weekday } from "../profile/schedule";
 // import { issuesFieldErrors } from "../utils";
-import { ageFromDateInput, countSelectedSlots, emptyFormState, formToApiBody, issuesToFieldErrors, profileToForm, type FieldErrors, type FormState, userUpdateSchema } from "../profile/myProfileForm";
+import {
+  ageFromDateInput,
+  countSelectedSlots,
+  emptyFormState,
+  formToApiBody,
+  issuesToFieldErrors,
+  profileToForm,
+  type FieldErrors,
+  type FormState,
+  userUpdateSchema,
+} from "../profile/myProfileForm";
 
 import { BasicInfoSection } from "../components/profilecomponents/BasicInfoSection";
 import { AboutSection } from "../components/profilecomponents/AboutSection";
@@ -26,7 +36,16 @@ export const MyProfilePage = () => {
   const [message, setMessage] = useState<string>("");
 
   const canSave = useMemo(() => {
-    return form.firstName && form.lastName && form.birthday && form.aboutMe && form.address.street && form.address.houseNumber && form.address.city && form.address.plz;
+    return (
+      form.firstName &&
+      form.lastName &&
+      form.birthday &&
+      form.aboutMe &&
+      form.address.street &&
+      form.address.houseNumber &&
+      form.address.city &&
+      form.address.plz
+    );
   }, [form]);
 
   const age = useMemo(() => ageFromDateInput(form.birthday), [form.birthday]);
@@ -68,7 +87,9 @@ export const MyProfilePage = () => {
   function toggleSlot(day: Weekday, slot: SlotKey) {
     setForm((prev) => {
       const curr = prev.availability[day] ?? [];
-      const next = curr.includes(slot) ? curr.filter((s) => s !== slot) : [...curr, slot];
+      const next = curr.includes(slot)
+        ? curr.filter((s) => s !== slot)
+        : [...curr, slot];
       return { ...prev, availability: { ...prev.availability, [day]: next } };
     });
 
@@ -76,10 +97,15 @@ export const MyProfilePage = () => {
     setMessage("");
   }
 
-  function toggleArrayValue(key: "servicesOffered" | "interests", value: string) {
+  function toggleArrayValue(
+    key: "servicesOffered" | "interests",
+    value: string,
+  ) {
     setForm((prev) => {
       const curr = prev[key];
-      const next = curr.includes(value) ? curr.filter((x) => x !== value) : [...curr, value];
+      const next = curr.includes(value)
+        ? curr.filter((x) => x !== value)
+        : [...curr, value];
       return { ...prev, [key]: next };
     });
 
@@ -130,7 +156,9 @@ export const MyProfilePage = () => {
         <div className="card bg-base-100 shadow">
           <div className="card-body">
             <h1 className="card-title text-2xl">My Profile</h1>
-            <p className="opacity-70">You need to be logged in to view this page.</p>
+            <p className="opacity-70">
+              You need to be logged in to view this page.
+            </p>
             <div className="card-actions mt-4">
               <Link to="/login" className="btn btn-primary">
                 Go to login
@@ -162,18 +190,51 @@ export const MyProfilePage = () => {
               </div>
             ) : (
               <>
-                <BasicInfoSection form={form} age={age} fieldErrors={fieldErrors} setField={setField} />
-                <AboutSection form={form} fieldErrors={fieldErrors} setField={setField} />
-                <LocationSection form={form} fieldErrors={fieldErrors} setField={setField} />
+                <BasicInfoSection
+                  form={form}
+                  age={age}
+                  fieldErrors={fieldErrors}
+                  setField={setField}
+                />
+                <AboutSection
+                  form={form}
+                  fieldErrors={fieldErrors}
+                  setField={setField}
+                />
+                <LocationSection
+                  form={form}
+                  fieldErrors={fieldErrors}
+                  setField={setField}
+                />
 
-                <AvailabilitySection availability={form.availability} error={fieldErrors.availability} toggleSlot={toggleSlot} />
+                <AvailabilitySection
+                  availability={form.availability}
+                  error={fieldErrors.availability}
+                  toggleSlot={toggleSlot}
+                />
 
-                <MultiSelectChips title="Services offered" options={SERVICE_OPTIONS} selected={form.servicesOffered} error={fieldErrors.servicesOffered} onToggle={(v) => toggleArrayValue("servicesOffered", v)} />
+                <MultiSelectChips
+                  title="Services offered"
+                  options={SERVICE_OPTIONS}
+                  selected={form.servicesOffered}
+                  error={fieldErrors.servicesOffered}
+                  onToggle={(v) => toggleArrayValue("servicesOffered", v)}
+                />
 
-                <MultiSelectChips title="Interests" options={INTEREST_OPTIONS} selected={form.interests} onToggle={(v) => toggleArrayValue("interests", v)} />
+                <MultiSelectChips
+                  title="Interests"
+                  options={INTEREST_OPTIONS}
+                  selected={form.interests}
+                  onToggle={(v) => toggleArrayValue("interests", v)}
+                />
 
                 <div className="card-actions mt-8">
-                  <button className="btn btn-primary" type="button" onClick={onSave} disabled={!canSave || saving}>
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    onClick={onSave}
+                    disabled={!canSave || saving}
+                  >
                     {saving ? "Saving..." : "Save profile"}
                   </button>
                 </div>

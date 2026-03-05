@@ -1,6 +1,14 @@
-const apiServerURL = import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhost:3000";
+const apiServerURL =
+  import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhost:3000";
 
-type Weekday = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+type Weekday =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
 
 export type ApiUserProfile = {
   _id: string;
@@ -55,7 +63,10 @@ export async function getMyProfileById(id: string): Promise<ApiUserProfile> {
 }
 
 // PUT /users/profile/:id  (requires full body)
-export async function updateMyProfileById(id: string, body: unknown): Promise<ApiUserProfile> {
+export async function updateMyProfileById(
+  id: string,
+  body: unknown,
+): Promise<ApiUserProfile> {
   const res = await fetch(`${apiServerURL}/users/profile/${id}`, {
     method: "PUT",
     headers: withAuthHeaders({ "Content-Type": "application/json" }),
@@ -66,4 +77,29 @@ export async function updateMyProfileById(id: string, body: unknown): Promise<Ap
 
   const data = (await res.json()) as any;
   return (data?.user ?? data) as ApiUserProfile;
+}
+
+// Public endpoints currently without authenticate.
+const SEND_AUTH_HEADER_FOR_PUBLIC = false;
+
+function maybeAuthHeaders(headers?: HeadersInit): HeadersInit | undefined {
+  return SEND_AUTH_HEADER_FOR_PUBLIC ? withAuthHeaders(headers) : headers;
+}
+
+// GET /users/all (public)
+export async function getPublicUsers(): Promise<ApiUserProfile[]> {
+  const res = await fetch(`${apiServerURL}/users/all`, {
+    headers: maybeAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return (await res.json()) as ApiUserProfile[];
+}
+
+// GET /users/:id (public)
+export async function getPublicUserById(id: string): Promise<ApiUserProfile> {
+  const res = await fetch(`${apiServerURL}/users/${id}`, {
+    headers: maybeAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return (await res.json()) as ApiUserProfile;
 }

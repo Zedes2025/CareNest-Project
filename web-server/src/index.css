@@ -1,2 +1,14 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* index.css */
+:root {
+  /* Chat colors */
+  --chat-bg: #1e293b; /* main chat window background */
+  --chat-user-bubble: #5e6783; /* user messages */
+  --chat-bot-bubble: #334155; /* bot messages */
+  --chat-text: #f1f5f9; /* default text color */
+  --chat-btn-bg: #4f46e5; /* button background */
+  --chat-btn-text: #ffffff; /* button text */
+  --chat-btn-hover: #4338ca; /* button hover */
+}

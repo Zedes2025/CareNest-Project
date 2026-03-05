@@ -7,7 +7,7 @@ import RegistrationPage from "./pages/RegistrationPage";
 import ProtectedLayout from "./components/layout/ProtectedLayout";
 import { HomePage, homeLoader } from "./pages/HomePage";
 import { DetailsPage, detailsLoader } from "./pages/DetailsPage";
-
+import Chat from "./components/Chat";
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,

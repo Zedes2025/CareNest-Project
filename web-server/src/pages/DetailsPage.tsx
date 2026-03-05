@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useLocation } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { getPublicUserById, type ApiUserProfile } from "../data";
 import { ProfileDetailCard } from "../components/ui/ProfileDetailCard";
 
@@ -22,7 +22,6 @@ export async function detailsLoader({
 
 export const DetailsPage = () => {
   const { user, error } = useLoaderData() as DetailsLoaderData;
-  const location = useLocation();
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="mx-auto w-full max-w-3xl">
@@ -34,7 +33,7 @@ export const DetailsPage = () => {
 
         {user && (
           <ProfileDetailCard user={user}>
-            <Link to={`/home${location.search}`} className="btn btn-outline">
+            <Link to="/home" className="btn btn-outline">
               Back
             </Link>
 

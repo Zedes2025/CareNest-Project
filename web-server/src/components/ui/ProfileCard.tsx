@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router";
+import { Link } from "react-router";
 import type { ApiUserProfile } from "../../data/users";
 
 type Props = {
@@ -6,7 +6,6 @@ type Props = {
 };
 
 export const ProfileCard = ({ user }: Props) => {
-  const location = useLocation();
   const services = user.servicesOffered ?? [];
   const servicesPreview = services.slice(0, 3);
   const extraCount = Math.max(0, services.length - servicesPreview.length);
@@ -55,10 +54,7 @@ export const ProfileCard = ({ user }: Props) => {
         </div>
 
         <div className="card-actions mt-4 w-full justify-center">
-          <Link
-            to={`/details/${user._id}${location.search}`}
-            className="btn btn-primary w-full"
-          >
+          <Link to={`/details/${user._id}`} className="btn btn-primary w-full">
             View more
           </Link>
         </div>

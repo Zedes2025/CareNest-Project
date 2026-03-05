@@ -7,6 +7,7 @@ export const ContactPage = () => {
     username: string;
     avatarUrl: string;
     action?: string;
+    status: string;
   }
 
   const [pending, setPending] = useState<Notification[]>([]);
@@ -26,12 +27,14 @@ when the user clicks on accept or decline, we need to send a fetch req to update
         username: "John Doe",
         avatarUrl:
           "https://img.daisyui.com/images/profile/demo/yellingcat@192.webp",
+        status: "pending",
       },
       {
         id: "2",
         username: "Jane Smith",
         avatarUrl:
           "https://img.daisyui.com/images/profile/demo/yellingcat@192.webp",
+        status: "pending",
       },
     ];
     setPending(data);
@@ -39,16 +42,12 @@ when the user clicks on accept or decline, we need to send a fetch req to update
 
   const handleAction = (id: string, action: string) => {
     const card = pending.find((n) => n.id === id);
+
     if (!card) return;
 
-    if (action === "accept" || action === "decline") {
-      // remove from pending
-      setPending(pending.filter((n) => n.id !== id));
-      // add to previous
-      setPrevious([{ ...card, action }, ...previous]);
-    }
-    if (action === "view") {
-    }
+    setPending(pending.filter((n) => n.id !== id));
+
+    setPrevious([{ ...card, status: action }, ...previous]);
   };
 
   return (
@@ -65,6 +64,7 @@ when the user clicks on accept or decline, we need to send a fetch req to update
                 username={notif.username}
                 avatarUrl={notif.avatarUrl}
                 mode="pending"
+                status={notif.status}
                 onAction={(action) => handleAction(notif.id, action)}
               />
             ))
@@ -82,6 +82,7 @@ when the user clicks on accept or decline, we need to send a fetch req to update
                 username={notif.username}
                 avatarUrl={notif.avatarUrl}
                 mode="previous"
+                status={notif.status}
                 onAction={(action) => handleAction(notif.id, action)}
               />
             ))

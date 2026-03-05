@@ -3,24 +3,28 @@ interface NotificationCardProps {
   avatarUrl: string;
   onAction: (action: "accept" | "decline" | "view") => void;
   mode?: "pending" | "previous";
+  status: string;
 }
 
 export const NotificationCard = ({
   username,
   avatarUrl,
   onAction,
-  mode = "pending", // "pending" or "previous"
+  mode = "pending",
+  status,
 }: NotificationCardProps) => {
   return (
     <div className="card w-96 bg-base-100 card-xs shadow-sm border mb-4">
       <div className="card-body p-4">
         <h2 className="card-title mb-2 text-lg">{username}</h2>
+
         <div className="flex items-center gap-4 mb-3">
           <div className="avatar">
             <div className="w-16 rounded-full">
               <img src={avatarUrl} alt={username} />
             </div>
           </div>
+
           <p className="flex-1 text-sm">
             {mode === "pending"
               ? `${username} wants to connect with you!`
@@ -37,6 +41,7 @@ export const NotificationCard = ({
               >
                 Accept
               </button>
+
               <button
                 onClick={() => onAction("decline")}
                 className="btn btn-sm rounded-xl"
@@ -46,10 +51,11 @@ export const NotificationCard = ({
             </>
           ) : (
             <button
-              onClick={() => onAction("view")}
-              className="btn btn-sm btn-outline rounded-xl"
+              className={`btn btn-sm rounded-xl ${
+                status === "accept" ? "btn-neutral" : "btn"
+              }`}
             >
-              responded
+              {status === "accept" ? "Approved" : "Declined"}
             </button>
           )}
         </div>

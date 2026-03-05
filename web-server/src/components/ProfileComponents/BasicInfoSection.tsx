@@ -1,4 +1,4 @@
-import type { FieldErrors, FormState } from "../profile/myProfileForm";
+import type { FieldErrors, FormState } from "../../profile/myProfileForm";
 
 type Props = {
   form: FormState;

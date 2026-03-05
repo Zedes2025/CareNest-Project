@@ -100,12 +100,13 @@ export const deleteUser: RequestHandler = async (req, res) => {
 
 export const publicProfileSchema = userUpdateSchema.omit({
   address: true,
-  birthday: true,
 });
-type PublicProfileDTO = Omit<
-  z.infer<typeof userCreateSchema>,
-  "address" | "birthday"
->;
+
+type BaseUser = z.infer<typeof userCreateSchema>;
+
+export type PublicProfileDTO = Omit<BaseUser, "address"> & {
+  city: string | null;
+};
 
 export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
   req,
@@ -113,9 +114,16 @@ export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
 ) => {
   const users = await User.find().lean(); // plain objects
 
-  const publicUsers = users.map(
-    ({ address, birthday, ...rest }) => rest satisfies PublicProfileDTO,
-  );
+  const publicUsers = users.map((u) => {
+    const city = u.address?.city ?? null;
+
+    const { address, ...rest } = u;
+
+    return {
+      ...rest,
+      city,
+    } satisfies PublicProfileDTO;
+  });
 
   res.json(publicUsers);
 };
@@ -128,9 +136,14 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
     res.status(404).json({ message: "User not found" });
     return;
   }
+  const city = user.address?.city ?? null;
 
-  // strip address and birthday
-  const { address, birthday, ...publicUser } = user;
+  const { address, ...rest } = user;
+
+  const publicUser = {
+    ...rest,
+    city,
+  } satisfies PublicProfileDTO;
 
   res.json(publicUser satisfies PublicProfileDTO);
 };

@@ -20,7 +20,9 @@ export type ApiUserProfile = {
   profilePicture?: string;
   aboutMe?: string;
 
-  location?: {
+  city?: string | null;
+
+  address?: {
     street: string;
     houseNumber: string;
     city: string;
@@ -77,4 +79,29 @@ export async function updateMyProfileById(
 
   const data = (await res.json()) as any;
   return (data?.user ?? data) as ApiUserProfile;
+}
+
+// Public endpoints currently without authenticate.
+const SEND_AUTH_HEADER_FOR_PUBLIC = true;
+
+function maybeAuthHeaders(headers?: HeadersInit): HeadersInit | undefined {
+  return SEND_AUTH_HEADER_FOR_PUBLIC ? withAuthHeaders(headers) : headers;
+}
+
+// GET /users/all (public)
+export async function getPublicUsers(): Promise<ApiUserProfile[]> {
+  const res = await fetch(`${apiServerURL}/users/all`, {
+    headers: maybeAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return (await res.json()) as ApiUserProfile[];
+}
+
+// GET /users/:id (public)
+export async function getPublicUserById(id: string): Promise<ApiUserProfile> {
+  const res = await fetch(`${apiServerURL}/users/${id}`, {
+    headers: maybeAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return (await res.json()) as ApiUserProfile;
 }

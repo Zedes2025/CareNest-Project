@@ -19,7 +19,7 @@ export default function RegisterPage({ error }: LoginProps) {
       await handleRegister(data);
 
       // 2. If successful, send them to the Login page
-      navigate("/Login");
+      navigate("/my-profile");
     } catch (error) {
       // 3. Catch any errors (User already exists, Network error, etc.)
       setFormError(error instanceof Error ? error.message : "Registration failed");

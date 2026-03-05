@@ -6,7 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 import { SERVICE_OPTIONS, INTEREST_OPTIONS } from "../profile/profileOptions";
 import { type SlotKey, type Weekday } from "../profile/schedule";
-
+// import { issuesFieldErrors } from "../utils";
 import {
   ageFromDateInput,
   countSelectedSlots,
@@ -19,11 +19,11 @@ import {
   userUpdateSchema,
 } from "../profile/myProfileForm";
 
-import { BasicInfoSection } from "../components/ProfileComponents/BasicInfoSection";
-import { AboutSection } from "../components/ProfileComponents/AboutSection";
-import { LocationSection } from "../components/ProfileComponents/LocationSection";
-import { AvailabilitySection } from "../components/ProfileComponents/AvailabilitySection";
-import { MultiSelectChips } from "../components/ProfileComponents/MultiSelectChips";
+import { BasicInfoSection } from "../components/profilecomponents/BasicInfoSection";
+import { AboutSection } from "../components/profilecomponents/AboutSection";
+import { LocationSection } from "../components/profilecomponents/LocationSection";
+import { AvailabilitySection } from "../components/profilecomponents/AvailabilitySection";
+import { MultiSelectChips } from "../components/profilecomponents/MultiSelectChips";
 
 export const MyProfilePage = () => {
   const { signedIn, user } = useAuth();
@@ -124,6 +124,7 @@ export const MyProfilePage = () => {
     const parsed = userUpdateSchema.safeParse(body);
 
     if (!parsed.success) {
+      console.log("Validation Failed:", parsed.error.format());
       setFieldErrors(issuesToFieldErrors(parsed.error));
       setSaving(false);
       return;

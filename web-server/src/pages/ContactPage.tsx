@@ -6,6 +6,13 @@ export const ContactPage = () => {
   const [previous, setPrevious] = useState([]);
 
   useEffect(() => {
+    /*
+to get data, we need to loop on fetch reqs with pending status and toUser==current user, 
+these are the date we need for the pending notifications. 
+when the user clicks on accept or decline, we need to send a fetch req to update the status of the request, and then we need to
+ move the notification from pending to previous with the action (accept or decline) that the user took.
+*/
+
     const data = [
       {
         id: 1,
@@ -34,7 +41,6 @@ export const ContactPage = () => {
       setPrevious([{ ...card, action }, ...previous]);
     }
     if (action === "view") {
-      //console.log("Viewing", card.username);
     }
   };
 

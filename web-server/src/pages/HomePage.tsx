@@ -58,7 +58,6 @@ export const HomePage = () => {
   const { user } = useAuth();
   const myId = user?._id;
 
-  // Load initial filters once from localStorage
   const initial = useMemo(() => loadHomeFilters(), []);
 
   const [cityQuery, setCityQuery] = useState(initial?.cityQuery ?? "");
@@ -71,7 +70,6 @@ export const HomePage = () => {
 
   const PAGE_SIZE = 25;
 
-  // Persist filters in localStorage on every change
   useEffect(() => {
     const state: HomeFiltersState = {
       cityQuery,
@@ -132,8 +130,18 @@ export const HomePage = () => {
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-center text-3xl font-semibold">Placeholdertitle</h1>
-        <p className="mt-3 text-center opacity-70">Placeholdertext</p>
+        <h1 className="text-center text-3xl font-semibold">
+          Welcome to CareNest!
+        </h1>
+        <p className="mt-3 text-center opacity-70">
+          Find the right caregiver for your needs! Browse our directory and find
+          the perfect match for you. You can search by city, availability, and
+          services offered. Need somebody to walk your dog in Berlin on Monday
+          morning? Just set the right search critera and we got you covered!
+          Klick on "View more" to learn more about each of our members! If you
+          think the Person could help you, click on "Connect" on their profile!
+          They will be notified that you're interested in meeting them!
+        </p>
 
         {data.error && (
           <div className="alert alert-error mt-6" role="alert">

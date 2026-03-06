@@ -1,6 +1,6 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { AppLayout } from "./components/layout/AppLayout";
-import { ContactPage } from "./pages/ContactPage";
+import { ContactPage, connectionLoader } from "./pages/ContactPage";
 import { MyProfilePage } from "./pages/MyProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/home", element: <HomePage />, loader: homeLoader },
           { path: "/my-profile", element: <MyProfilePage /> },
-          { path: "/contact", element: <ContactPage /> },
+          { path: "/contact", element: <ContactPage />, loader: connectionLoader },
           {
             path: "/details/:id",
             element: <DetailsPage />,

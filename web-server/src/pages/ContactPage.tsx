@@ -1,23 +1,28 @@
-import { useEffect, useState } from "react";
 import { NotificationCard } from "../components/contactcomponents/notifCard";
-import { getConnection } from "../data/connection";
-import { useLoaderData } from "react-router";
+import { getConnections } from "../data/connection";
+import { useFetcher, useLoaderData, type LoaderFunctionArgs } from "react-router";
 
-export async function connectionLoader({ params }: { params: { id: string } }) {
+export async function connectionLoader({ params }: LoaderFunctionArgs) {
+  console.log("Current params:", params);
   try {
-    const id = params.id;
-    if (!id) return { user: null, error: "Missing id." };
+    const userId = params.id as string;
+    if (!userId) return { user: null, error: "Missing id." };
 
-    const user = await getConnection(id);
-    return { user, error: null };
+    const req = await getConnections(userId);
+    return { user: req, error: null };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Failed to load profile.";
-    return { user: null, error: msg };
+    console.error(e);
+    return { user: null, error: "Failed to load requests." };
   }
 }
 
-export const ConnectionsPage = () => {
+export const ContactPage = () => {
   const { user, error } = useLoaderData() as { user: any[] | null; error: string | null };
+  const fetcher = useFetcher();
+
+  const handleAction = (id: string, action: "accepted" | "rejected") => {
+    fetcher.submit({ status: action }, { method: "POST", action: `/connectionrequests/${id}/update` });
+  };
 
   if (error) return <p className="text-red-500">{error}</p>;
   if (!user) return <p>Loading...</p>;
@@ -33,11 +38,12 @@ export const ConnectionsPage = () => {
             user.map((each) => (
               <NotificationCard
                 key={each._id}
-                // String interpolation to join names
-                username={`${each.firstName} ${each.lastName}`}
+                username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`}
                 avatarUrl={each.profilePicture}
                 mode="pending"
                 status={each.status}
+                // FIX: Pass the function here!
+                onAction={(action) => handleAction(each._id, action === "accept" ? "accepted" : "rejected")}
               />
             ))
           ) : (

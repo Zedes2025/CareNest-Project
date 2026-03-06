@@ -98,7 +98,7 @@ A new visitor asks: "${prompt}"
   const completion = await client.chat.completions.create({
     model: process.env.AI_MODEL || 'gemini-2.5-flash',
     messages,
-    max_tokens: 400
+    max_tokens: 700
   });
 
   const completionText = completion.choices[0]?.message.content || 'No completion generated';

@@ -49,9 +49,12 @@ const userProfiles: { [key: string]: { age: number; interests: string[] } } = {
   '69a5a26d06c34a44fee74721': { age: 70, interests: ['shopping', 'watching after kids'] },
   '69a5a26d06c34a44fee74723': { age: 18, interests: ['shopping', 'watching movies'] }
 };
-// Example app info (you can expand)
+
+//___________________________________________________________________
+
+// Example app info
 const appInfo = `
-HelpHands is a community support platform that connects people who want to lend a hand with those in need. 
+CareNnest is a community support platform that connects people who want to lend a hand with those in need. 
 Through the application, users can:
 - Connect with neighbors and build strong community bonds
 - Assist elderly or visually-impaired users to read documents via an AI voice assistant
@@ -66,7 +69,7 @@ export const createAiChat: RequestHandler<{}, CompletionDTO, PromptDTO> = async 
   });
 
   // System prompt with app info
-  const systemPrompt = {
+  const systemPrompt: ChatCompletionMessageParam = {
     role: 'system',
     content: `
 You are a professional, friendly assistant for the CareNest community app.You determine if a question is about this app.
@@ -88,13 +91,14 @@ Question: "${prompt}"
 A new visitor asks: "${prompt}"
 `;
   }
+  messages.push(systemPrompt);
 
   messages.push({ role: 'user', content: userPromptContent });
 
   const completion = await client.chat.completions.create({
     model: process.env.AI_MODEL || 'gemini-2.5-flash',
     messages,
-    max_tokens: 1000
+    max_tokens: 400
   });
 
   const completionText = completion.choices[0]?.message.content || 'No completion generated';

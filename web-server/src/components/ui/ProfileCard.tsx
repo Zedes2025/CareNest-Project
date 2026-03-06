@@ -9,12 +9,11 @@ export const ProfileCard = ({ user }: Props) => {
   const services = user.servicesOffered ?? [];
   const servicesPreview = services.slice(0, 3);
   const extraCount = Math.max(0, services.length - servicesPreview.length);
-
   const hasImage = Boolean(user.profilePicture);
 
   return (
-    <div className="card bg-base-100 shadow">
-      <div className="card-body items-center text-center">
+    <div className="card bg-base-100 shadow h-full">
+      <div className="card-body items-center text-center gap-3">
         <div className="avatar">
           {hasImage ? (
             <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
@@ -33,27 +32,30 @@ export const ProfileCard = ({ user }: Props) => {
           )}
         </div>
 
-        <h3 className="mt-3 text-lg font-semibold">
+        <h3 className="text-lg font-semibold leading-tight min-h-13 line-clamp-2">
           {user.firstName} {user.lastName}
         </h3>
 
-        <div className="mt-1 text-sm opacity-70">{user.city ?? "City -"}</div>
+        <div className="text-sm opacity-70">{user.city ?? "City -"}</div>
 
-        <div className="mt-2 flex flex-wrap justify-center gap-2">
-          {servicesPreview.map((s) => (
-            <span key={s} className="badge badge-outline">
-              {s}
-            </span>
-          ))}
-          {extraCount > 0 && (
-            <span className="badge badge-ghost">+{extraCount}</span>
-          )}
-          {services.length === 0 && (
+        <div className="flex flex-wrap justify-center gap-2 min-h-18 content-start">
+          {services.length ? (
+            <>
+              {servicesPreview.map((s) => (
+                <span key={s} className="badge badge-outline">
+                  {s}
+                </span>
+              ))}
+              {extraCount > 0 && (
+                <span className="badge badge-ghost">+{extraCount}</span>
+              )}
+            </>
+          ) : (
             <span className="opacity-60 text-sm">No services listed</span>
           )}
         </div>
 
-        <div className="card-actions mt-4 w-full justify-center">
+        <div className="card-actions mt-auto w-full justify-center">
           <Link to={`/details/${user._id}`} className="btn btn-primary w-full">
             View more
           </Link>

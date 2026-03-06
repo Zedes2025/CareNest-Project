@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
-import { getMyProfileById, updateMyProfileById } from "../data";
+import {
+  getMyProfileById,
+  updateMyProfileById,
+  type ApiUserProfile,
+} from "../data";
 import { useAuth } from "../contexts/AuthContext";
 
 import { SERVICE_OPTIONS, INTEREST_OPTIONS } from "../profile/profileOptions";
 import { type SlotKey, type Weekday } from "../profile/schedule";
-// import { issuesFieldErrors } from "../utils";
+
 import {
   ageFromDateInput,
   countSelectedSlots,
@@ -25,11 +29,19 @@ import { LocationSection } from "../components/profilecomponents/LocationSection
 import { AvailabilitySection } from "../components/profilecomponents/AvailabilitySection";
 import { MultiSelectChips } from "../components/profilecomponents/MultiSelectChips";
 
+import { ProfileDetailCard } from "../components/ui/ProfileDetailCard";
+
+type Mode = "view" | "edit";
+
 export const MyProfilePage = () => {
   const { signedIn, user } = useAuth();
 
+  const [mode, setMode] = useState<Mode>("view");
+
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const [profile, setProfile] = useState<ApiUserProfile | null>(null);
 
   const [form, setForm] = useState<FormState>(emptyFormState);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -58,8 +70,9 @@ export const MyProfilePage = () => {
       setMessage("");
       setFieldErrors({});
       try {
-        const profile = await getMyProfileById(user._id);
-        setForm(profileToForm(profile));
+        const p = await getMyProfileById(user._id);
+        setProfile(p);
+        setForm(profileToForm(p));
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Failed to load profile.";
         setMessage(msg);
@@ -124,7 +137,6 @@ export const MyProfilePage = () => {
     const parsed = userUpdateSchema.safeParse(body);
 
     if (!parsed.success) {
-      console.log("Validation Failed:", parsed.error.format());
       setFieldErrors(issuesToFieldErrors(parsed.error));
       setSaving(false);
       return;
@@ -140,14 +152,24 @@ export const MyProfilePage = () => {
     }
 
     try {
-      await updateMyProfileById(user._id, parsed.data);
+      const updated = await updateMyProfileById(user._id, parsed.data);
+      setProfile(updated);
+      setForm(profileToForm(updated));
       setMessage("Profile saved.");
+      setMode("view");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to save profile.";
       setMessage(msg);
     } finally {
       setSaving(false);
     }
+  };
+
+  const onCancelEdit = () => {
+    if (profile) setForm(profileToForm(profile));
+    setFieldErrors({});
+    setMessage("");
+    setMode("view");
   };
 
   if (!signedIn) {
@@ -173,75 +195,128 @@ export const MyProfilePage = () => {
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="mx-auto w-full max-w-3xl">
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h1 className="card-title text-2xl">My Profile</h1>
+        {message && (
+          <div className="alert alert-info mb-6" role="status">
+            <span>{message}</span>
+          </div>
+        )}
 
-            {message && (
-              <div className="alert alert-info mt-2" role="status">
-                <span>{message}</span>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="mt-6 flex items-center gap-3">
+        {loading ? (
+          <div className="card bg-base-100 shadow">
+            <div className="card-body">
+              <div className="flex items-center gap-3">
                 <span className="loading loading-ring loading-md" />
                 <span className="opacity-70">Loading profile...</span>
               </div>
-            ) : (
-              <>
-                <BasicInfoSection
-                  form={form}
-                  age={age}
-                  fieldErrors={fieldErrors}
-                  setField={setField}
-                />
-                <AboutSection
-                  form={form}
-                  fieldErrors={fieldErrors}
-                  setField={setField}
-                />
-                <LocationSection
-                  form={form}
-                  fieldErrors={fieldErrors}
-                  setField={setField}
-                />
+            </div>
+          </div>
+        ) : mode === "view" ? (
+          profile ? (
+            <>
+              {!canSave && (
+                <div className="alert alert-warning mb-6" role="alert">
+                  <span>
+                    Your profile looks incomplete. Click “Edit” to finish it.
+                  </span>
+                </div>
+              )}
 
-                <AvailabilitySection
-                  availability={form.availability}
-                  error={fieldErrors.availability}
-                  toggleSlot={toggleSlot}
-                />
+              <ProfileDetailCard user={profile}>
+                <Link to="/home" className="btn btn-outline">
+                  Back
+                </Link>
 
-                <MultiSelectChips
-                  title="Services offered"
-                  options={SERVICE_OPTIONS}
-                  selected={form.servicesOffered}
-                  error={fieldErrors.servicesOffered}
-                  onToggle={(v) => toggleArrayValue("servicesOffered", v)}
-                />
-
-                <MultiSelectChips
-                  title="Interests"
-                  options={INTEREST_OPTIONS}
-                  selected={form.interests}
-                  onToggle={(v) => toggleArrayValue("interests", v)}
-                />
-
-                <div className="card-actions mt-8">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setMode("edit")}
+                >
+                  Edit
+                </button>
+              </ProfileDetailCard>
+            </>
+          ) : (
+            <div className="card bg-base-100 shadow">
+              <div className="card-body">
+                <h1 className="card-title text-2xl">My Profile</h1>
+                <p className="opacity-70">Profile could not be loaded.</p>
+                <div className="card-actions mt-4">
                   <button
-                    className="btn btn-primary"
                     type="button"
-                    onClick={onSave}
-                    disabled={!canSave || saving}
+                    className="btn btn-primary"
+                    onClick={() => setMode("edit")}
                   >
-                    {saving ? "Saving..." : "Save profile"}
+                    Edit
                   </button>
                 </div>
-              </>
-            )}
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="card bg-base-100 shadow">
+            <div className="card-body">
+              <h1 className="card-title text-2xl">Edit Profile</h1>
+
+              <BasicInfoSection
+                form={form}
+                age={age}
+                fieldErrors={fieldErrors}
+                setField={setField}
+              />
+              <AboutSection
+                form={form}
+                fieldErrors={fieldErrors}
+                setField={setField}
+              />
+              <LocationSection
+                form={form}
+                fieldErrors={fieldErrors}
+                setField={setField}
+              />
+
+              <AvailabilitySection
+                availability={form.availability}
+                error={fieldErrors.availability}
+                toggleSlot={toggleSlot}
+              />
+
+              <MultiSelectChips
+                title="Services offered"
+                options={SERVICE_OPTIONS}
+                selected={form.servicesOffered}
+                error={fieldErrors.servicesOffered}
+                onToggle={(v) => toggleArrayValue("servicesOffered", v)}
+              />
+
+              <MultiSelectChips
+                title="Interests"
+                options={INTEREST_OPTIONS}
+                selected={form.interests}
+                onToggle={(v) => toggleArrayValue("interests", v)}
+              />
+
+              <div className="card-actions mt-8 justify-between">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={onCancelEdit}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={onSave}
+                  disabled={!canSave || saving}
+                >
+                  {saving ? "Saving..." : "Save profile"}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ type Idparams = { id: string };
 type GetConnectionReqRes = connectionDTO[] | { message: string };
 
 const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
-  const { fromUserId, toUserId, message } = req.body;
+  const { fromUserId, toUserId, profilePicture } = req.body;
   if (fromUserId === toUserId) {
     throw new Error("You cannot send a request to yourself", { cause: { status: 400 } });
   }
@@ -31,7 +31,7 @@ const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionI
   const connectionRequest = new ConnectionReq({
     fromUserId,
     toUserId,
-    message,
+    profilePicture,
     status: "pending", // Always hardcode this on creation
   });
 

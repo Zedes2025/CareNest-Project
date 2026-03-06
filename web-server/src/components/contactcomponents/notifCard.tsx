@@ -1,18 +1,16 @@
 interface NotificationCardProps {
   username: string;
   avatarUrl: string;
-  onAction: (action: "accept" | "decline" | "view") => void;
   mode?: "pending" | "previous";
-  status: string;
+  status: ConnectionStatus;
+  // 2. Add the onAction callback to the interface
+  onAction?: (action: "accept" | "decline") => void;
 }
 
-export const NotificationCard = ({
-  username,
-  avatarUrl,
-  onAction,
-  mode = "pending",
-  status,
-}: NotificationCardProps) => {
+export const NotificationCard = ({ username, avatarUrl, mode = "pending", status, onAction }: NotificationCardProps) => {
+  // Helper to determine the button appearance
+  const isAccepted = status === "accepted";
+
   return (
     <div className="card w-96 bg-base-100 card-xs shadow-sm border mb-4">
       <div className="card-body p-4">
@@ -25,37 +23,22 @@ export const NotificationCard = ({
             </div>
           </div>
 
-          <p className="flex-1 text-sm">
-            {mode === "pending"
-              ? `${username} wants to connect with you!`
-              : `You responded to ${username}`}
-          </p>
+          <p className="flex-1 text-sm">{mode === "pending" ? `${username} wants to connect with you!` : `You responded to ${username}`}</p>
         </div>
 
         <div className="flex justify-end gap-2">
           {mode === "pending" ? (
             <>
-              <button
-                onClick={() => onAction("accept")}
-                className="btn btn-sm btn-neutral rounded-xl"
-              >
+              <button onClick={() => onAction?.("accept")} className="btn btn-sm btn-neutral rounded-xl">
                 Accept
               </button>
-
-              <button
-                onClick={() => onAction("decline")}
-                className="btn btn-sm rounded-xl"
-              >
+              <button onClick={() => onAction?.("decline")} className="btn btn-sm rounded-xl">
                 Decline
               </button>
             </>
           ) : (
-            <button
-              className={`btn btn-sm rounded-xl ${
-                status === "accept" ? "btn-neutral" : "btn"
-              }`}
-            >
-              {status === "accept" ? "Approved" : "Declined"}
+            <button disabled className={`btn btn-sm rounded-xl ${isAccepted ? "btn-neutral" : "btn-outline"}`}>
+              {isAccepted ? "Approved" : "Declined"}
             </button>
           )}
         </div>

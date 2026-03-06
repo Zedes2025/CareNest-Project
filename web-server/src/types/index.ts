@@ -26,4 +26,6 @@ declare global {
     handleSignOut: () => Promise<void>;
     handleRegister: (formData: RegisterFormState) => Promise<void>;
   };
+
+  type ConnectionStatus = "pending" | "accepted" | "rejected";
 }

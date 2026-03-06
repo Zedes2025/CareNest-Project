@@ -53,7 +53,7 @@ export const DetailsPage = () => {
             <Link to="/home" className="btn btn-outline">
               Back
             </Link>
-            <button className="btn" disabled={isSending} onClick={handleConnect}>
+            <button className="btn bg-blue-800 text-white" disabled={isSending} onClick={handleConnect}>
               {isSending ? "Sending..." : "Connect"}
             </button>
             <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">

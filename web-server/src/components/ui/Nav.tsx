@@ -22,33 +22,33 @@ function navBtnClass(isActive: boolean) {
 
 export const Nav = () => {
   const { signedIn, user, handleSignOut } = useAuth();
+
   const handleLogout = async () => {
-    console.log("1. Button clicked");
     try {
       await handleSignOut();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Error logging out");
-      }
+      if (error instanceof Error) toast.error(error.message);
+      else toast.error("Error logging out");
     }
   };
+
   return (
     <div className="navbar bg-base-100 border-b border-base-200">
-      {/* Center: placeholder text */}
+      <div className="navbar-start" />
+
       <div className="navbar-center">
         <span className="text-base font-semibold tracking-wide">
           Connect with your community!
         </span>
       </div>
 
-      {/* Right: navigation buttons */}
-      <div className="navbar-end gap-1">
+      <div className="navbar-end gap-2">
         {signedIn ? (
           <>
-            {/* Adjust paths if your router uses different ones */}
-            <p>Welcome back , {user?.firstName}</p>
+            <span className="hidden sm:inline text-sm opacity-70">
+              Welcome back, {user?.firstName}
+            </span>
+
             <NavLink
               to="/home"
               className={({ isActive }) => navBtnClass(isActive)}
@@ -70,13 +70,13 @@ export const Nav = () => {
               Contacts
             </NavLink>
 
-            <NavLink
-              to="/login"
+            <button
+              type="button"
               onClick={handleLogout}
-              className="btn btn-ghost btn-sm rounded-xl transition-colors hover:text-blue-600 hover:bg-blue-50"
+              className="btn btn-ghost btn-sm rounded-xl transition-colors hover:text-blue-50 hover:bg-blue-800"
             >
               Logout
-            </NavLink>
+            </button>
           </>
         ) : (
           <>

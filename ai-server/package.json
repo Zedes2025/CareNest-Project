@@ -31,7 +31,12 @@
     "build": "tsc",
     "start": "node --env-file=.env.production.local dist/app.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "openai": "^6.27.0",
+    "zod": "^4.3.6"
+  },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

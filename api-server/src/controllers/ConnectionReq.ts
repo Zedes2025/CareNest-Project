@@ -7,6 +7,7 @@ type connectionInputDTO = z.infer<typeof connectionReqInputSchema>;
 type connectionDTO = z.infer<typeof connectionReqSchema>;
 type Idparams = { id: string };
 type GetConnectionReqRes = connectionDTO[] | { message: string };
+type updatingStatusReqRes = (Omit<connectionDTO, "_id"> & { _id: string }) | { message: string };
 
 const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
   const { fromUserId, toUserId } = req.body;
@@ -50,14 +51,37 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
     res.status(404).json({ message: "No requests found for this user" });
     return;
   }
-
   // 3. Return the array (Convert to plain objects with string IDs)
-  //   const formattedReqs = myReqs.map((req) => ({
-  //     ...req.toObject(),
-  //     fromUserId: req.fromUserId.toString(),
-  //     toUserId: req.toUserId.toString(),
-  //   }));
+  // const formattedReqs = myReqs.map((req) => ({
+  //   ...req.toObject(),
+  //   fromUserId: req.fromUserId.toString(),
+  //   toUserId: req.toUserId.toString(),
+  // }));
   res.json(myReqs);
 };
 
-export { sendConnectionRequest, getConnectionRequest };
+const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req, res): Promise<void> => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // 1. Fetch the data
+  const updatingStatus = await ConnectionReq.findById(id);
+
+  // 2. Check if the document exists
+  if (!updatingStatus) {
+    res.status(404).json({ message: "Not found" });
+    return;
+  }
+
+  updatingStatus.status = status;
+  const updated = await updatingStatus.save();
+  // const formattedResponse = {
+  //   ...updated.toObject(),
+  //   fromUserId: updated.fromUserId.toString(),
+  //   toUserId: updated.toUserId.toString(),
+  //   _id: updated._id.toString(),
+  // };
+  res.json(updated);
+};
+
+export { sendConnectionRequest, getConnectionRequest, statusUpdate };

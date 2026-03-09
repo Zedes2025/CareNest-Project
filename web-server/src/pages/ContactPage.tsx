@@ -29,7 +29,11 @@ export const ContactPage = () => {
         <h1 className="text-2xl font-semibold">Notifications</h1>
         <div className="mt-4">
           <h2 className="text-lg font-semibold mb-2">Pending requests</h2>
-          {user.length > 0 ? user.map((each) => <NotificationCard key={each._id} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} />) : <p>No pending connection request</p>}
+          {user.filter((each) => each.status === "pending").length > 0 ? user.filter((each) => each.status === "pending").map((each) => <NotificationCard key={each._id} id={each._id.toString()} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} initialStatus={each.status} />) : <p>No pending connection request</p>}
+        </div>
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold mb-2">Archives</h2>
+          {user.filter((each) => each.status === "accepted").length > 0 ? user.filter((each) => each.status === "accepted").map((each) => <NotificationCard key={each._id} id={each._id.toString()} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} initialStatus={each.status} />) : <p>No history of connection request found</p>}
         </div>
       </section>
     </div>

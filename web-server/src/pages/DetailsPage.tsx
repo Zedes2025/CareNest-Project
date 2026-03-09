@@ -26,7 +26,7 @@ export const DetailsPage = () => {
     setIsSending(true);
     try {
       // 1. Call the API function
-      await sendConnectionRequest(user._id, user.profilePicture ?? "");
+      await sendConnectionRequest(user._id);
       // 2. Only if successful, show the modal
       const modal = document.getElementById("my_modal_5") as HTMLDialogElement;
       modal?.showModal();

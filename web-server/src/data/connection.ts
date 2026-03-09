@@ -13,30 +13,49 @@ export async function getConnections(userId: string) {
   return await res.json();
 }
 
-export async function sendConnectionRequest(toUserId: string, profilePicture: string) {
+export async function sendConnectionRequest(toUserId: string) {
   const aboutme = await me();
-  console.log(aboutme);
+  const accessToken = localStorage.getItem("accessToken");
+  // console.log(aboutme); //sanity check whether it is retrieving data for aboutme
   const fromUserId = aboutme._id;
   const res = await fetch(`${apiServerURL}/connectionrequests`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // If you use JWT authentication, add your token here:
-      // "Authorization": `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       fromUserId,
       toUserId,
-      profilePicture,
     }),
   });
-
   const data = await res.json();
-
   if (!res.ok) {
     // Throw the error so the frontend component can catch it
     throw new Error(data.message || "Failed to send request");
   }
 
+  return data;
+}
+
+export async function statusUpdate(_id: string, status: string) {
+  const accessToken = localStorage.getItem("accessToken");
+  // const id = _id.toString();
+
+  const res = await fetch(`${apiServerURL}/connectionrequests/${_id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      status,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to update request status");
+  }
+
+  const data = await res.json();
   return data;
 }

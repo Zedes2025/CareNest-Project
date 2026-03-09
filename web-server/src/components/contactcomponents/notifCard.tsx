@@ -1,10 +1,27 @@
+import { useState } from "react";
+import { statusUpdate } from "../../data/connection";
+
 interface NotificationCardProps {
   username: string;
   avatarUrl: string;
+  id: string;
+  initialStatus: string;
 }
 
-export const NotificationCard = ({ username, avatarUrl }: NotificationCardProps) => {
-  console.log(avatarUrl);
+export const NotificationCard = ({ username, avatarUrl, id, initialStatus }: NotificationCardProps) => {
+  // 1. Initialize local state with the status passed from parent
+  const [status, setStatus] = useState(initialStatus);
+
+  if (!id) return null;
+  const changeStatus = async (status: "accepted" | "declined") => {
+    try {
+      await statusUpdate(id, status);
+      alert(`Request ${status} successfully!`);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+
   return (
     <div className="card w-96 bg-base-100 shadow border mb-4">
       <div className="card-body p-4">
@@ -14,7 +31,6 @@ export const NotificationCard = ({ username, avatarUrl }: NotificationCardProps)
               <img src={avatarUrl} alt={username} />
             </div>
           </div>
-
           <div>
             <h2 className="font-semibold">{username}</h2>
             <p className="text-sm text-gray-500">wants to connect with you</p>
@@ -22,9 +38,19 @@ export const NotificationCard = ({ username, avatarUrl }: NotificationCardProps)
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <button className="btn btn-sm btn-neutral rounded-xl">Accept</button>
-
-          <button className="btn btn-sm btn-outline rounded-xl">Decline</button>
+          {status === "pending" ? (
+            <>
+              <button className="btn btn-sm btn-neutral rounded-xl" onClick={() => changeStatus("accepted")}>
+                Accept
+              </button>
+              <button className="btn btn-sm btn-outline rounded-xl" onClick={() => changeStatus("declined")}>
+                Decline
+              </button>
+            </>
+          ) : (
+            // 3. This shows instead of buttons once the state changes
+            <span className="font-bold capitalize text-primary">{status}</span>
+          )}
         </div>
       </div>
     </div>

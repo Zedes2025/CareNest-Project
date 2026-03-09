@@ -6,7 +6,7 @@ const connectionReqSchema = new Schema(
     toUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     // message: { type: String, required: true, minLength: 10, trim: true },
     // profilePicture: { type: String, ref: "User", required: true },
-    status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
+    status: { type: String, enum: ["pending", "accepted", "declined"], default: "pending" },
   },
   { timestamps: true },
 );

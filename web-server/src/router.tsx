@@ -7,10 +7,13 @@ import RegistrationPage from "./pages/RegistrationPage";
 import ProtectedLayout from "./components/layout/ProtectedLayout";
 import { HomePage, homeLoader } from "./pages/HomePage";
 import { DetailsPage, detailsLoader } from "./pages/DetailsPage";
-import Chat from "./components/Chat";
+import ErrorPage from "./pages/ErrorPage";
+
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <ErrorPage />,
+    hydrateFallbackElement: <div>Loading...</div>,
     children: [
       { index: true, loader: () => redirect("/login") },
       { path: "/login", element: <LoginPage /> },

@@ -14,8 +14,7 @@ export const getMyProfileById: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
-  if (!isValidObjectId(id))
-    throw new Error("Invalid id", { cause: { status: 400 } });
+  if (!isValidObjectId(id)) throw new Error("Invalid id", { cause: { status: 400 } });
   const user = await User.findById(id).lean();
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json(user);
@@ -50,11 +49,7 @@ export const updateUserProfile: RequestHandler<
 > = async (req, res) => {
   const { id } = req.params;
 
-  const updatedUserDoc = await User.findByIdAndUpdate(
-    id,
-    { $set: req.body },
-    { new: true },
-  );
+  const updatedUserDoc = await User.findByIdAndUpdate(id, { $set: req.body }, { new: true });
 
   if (!updatedUserDoc) {
     res.status(404).json({ message: "User not found" });
@@ -87,8 +82,7 @@ export const deleteUser: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
-  if (!isValidObjectId(id))
-    throw new Error("Invalid id", { cause: { status: 400 } });
+  if (!isValidObjectId(id)) throw new Error("Invalid id", { cause: { status: 400 } });
   const user = await User.findByIdAndDelete(id);
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json({ message: "User deleted" });
@@ -108,10 +102,7 @@ export type PublicProfileDTO = Omit<BaseUser, "address"> & {
   city: string | null;
 };
 
-export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
-  req,
-  res,
-) => {
+export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (req, res) => {
   const users = await User.find().lean(); // plain objects
 
   const publicUsers = users.map((u) => {

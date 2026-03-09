@@ -23,11 +23,10 @@ export const DetailsPage = () => {
 
   const handleConnect = async () => {
     if (!user?._id) return;
-
     setIsSending(true);
     try {
       // 1. Call the API function
-      await sendConnectionRequest(user._id, user.profilePicture ?? "");
+      await sendConnectionRequest(user._id);
       // 2. Only if successful, show the modal
       const modal = document.getElementById("my_modal_5") as HTMLDialogElement;
       modal?.showModal();
@@ -54,7 +53,7 @@ export const DetailsPage = () => {
               Back
             </Link>
             <button className="btn bg-blue-800 text-white" disabled={isSending} onClick={handleConnect}>
-              {isSending ? "Sending..." : "Connect"}
+              {isSending ? "Sent" : "Connect"}
             </button>
             <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
               <div className="modal-box">

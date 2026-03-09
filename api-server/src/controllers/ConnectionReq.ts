@@ -9,7 +9,7 @@ type Idparams = { id: string };
 type GetConnectionReqRes = connectionDTO[] | { message: string };
 
 const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
-  const { fromUserId, toUserId, profilePicture } = req.body;
+  const { fromUserId, toUserId } = req.body;
   if (fromUserId === toUserId) {
     throw new Error("You cannot send a request to yourself", { cause: { status: 400 } });
   }
@@ -31,7 +31,6 @@ const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionI
   const connectionRequest = new ConnectionReq({
     fromUserId,
     toUserId,
-    profilePicture,
     status: "pending", // Always hardcode this on creation
   });
 
@@ -44,7 +43,7 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
   const { id } = req.params;
 
   // 1. Fetch the data
-  const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName").exec();
+  const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName profilePicture").exec();
 
   // 2. Check if the array is empty
   if (!myReqs || myReqs.length === 0) {

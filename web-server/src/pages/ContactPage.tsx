@@ -29,7 +29,7 @@ export const ContactPage = () => {
         <h1 className="text-2xl font-semibold">Notifications</h1>
         <div className="mt-4">
           <h2 className="text-lg font-semibold mb-2">Pending requests</h2>
-          {user.length > 0 ? user.map((each) => <NotificationCard key={each._id} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.profilePicture} />) : <p>No pending connection request</p>}
+          {user.length > 0 ? user.map((each) => <NotificationCard key={each._id} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} />) : <p>No pending connection request</p>}
         </div>
       </section>
     </div>

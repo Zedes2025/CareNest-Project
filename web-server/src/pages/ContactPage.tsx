@@ -27,13 +27,15 @@ export const ContactPage = () => {
     <div className="container mx-auto px-4 py-10">
       <section>
         <h1 className="text-2xl font-semibold">Notifications</h1>
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-2">Pending requests</h2>
-          {user.filter((each) => each.status === "pending").length > 0 ? user.filter((each) => each.status === "pending").map((each) => <NotificationCard key={each._id} id={each._id.toString()} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} initialStatus={each.status} />) : <p>No pending connection request</p>}
-        </div>
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-2">Archives</h2>
-          {user.filter((each) => each.status === "accepted").length > 0 ? user.filter((each) => each.status === "accepted").map((each) => <NotificationCard key={each._id} id={each._id.toString()} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} initialStatus={each.status} />) : <p>No history of connection request found</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold mb-2">Pending requests</h2>
+            {user.filter((each) => each.status === "pending").length > 0 ? user.filter((each) => each.status === "pending").map((each) => <NotificationCard key={each._id} id={each._id.toString()} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} initialStatus={each.status} />) : <p>No pending connection request</p>}
+          </div>
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold mb-2">Archives</h2>
+            {user.filter((each) => each.status === "accepted" || each.status === "declined").length > 0 ? user.filter((each) => each.status === "accepted" || each.status === "declined").map((each) => <NotificationCard key={each._id} id={each._id.toString()} username={`${each.fromUserId?.firstName || "Unknown"} ${each.fromUserId?.lastName || ""}`} avatarUrl={each.fromUserId?.profilePicture} initialStatus={each.status} />) : <p>No history of connection request found</p>}
+          </div>
         </div>
       </section>
     </div>

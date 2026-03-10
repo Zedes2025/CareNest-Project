@@ -1,4 +1,3 @@
-import { AuthProvider } from "../../contexts/AuthContext";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { Outlet, useNavigation } from "react-router";

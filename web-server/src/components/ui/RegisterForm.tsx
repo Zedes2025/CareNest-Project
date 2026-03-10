@@ -55,6 +55,8 @@ export default function RegisterForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (loading) return;
+
     setFieldErrors({}); // Clear previous errors
     setFormMessage("");
 
@@ -92,7 +94,11 @@ export default function RegisterForm({
                 <span>{formMessage}</span>
               </div>
             )}
-
+            {error && (
+              <div className="alert alert-error mt-2" role="alert">
+                <span>{error}</span>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               {/* //first Name */}
               <div className="form-control">
@@ -203,9 +209,16 @@ export default function RegisterForm({
                 <button
                   className="btn btn-primary w-full"
                   type="submit"
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || loading}
                 >
-                  Create account
+                  {loading ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      Creating...
+                    </>
+                  ) : (
+                    "Create account"
+                  )}
                 </button>
               </div>
             </form>

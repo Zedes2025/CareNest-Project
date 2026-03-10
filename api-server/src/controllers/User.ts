@@ -1,9 +1,14 @@
 import { type UserType } from "#types";
 import { User } from "#models";
 import { type RequestHandler } from "express";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, type Types } from "mongoose";
 import { userCreateSchema, userUpdateSchema } from "#schemas";
 import { z } from "zod";
+
+type UserProfile = z.infer<typeof userUpdateSchema> & {
+  _id: string;
+  isProfileComplete: boolean;
+};
 
 export const getUsers: RequestHandler = async (req, res) => {
   const users = await User.find();
@@ -18,28 +23,6 @@ export const getMyProfileById: RequestHandler = async (req, res) => {
   const user = await User.findById(id).lean();
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json(user);
-};
-
-//register:  auth server provides this, so no need to implement here. This is just for testing with postman, can be removed later
-// export const createUser: RequestHandler<
-//   {},
-//   {},
-//   z.infer<typeof userCreateSchema>
-// > = async (req, res) => {
-//   // onlyregistratiom
-//   if (!req.body)
-//     throw new Error("First name, last name, and email are required", {
-//       cause: { status: 400 },
-//     });
-//   const { firstName, lastName, email, password } = req.body;
-
-//   const user = await User.create({ firstName, lastName, email, password });
-//   res.status(201).json(user);
-// };
-
-type UserProfile = z.infer<typeof userUpdateSchema> & {
-  _id: string;
-  isProfileComplete: boolean;
 };
 
 export const updateUserProfile: RequestHandler<
@@ -60,7 +43,7 @@ export const updateUserProfile: RequestHandler<
 
   const userProfile: UserProfile = {
     ...updatedUser,
-
+    _id: updatedUser._id.toString(),
     isProfileComplete: !!(
       updatedUser.firstName &&
       updatedUser.lastName &&
@@ -138,3 +121,20 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
 
   res.json(publicUser satisfies PublicProfileDTO);
 };
+
+//register:  auth server provides this, so no need to implement here. This is just for testing with postman, can be removed later
+// export const createUser: RequestHandler<
+//   {},
+//   {},
+//   z.infer<typeof userCreateSchema>
+// > = async (req, res) => {
+//   // onlyregistratiom
+//   if (!req.body)
+//     throw new Error("First name, last name, and email are required", {
+//       cause: { status: 400 },
+//     });
+//   const { firstName, lastName, email, password } = req.body;
+
+//   const user = await User.create({ firstName, lastName, email, password });
+//   res.status(201).json(user);
+// };

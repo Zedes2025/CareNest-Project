@@ -5,15 +5,7 @@ const DailyScheduleSchema = new Schema<DailySchedule>(
   {
     day: {
       type: String,
-      enum: [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-      ],
+      enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       required: true,
     },
     slots: { type: [String], default: [] }, // flexible slots like "morning", "noon", etc.

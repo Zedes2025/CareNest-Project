@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import {
   getMyProfileById,
   updateMyProfileById,
+  deleteMyProfileById,
   type ApiUserProfile,
 } from "../data";
 import { useAuth } from "../contexts/AuthContext";
@@ -34,7 +35,8 @@ import { ProfileDetailCard } from "../components/ui/ProfileDetailCard";
 type Mode = "view" | "edit";
 
 export const MyProfilePage = () => {
-  const { signedIn, user } = useAuth();
+  const { signedIn, user, handleSignOut } = useAuth();
+  const navigate = useNavigate();
 
   const [mode, setMode] = useState<Mode>("view");
 
@@ -46,6 +48,12 @@ export const MyProfilePage = () => {
   const [form, setForm] = useState<FormState>(emptyFormState);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState<string>("");
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteText, setDeleteText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const canConfirmDelete = deleteText === "Delete";
 
   const canSave = useMemo(() => {
     return (
@@ -172,6 +180,33 @@ export const MyProfilePage = () => {
     setMode("view");
   };
 
+  const onDelete = async () => {
+    if (!user?._id) return;
+
+    setDeleting(true);
+    setMessage("");
+
+    try {
+      await deleteMyProfileById(user._id);
+
+      // close modal/reset UI
+      setDeleteOpen(false);
+      setDeleteText("");
+      setProfile(null);
+
+      // logout user (clears tokens + signedIn=false)
+      await handleSignOut();
+
+      // optional: explicit navigation (ProtectedLayout would also redirect)
+      navigate("/login", { replace: true });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to delete profile.";
+      setMessage(msg);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (!signedIn) {
     return (
       <div className="container mx-auto px-4 py-10">
@@ -222,17 +257,33 @@ export const MyProfilePage = () => {
               )}
 
               <ProfileDetailCard user={profile}>
-                <Link to="/home" className="btn btn-outline">
-                  Back
-                </Link>
+                <div className="w-full grid grid-cols-3 items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-error justify-self-start"
+                    onClick={() => {
+                      setDeleteText("");
+                      setDeleteOpen(true);
+                    }}
+                  >
+                    Delete Profile
+                  </button>
 
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => setMode("edit")}
-                >
-                  Edit
-                </button>
+                  <Link
+                    to="/home"
+                    className="btn btn-outline justify-self-center"
+                  >
+                    Find people
+                  </Link>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary justify-self-end"
+                    onClick={() => setMode("edit")}
+                  >
+                    Edit
+                  </button>
+                </div>
               </ProfileDetailCard>
             </>
           ) : (
@@ -240,7 +291,10 @@ export const MyProfilePage = () => {
               <div className="card-body">
                 <h1 className="card-title text-2xl">My Profile</h1>
                 <p className="opacity-70">Profile could not be loaded.</p>
-                <div className="card-actions mt-4">
+                <div className="card-actions mt-4 justify-between w-full">
+                  <Link to="/home" className="btn btn-outline">
+                    Find people
+                  </Link>
                   <button
                     type="button"
                     className="btn btn-primary"
@@ -317,6 +371,62 @@ export const MyProfilePage = () => {
             </div>
           </div>
         )}
+
+        {/* Delete modal */}
+        <div className={`modal ${deleteOpen ? "modal-open" : ""}`}>
+          <div className="modal-box">
+            <h3 className="font-semibold text-lg">Delete profile</h3>
+            <p className="mt-2">
+              Do you really want to delete your profile? Type{" "}
+              <span className="font-mono">Delete</span> in the field below.
+            </p>
+
+            <input
+              className="input input-bordered w-full mt-4"
+              value={deleteText}
+              onChange={(e) => setDeleteText(e.target.value)}
+              placeholder='Type "Delete"'
+              disabled={deleting}
+            />
+
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => {
+                  setDeleteOpen(false);
+                  setDeleteText("");
+                }}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-error"
+                onClick={onDelete}
+                disabled={!canConfirmDelete || deleting}
+              >
+                {deleting ? "Deleting..." : "Confirm delete"}
+              </button>
+            </div>
+          </div>
+
+          <div className="modal-backdrop">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => {
+                if (deleting) return;
+                setDeleteOpen(false);
+                setDeleteText("");
+              }}
+            >
+              close
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

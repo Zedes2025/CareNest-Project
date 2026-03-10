@@ -1,9 +1,24 @@
 import { type UserType } from "#types";
 import { User } from "#models";
 import { type RequestHandler } from "express";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, type Types } from "mongoose";
 import { userCreateSchema, userUpdateSchema } from "#schemas";
 import { z } from "zod";
+
+import { getCoordinatesFromAddress } from "../services/geo.services.ts";
+
+interface Address {
+  //interface for user address
+  hausnr: string;
+  street: string;
+  plz: string;
+  city: string;
+  country: string;
+}
+type UserProfile = z.infer<typeof userUpdateSchema> & {
+  _id: string;
+  isProfileComplete: boolean;
+};
 
 export const getUsers: RequestHandler = async (req, res) => {
   const users = await User.find();
@@ -14,32 +29,11 @@ export const getMyProfileById: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
-  if (!isValidObjectId(id)) throw new Error("Invalid id", { cause: { status: 400 } });
+  if (!isValidObjectId(id))
+    throw new Error("Invalid id", { cause: { status: 400 } });
   const user = await User.findById(id).lean();
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json(user);
-};
-
-//register:  auth server provides this, so no need to implement here. This is just for testing with postman, can be removed later
-// export const createUser: RequestHandler<
-//   {},
-//   {},
-//   z.infer<typeof userCreateSchema>
-// > = async (req, res) => {
-//   // onlyregistratiom
-//   if (!req.body)
-//     throw new Error("First name, last name, and email are required", {
-//       cause: { status: 400 },
-//     });
-//   const { firstName, lastName, email, password } = req.body;
-
-//   const user = await User.create({ firstName, lastName, email, password });
-//   res.status(201).json(user);
-// };
-
-type UserProfile = z.infer<typeof userUpdateSchema> & {
-  _id: string;
-  isProfileComplete: boolean;
 };
 
 export const updateUserProfile: RequestHandler<
@@ -49,7 +43,11 @@ export const updateUserProfile: RequestHandler<
 > = async (req, res) => {
   const { id } = req.params;
 
-  const updatedUserDoc = await User.findByIdAndUpdate(id, { $set: req.body }, { new: true });
+  const updatedUserDoc = await User.findByIdAndUpdate(
+    id,
+    { $set: req.body },
+    { new: true },
+  );
 
   if (!updatedUserDoc) {
     res.status(404).json({ message: "User not found" });
@@ -57,10 +55,32 @@ export const updateUserProfile: RequestHandler<
   }
 
   const updatedUser = updatedUserDoc.toObject();
+  if (updatedUser.address) {
+    // Using address to calculate lat/lng, so that we can find the distance between users later, to show nearby users first.
+    const coords = await getCoordinatesFromAddress({
+      hausnr: updatedUser.address.houseNumber,
+      street: updatedUser.address.street,
+      plz: updatedUser.address.plz,
+      city: updatedUser.address.city,
+      country: "Germany", // Default to Germany, can be made dynamic later
+    });
 
+    if (coords) {
+      // if we got valid coordinates, save them to the user document
+      updatedUser.address.latitude = coords.lat;
+      updatedUser.address.longitude = coords.lon;
+      await User.findByIdAndUpdate(id, {
+        $set: {
+          // save lat/lng to db
+          "address.latitude": coords.lat,
+          "address.longitude": coords.lon,
+        },
+      });
+    }
+  }
   const userProfile: UserProfile = {
     ...updatedUser,
-
+    _id: updatedUser._id.toString(),
     isProfileComplete: !!(
       updatedUser.firstName &&
       updatedUser.lastName &&
@@ -82,7 +102,8 @@ export const deleteUser: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
-  if (!isValidObjectId(id)) throw new Error("Invalid id", { cause: { status: 400 } });
+  if (!isValidObjectId(id))
+    throw new Error("Invalid id", { cause: { status: 400 } });
   const user = await User.findByIdAndDelete(id);
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json({ message: "User deleted" });
@@ -102,7 +123,10 @@ export type PublicProfileDTO = Omit<BaseUser, "address"> & {
   city: string | null;
 };
 
-export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (req, res) => {
+export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
+  req,
+  res,
+) => {
   const users = await User.find().lean(); // plain objects
 
   const publicUsers = users.map((u) => {
@@ -138,3 +162,20 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
 
   res.json(publicUser satisfies PublicProfileDTO);
 };
+
+//register:  auth server provides this, so no need to implement here. This is just for testing with postman, can be removed later
+// export const createUser: RequestHandler<
+//   {},
+//   {},
+//   z.infer<typeof userCreateSchema>
+// > = async (req, res) => {
+//   // onlyregistratiom
+//   if (!req.body)
+//     throw new Error("First name, last name, and email are required", {
+//       cause: { status: 400 },
+//     });
+//   const { firstName, lastName, email, password } = req.body;
+
+//   const user = await User.create({ firstName, lastName, email, password });
+//   res.status(201).json(user);
+// };

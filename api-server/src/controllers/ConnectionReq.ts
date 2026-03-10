@@ -44,7 +44,7 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
   const { id } = req.params;
 
   // 1. Fetch the data
-  const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName profilePicture").exec();
+  const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName profilePicture").lean().exec();
 
   // 2. Check if the array is empty
   if (!myReqs || myReqs.length === 0) {
@@ -52,12 +52,12 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
     return;
   }
   // 3. Return the array (Convert to plain objects with string IDs)
-  // const formattedReqs = myReqs.map((req) => ({
-  //   ...req.toObject(),
-  //   fromUserId: req.fromUserId.toString(),
-  //   toUserId: req.toUserId.toString(),
-  // }));
-  res.json(myReqs);
+  const formattedReqs = myReqs.map((req) => ({
+    ...req,
+    fromUserId: req.fromUserId.toString(),
+    toUserId: req.toUserId.toString(),
+  }));
+  res.json(formattedReqs);
 };
 
 const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req, res): Promise<void> => {
@@ -75,13 +75,14 @@ const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req,
 
   updatingStatus.status = status;
   const updated = await updatingStatus.save();
-  // const formattedResponse = {
-  //   ...updated.toObject(),
-  //   fromUserId: updated.fromUserId.toString(),
-  //   toUserId: updated.toUserId.toString(),
-  //   _id: updated._id.toString(),
-  // };
-  res.json(updated);
+
+  const formattedResponse = {
+    ...updated.toObject(),
+    fromUserId: updated.fromUserId.toString(),
+    toUserId: updated.toUserId.toString(),
+    _id: updated._id.toString(),
+  };
+  res.json(formattedResponse);
 };
 
 export { sendConnectionRequest, getConnectionRequest, statusUpdate };

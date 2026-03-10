@@ -1,11 +1,4 @@
-export type Weekday =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
+export type Weekday = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
 export type TimeSlot = string; // flexible for now, e.g., "morning", "noon", "afternoon"
 
@@ -38,8 +31,6 @@ type UserType = {
   updatedAt: Date;
 };
 
-type ConnectionReqType = {};
-
 // Message type
 interface Message {
   role: "assistant" | "system" | "user" | "developer";
@@ -55,4 +46,4 @@ interface AIConversationType {
   createdAt: Date;
 }
 
-export type { UserType, AIConversationType, ConnectionReqType };
+export type { UserType, AIConversationType };

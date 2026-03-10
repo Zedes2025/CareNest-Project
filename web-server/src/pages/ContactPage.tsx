@@ -2,6 +2,7 @@ import { NotificationCard } from "../components/contactcomponents/notifCard";
 import { getConnections } from "../data/connection";
 import { me } from "../data";
 import { useLoaderData } from "react-router";
+import { useState } from "react";
 
 export async function connectionLoader() {
   const aboutme = await me();
@@ -19,9 +20,16 @@ export async function connectionLoader() {
 }
 
 export const ContactPage = () => {
-  const { user, error } = useLoaderData() as { user: any[] | null; error: string | null };
+  // const { user, error } = useLoaderData() as { user: any[] | null; error: string | null };
+  const { user: initialUser, error } = useLoaderData() as { user: any[] | null; error: string | null };
+  const [connections, setConnections] = useState(initialUser || []);
+  const handleUpdate = (id: string, newStatus: string) => {
+    // This updates the local array, triggering a re-render
+    setConnections((prev) => prev.map((conn) => (conn._id === id ? { ...conn, status: newStatus } : conn)));
+  };
+
   if (error) return <p className="text-red-500">{error}</p>;
-  if (!user) return <p>Loading...</p>;
+  if (!connections) return <p>Loading...</p>;
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -30,11 +38,35 @@ export const ContactPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Pending requests</h2>
-            {user.filter((each) => each.status === "pending").length > 0 ? user.filter((each) => each.status === "pending").map((each) => <NotificationCard key={each._id} id={each._id} username={`${each.senderFirstName || "Unknown"} ${each.senderLastName || ""}`} avatarUrl={each.senderProfilePicture} initialStatus={each.status} />) : <p>No pending connection request</p>}
+            {connections
+              .filter((e) => e.status === "pending")
+              .map((each) => (
+                <NotificationCard
+                  key={each._id}
+                  id={each._id}
+                  // Pass the callback to update the state
+                  onUpdate={(status) => handleUpdate(each._id, status)}
+                  username={`${each.senderFirstName} ${each.senderLastName}`}
+                  avatarUrl={each.senderProfilePicture}
+                  initialStatus={each.status}
+                />
+              ))}
           </div>
           <div className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Archives</h2>
-            {user.filter((each) => each.status === "accepted" || each.status === "declined").length > 0 ? user.filter((each) => each.status === "accepted" || each.status === "declined").map((each) => <NotificationCard key={each._id} id={each._id} username={`${each.senderFirstName || "Unknown"} ${each.senderLastName || ""}`} avatarUrl={each.senderProfilePicture} initialStatus={each.status} />) : <p>No history of connection request found</p>}
+            {connections
+              .filter((e) => e.status === "accepted" || e.status === "declined")
+              .map((each) => (
+                <NotificationCard
+                  key={each._id}
+                  id={each._id}
+                  // Pass the callback to update the state
+                  onUpdate={(status) => handleUpdate(each._id, status)}
+                  username={`${each.senderFirstName} ${each.senderLastName}`}
+                  avatarUrl={each.senderProfilePicture}
+                  initialStatus={each.status}
+                />
+              ))}
           </div>
         </div>
       </section>

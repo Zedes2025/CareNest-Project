@@ -30,9 +30,9 @@ export const DetailsPage = () => {
       // 2. Only if successful, show the modal
       const modal = document.getElementById("my_modal_5") as HTMLDialogElement;
       modal?.showModal();
-    } catch (err) {
-      console.error("Failed to connect:", err);
-      alert("Failed to send connection request.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to send connection request.";
+      alert(msg);
     } finally {
       setIsSending(false);
     }

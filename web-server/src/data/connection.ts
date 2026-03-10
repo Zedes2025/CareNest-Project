@@ -31,8 +31,9 @@ export async function sendConnectionRequest(toUserId: string) {
   });
   const data = await res.json();
   if (!res.ok) {
-    // Throw the error so the frontend component can catch it
-    throw new Error(data.message || "Failed to send request");
+    // If the API returns a message, throw it explicitly.
+    const errorMessage = data.message || "Failed to send connection request.";
+    throw new Error(errorMessage);
   }
 
   return data;

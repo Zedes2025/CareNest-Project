@@ -81,6 +81,20 @@ export async function updateMyProfileById(
   return (data?.user ?? data) as ApiUserProfile;
 }
 
+// DELETE /users/profile/:id (requires auth)
+export async function deleteMyProfileById(
+  id: string,
+): Promise<{ message: string }> {
+  const res = await fetch(`${apiServerURL}/users/profile/${id}`, {
+    method: "DELETE",
+    headers: withAuthHeaders(),
+  });
+
+  if (!res.ok) throw new Error(await readError(res));
+
+  return (await res.json()) as { message: string };
+}
+
 // Public endpoints currently without authenticate.
 const SEND_AUTH_HEADER_FOR_PUBLIC = true;
 

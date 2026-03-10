@@ -5,7 +5,7 @@ import { isValidObjectId, type Types } from "mongoose";
 import { userCreateSchema, userUpdateSchema } from "#schemas";
 import { z } from "zod";
 
-import { getCoordinatesFromAddress } from "../services/geo.service.ts";
+import { getCoordinatesFromAddress } from "../services/geo.services.ts";
 
 interface Address {
   //interface for user address

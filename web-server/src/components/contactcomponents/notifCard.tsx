@@ -8,9 +8,15 @@ interface NotificationCardProps {
   initialStatus: string;
 }
 
-export const NotificationCard = ({ username, avatarUrl, id, initialStatus }: NotificationCardProps) => {
+export const NotificationCard = ({
+  username,
+  avatarUrl,
+  id,
+  initialStatus,
+}: NotificationCardProps) => {
   // 1. Initialize local state with the status passed from parent
-  const [status, setStatus] = useState(initialStatus);
+  // const [status, setStatus] = useState(initialStatus);
+  const [status] = useState(initialStatus);
 
   if (!id) return null;
   const changeStatus = async (status: "accepted" | "declined") => {
@@ -40,10 +46,16 @@ export const NotificationCard = ({ username, avatarUrl, id, initialStatus }: Not
         <div className="flex justify-end gap-2 mt-4">
           {status === "pending" ? (
             <>
-              <button className="btn btn-sm btn-neutral rounded-xl" onClick={() => changeStatus("accepted")}>
+              <button
+                className="btn btn-sm btn-neutral rounded-xl"
+                onClick={() => changeStatus("accepted")}
+              >
                 Accept
               </button>
-              <button className="btn btn-sm btn-outline rounded-xl" onClick={() => changeStatus("declined")}>
+              <button
+                className="btn btn-sm btn-outline rounded-xl"
+                onClick={() => changeStatus("declined")}
+              >
                 Decline
               </button>
             </>

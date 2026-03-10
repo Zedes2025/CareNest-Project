@@ -84,8 +84,12 @@ export default function Chat() {
     speechSynthesis.speak(textToSpeech);
   }
   function stopPlayback(text: string) {
-    speechSynthesis.cancel();
+    speechSynthesis.pause();
   }
+  function resumePlayback(text: string) {
+    speechSynthesis.resume();
+  }
+
   return (
     <div
       // fixed chat window positioned at bottom-right
@@ -133,7 +137,15 @@ export default function Chat() {
                       onClick={() => stopPlayback(msg.content)} // btn to stop speech
                       className="  mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl justify-end"
                     >
-                      ⏹️ Stop
+                      ⏸️ pause
+                    </button>
+                  )}
+                  {isBot && (
+                    <button
+                      onClick={() => resumePlayback(msg.content)} // btn to stop speech
+                      className="  mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl justify-end"
+                    >
+                      ⏯️ resume
                     </button>
                   )}
                 </div>

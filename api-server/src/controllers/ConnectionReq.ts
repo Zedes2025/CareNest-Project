@@ -6,7 +6,7 @@ import { z } from "zod";
 type connectionInputDTO = z.infer<typeof connectionReqInputSchema>;
 type connectionDTO = z.infer<typeof connectionReqSchema>;
 type Idparams = { id: string };
-type GetConnectionReqRes = connectionDTO[] | { message: string };
+type GetConnectionReqRes = (Omit<connectionDTO, "_id"> & { _id: string })[] | { message: string };
 type updatingStatusReqRes = (Omit<connectionDTO, "_id"> & { _id: string }) | { message: string };
 
 const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
@@ -21,11 +21,21 @@ const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionI
       { fromUserId, toUserId },
       { fromUserId: toUserId, toUserId: fromUserId },
     ],
+    status: { $in: ["pending", "accepted"] },
   });
 
   if (existingRequest) {
-    res.status(400).json({ message: "Connection request already exists or is pending." });
-    return;
+    // Scenario 1: It's still pending
+    if (existingRequest.status === "pending") {
+      res.status(400).json({ message: "Connection request is already pending." });
+      return;
+    }
+
+    // Scenario 2: They are already connected
+    if (existingRequest.status === "accepted") {
+      res.status(400).json({ message: "You are already connected with this user." });
+      return;
+    }
   }
 
   // 3. Create the request
@@ -52,11 +62,21 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
     return;
   }
   // 3. Return the array (Convert to plain objects with string IDs)
-  const formattedReqs = myReqs.map((req) => ({
-    ...req,
-    fromUserId: req.fromUserId.toString(),
-    toUserId: req.toUserId.toString(),
-  }));
+  const formattedReqs = myReqs.map((req) => {
+    const sender = req.fromUserId as any;
+
+    return {
+      ...req,
+      // Now you can safely access the fields
+      senderFirstName: sender.firstName,
+      senderLastName: sender.lastName,
+      senderProfilePicture: sender.profilePicture,
+      // Now you can safely turn the ID into a string
+      fromUserId: sender._id.toString(),
+      toUserId: req.toUserId.toString(),
+      _id: req._id.toString(),
+    };
+  });
   res.json(formattedReqs);
 };
 

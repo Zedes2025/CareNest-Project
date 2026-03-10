@@ -14,7 +14,6 @@ app.use(
     exposedHeaders: ["WWW-Authenticate"], // needed to send the 'refresh trigger''
   }),
 );
-
 app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/ai", aiChatRoutes);

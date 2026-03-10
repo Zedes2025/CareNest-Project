@@ -1,16 +1,19 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { AppLayout } from "./components/layout/AppLayout";
-import { ContactPage } from "./pages/ContactPage";
+import { ContactPage, connectionLoader } from "./pages/ContactPage";
 import { MyProfilePage } from "./pages/MyProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ProtectedLayout from "./components/layout/ProtectedLayout";
 import { HomePage, homeLoader } from "./pages/HomePage";
 import { DetailsPage, detailsLoader } from "./pages/DetailsPage";
-import Chat from "./components/Chat";
+import ErrorPage from "./pages/ErrorPage";
+
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <ErrorPage />,
+    hydrateFallbackElement: <div>Loading...</div>,
     children: [
       { index: true, loader: () => redirect("/login") },
       { path: "/login", element: <LoginPage /> },
@@ -22,7 +25,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/home", element: <HomePage />, loader: homeLoader },
           { path: "/my-profile", element: <MyProfilePage /> },
-          { path: "/contact", element: <ContactPage /> },
+          { path: "/contact", element: <ContactPage />, loader: connectionLoader },
           {
             path: "/details/:id",
             element: <DetailsPage />,

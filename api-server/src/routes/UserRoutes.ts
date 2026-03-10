@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { validateBody, authenticate } from "#middlewares";
+import { validateBodyZod, authenticate } from "#middlewares";
 import { z } from "zod";
 
 import {
@@ -18,11 +18,7 @@ const userRoutes = Router();
 
 userRoutes.route("/register").get(getUsers); // just for postman testing, can be removed later
 //.post(authenticate, validateBody(userCreateSchema), createUser);
-userRoutes
-  .route("/profile/:id")
-  .get(authenticate, getMyProfileById)
-  .put(authenticate, validateBody(userUpdateSchema), updateUserProfile)
-  .delete(authenticate, deleteUser);
+userRoutes.route("/profile/:id").get(authenticate, getMyProfileById).put(authenticate, validateBodyZod(userUpdateSchema), updateUserProfile).delete(authenticate, deleteUser);
 
 userRoutes.route("/all").get(authenticate, getAllUsers);
 userRoutes.route("/:id").get(authenticate, getOtherUserById);

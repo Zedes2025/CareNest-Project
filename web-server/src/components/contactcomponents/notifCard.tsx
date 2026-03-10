@@ -1,62 +1,55 @@
+import { useState } from "react";
+import { statusUpdate } from "../../data/connection";
+
 interface NotificationCardProps {
   username: string;
   avatarUrl: string;
-  onAction: (action: "accept" | "decline" | "view") => void;
-  mode?: "pending" | "previous";
-  status: string;
+  id: string;
+  initialStatus: string;
 }
 
-export const NotificationCard = ({
-  username,
-  avatarUrl,
-  onAction,
-  mode = "pending",
-  status,
-}: NotificationCardProps) => {
-  return (
-    <div className="card w-96 bg-base-100 card-xs shadow-sm border mb-4">
-      <div className="card-body p-4">
-        <h2 className="card-title mb-2 text-lg">{username}</h2>
+export const NotificationCard = ({ username, avatarUrl, id, initialStatus }: NotificationCardProps) => {
+  // 1. Initialize local state with the status passed from parent
+  const [status, setStatus] = useState(initialStatus);
 
-        <div className="flex items-center gap-4 mb-3">
+  if (!id) return null;
+  const changeStatus = async (status: "accepted" | "declined") => {
+    try {
+      await statusUpdate(id, status);
+      alert(`Request ${status} successfully!`);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+
+  return (
+    <div className="card w-96 bg-base-100 shadow border mb-4">
+      <div className="card-body p-4">
+        <div className="flex items-center gap-4">
           <div className="avatar">
-            <div className="w-16 rounded-full">
+            <div className="w-14 rounded-full">
               <img src={avatarUrl} alt={username} />
             </div>
           </div>
-
-          <p className="flex-1 text-sm">
-            {mode === "pending"
-              ? `${username} wants to connect with you!`
-              : `You responded to ${username}`}
-          </p>
+          <div>
+            <h2 className="font-semibold">{username}</h2>
+            <p className="text-sm text-gray-500">wants to connect with you</p>
+          </div>
         </div>
 
-        <div className="flex justify-end gap-2">
-          {mode === "pending" ? (
+        <div className="flex justify-end gap-2 mt-4">
+          {status === "pending" ? (
             <>
-              <button
-                onClick={() => onAction("accept")}
-                className="btn btn-sm btn-neutral rounded-xl"
-              >
+              <button className="btn btn-sm btn-neutral rounded-xl" onClick={() => changeStatus("accepted")}>
                 Accept
               </button>
-
-              <button
-                onClick={() => onAction("decline")}
-                className="btn btn-sm rounded-xl"
-              >
+              <button className="btn btn-sm btn-outline rounded-xl" onClick={() => changeStatus("declined")}>
                 Decline
               </button>
             </>
           ) : (
-            <button
-              className={`btn btn-sm rounded-xl ${
-                status === "accept" ? "btn-neutral" : "btn"
-              }`}
-            >
-              {status === "accept" ? "Approved" : "Declined"}
-            </button>
+            // 3. This shows instead of buttons once the state changes
+            <span className="font-bold capitalize text-primary">{status}</span>
           )}
         </div>
       </div>

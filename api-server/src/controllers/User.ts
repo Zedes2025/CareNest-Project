@@ -119,9 +119,17 @@ export const publicProfileSchema = userUpdateSchema.omit({
 
 type BaseUser = z.infer<typeof userCreateSchema>;
 
+//Modified DTO to include Latitude and Longitude - Konstantin
 export type PublicProfileDTO = Omit<BaseUser, "address"> & {
   city: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
+
+// Old Code
+// export type PublicProfileDTO = Omit<BaseUser, "address"> & {
+//   city: string | null;
+// };
 
 export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
   req,
@@ -131,12 +139,16 @@ export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
 
   const publicUsers = users.map((u) => {
     const city = u.address?.city ?? null;
+    const latitude = u.address?.latitude ?? null;
+    const longitude = u.address?.longitude ?? null;
 
     const { address, ...rest } = u;
 
     return {
       ...rest,
       city,
+      latitude,
+      longitude,
     } satisfies PublicProfileDTO;
   });
 
@@ -152,12 +164,16 @@ export const getOtherUserById: RequestHandler = async (req, res) => {
     return;
   }
   const city = user.address?.city ?? null;
+  const latitude = user.address?.latitude ?? null;
+  const longitude = user.address?.longitude ?? null;
 
   const { address, ...rest } = user;
 
   const publicUser = {
     ...rest,
     city,
+    latitude,
+    longitude,
   } satisfies PublicProfileDTO;
 
   res.json(publicUser satisfies PublicProfileDTO);

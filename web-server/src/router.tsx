@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ProtectedLayout from "./components/layout/ProtectedLayout";
 import { HomePage, homeLoader } from "./pages/HomePage";
+import { Documents } from "./pages/DocumentPage";
 import { DetailsPage, detailsLoader } from "./pages/DetailsPage";
 import ErrorPage from "./pages/ErrorPage";
 
@@ -25,11 +26,19 @@ export const router = createBrowserRouter([
         children: [
           { path: "/home", element: <HomePage />, loader: homeLoader },
           { path: "/my-profile", element: <MyProfilePage /> },
-          { path: "/contact", element: <ContactPage />, loader: connectionLoader },
+          {
+            path: "/contact",
+            element: <ContactPage />,
+            loader: connectionLoader,
+          },
           {
             path: "/details/:id",
             element: <DetailsPage />,
             loader: detailsLoader,
+          },
+          {
+            path: "/documents",
+            element: <Documents />,
           },
         ],
       },

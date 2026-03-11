@@ -1,5 +1,5 @@
 import { NotificationCard } from "../components/contactcomponents/notifCard";
-import { getConnections } from "../data/connection";
+import { getConnections, myConnectionRequest } from "../data/connection";
 import { me } from "../data";
 import { useLoaderData } from "react-router";
 import { useState } from "react";
@@ -7,21 +7,27 @@ import { useState } from "react";
 export async function connectionLoader() {
   const aboutme = await me();
   if (!aboutme) return;
-  const toUserID = aboutme._id;
+
   try {
-    const id = toUserID;
-    if (!id) return { user: null, error: "Missing id." };
-    const connections = await getConnections(toUserID);
-    return { user: connections };
+    // Fetch both types of requests
+    const [incoming, outgoing] = await Promise.all([
+      getConnections(aboutme._id), // Requests others sent to me
+      myConnectionRequest(aboutme._id), // Requests I sent to others
+    ]);
+
+    // Tag them so you can distinguish them in the UI if needed
+    const allRequests = [...incoming.map((req: any) => ({ ...req, type: "incoming" })), ...outgoing.map((req: any) => ({ ...req, type: "outgoing" }))];
+
+    return { user: allRequests };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Failed to load profile.";
-    return { user: null, error: msg };
+    return { user: null, error: "Failed to load connections." };
   }
 }
 
 export const ContactPage = () => {
   // const { user, error } = useLoaderData() as { user: any[] | null; error: string | null };
   const { user: initialUser, error } = useLoaderData() as { user: any[] | null; error: string | null };
+  console.log("Loader Data:", initialUser);
   const [connections, setConnections] = useState(initialUser || []);
   const handleUpdate = (id: string, newStatus: string) => {
     // This updates the local array, triggering a re-render
@@ -39,7 +45,7 @@ export const ContactPage = () => {
           <div className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Pending requests</h2>
             {connections
-              .filter((e) => e.status === "pending")
+              .filter((e) => e.status === "pending" && e.type === "incoming")
               .map((each) => (
                 <NotificationCard
                   key={each._id}
@@ -49,13 +55,37 @@ export const ContactPage = () => {
                   username={`${each.senderFirstName} ${each.senderLastName}`}
                   avatarUrl={each.senderProfilePicture}
                   initialStatus={each.status}
+                  isOutgoing={false}
+                />
+              ))}
+          </div>
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold mb-2">Sent requests</h2>
+            {connections
+              .filter((e) => e.type === "outgoing")
+              .map((each) => (
+                <NotificationCard
+                  key={each._id}
+                  id={each._id}
+                  isOutgoing={true}
+                  // Pass the callback to update the state
+                  username={`${each.receiverFirstName} ${each.receiverLastName}`}
+                  avatarUrl={each.receiverProfilePicture}
+                  initialStatus={each.status}
+                  onUpdate={(status) => handleUpdate(each._id, status)}
                 />
               ))}
           </div>
           <div className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Archives</h2>
             {connections
-              .filter((e) => e.status === "accepted" || e.status === "declined")
+              .filter((e) => {
+                const isFinalized = (e.status === "accepted" || e.status === "declined") && e.type === "incoming";
+                // 2. Exclude self-requests (if the sender ID matches the receiver ID)
+                const isNotSelf = e.fromUserId !== e.toUserId;
+
+                return isFinalized && isNotSelf;
+              })
               .map((each) => (
                 <NotificationCard
                   key={each._id}
@@ -65,6 +95,7 @@ export const ContactPage = () => {
                   username={`${each.senderFirstName} ${each.senderLastName}`}
                   avatarUrl={each.senderProfilePicture}
                   initialStatus={each.status}
+                  isOutgoing={false}
                 />
               ))}
           </div>

@@ -2,12 +2,22 @@ const apiServerURL = import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhos
 import { me } from "./auth";
 
 export async function getConnections(userId: string) {
-  // Your backend endpoint uses /:id, so the URL must look like this:
   const res = await fetch(`${apiServerURL}/connectionrequests/${userId}`);
 
   if (!res.ok) {
     if (res.status === 404) return []; // Return empty array if no requests
     throw new Error("Failed to fetch pending requests");
+  }
+
+  return await res.json();
+}
+
+export async function myConnectionRequest(fromUserId: string) {
+  const res = await fetch(`${apiServerURL}/connectionrequests/sent/${fromUserId}`);
+
+  if (!res.ok) {
+    if (res.status === 404) return [];
+    throw new Error("Failed to fetch sent requests");
   }
 
   return await res.json();

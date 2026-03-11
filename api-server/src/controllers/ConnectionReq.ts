@@ -77,6 +77,41 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
       _id: req._id.toString(),
     };
   });
+  // console.log(formattedReqs);
+  res.json(formattedReqs);
+};
+
+const myConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
+  const { id } = req.params;
+
+  // 1. Fetch the data
+  const myReqs = await ConnectionReq.find({ fromUserId: id }).populate("toUserId", "firstName lastName profilePicture").populate("fromUserId", "firstName lastName").lean().exec();
+
+  // 2. Check if the array is empty
+  if (!myReqs || myReqs.length === 0) {
+    res.status(404).json({ message: "No requests found for this user" });
+    return;
+  }
+  // // 3. Return the array (Convert to plain objects with string IDs)
+  const formattedReqs = myReqs.map((req) => {
+    const receiver = req.toUserId as any;
+    const from = req.fromUserId as any;
+
+    return {
+      ...req,
+      // Now you can safely access the fields
+      // Use optional chaining (?.) and fallbacks
+      senderFirstName: from?.firstName || "Unknown",
+      senderLastName: from?.lastName || "User",
+      receiverFirstName: receiver?.firstName || "Unknown",
+      receiverLastName: receiver?.lastName || "User",
+      receiverProfilePicture: receiver?.profilePicture || "",
+      fromUserId: from?._id?.toString() || "",
+      toUserId: receiver?._id?.toString() || "",
+      _id: req._id.toString(),
+    };
+  });
+  // console.log(formattedReqs);
   res.json(formattedReqs);
 };
 
@@ -92,7 +127,7 @@ const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req,
     res.status(404).json({ message: "Not found" });
     return;
   }
-
+  //3. Updating the status and saving
   updatingStatus.status = status;
   const updated = await updatingStatus.save();
 
@@ -105,4 +140,4 @@ const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req,
   res.json(formattedResponse);
 };
 
-export { sendConnectionRequest, getConnectionRequest, statusUpdate };
+export { sendConnectionRequest, getConnectionRequest, statusUpdate, myConnectionRequest };

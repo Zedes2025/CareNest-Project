@@ -31,15 +31,15 @@ export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpd
             )}
           </div>
           <div>
-            {/* <h2 className="font-semibold">{isOutgoing ? "You" : username}</h2>
-            <p className="text-sm text-gray-500">{isOutgoing ? `sent a requests to ${username}` : "wants to connect with you"}</p>  </h2>*/}
-            {isOutgoing ? "" : username}
-
-            {/* Use a div or flex container instead of a <p> tag to keep it valid */}
+            {!isOutgoing && username}
+            {/* if its not ougoing requests , have the user name*
+             Use a div or flex container instead of a <p> tag to keep it valid  */}
             <div className="flex items-center gap-2 text-sm text-gray-500">
               {isOutgoing ? (
                 <>
-                  <span>You sent a request to</span>
+                  <span>
+                    <b>You</b> sent a request to
+                  </span>
                   <span className="font-medium text-gray-800">{username}</span>
                   {/* The small inline image/avatar */}
                   <div className="avatar">

@@ -5,7 +5,7 @@
 :root {
   /* Chat colors */
   --chat-bg: #c8d2e0; /* main chat window background */
-  --chat-user-bubble: #5e6783; /* user messages */
+  --chat-user-bubble: #a6aab4; /* user messages */
   --chat-bot-bubble: #8eb2e4; /* bot messages */
   --chat-text: #33373a; /* default text color */
   --chat-btn-bg: #4f46e5; /* button background */

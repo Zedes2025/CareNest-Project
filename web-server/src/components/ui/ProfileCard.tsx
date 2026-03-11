@@ -3,9 +3,10 @@ import type { ApiUserProfile } from "../../data/users";
 
 type Props = {
   user: ApiUserProfile;
+  distanceKm?: number | null;
 };
 
-export const ProfileCard = ({ user }: Props) => {
+export const ProfileCard = ({ user, distanceKm }: Props) => {
   const services = user.servicesOffered ?? [];
   const servicesPreview = services.slice(0, 3);
   const extraCount = Math.max(0, services.length - servicesPreview.length);
@@ -36,7 +37,10 @@ export const ProfileCard = ({ user }: Props) => {
           {user.firstName} {user.lastName}
         </h3>
 
-        <div className="text-sm opacity-70">{user.city ?? "City -"}</div>
+        <div className="mt-1 text-sm opacity-70">
+          {user.city ?? "City -"}
+          {typeof distanceKm === "number" ? ` · ${distanceKm} km away` : ""}
+        </div>
 
         <div className="flex flex-wrap justify-center gap-2 min-h-18 content-start">
           {services.length ? (

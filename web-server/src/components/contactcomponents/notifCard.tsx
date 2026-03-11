@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { statusUpdate } from "../../data/connection";
 
 interface NotificationCardProps {
@@ -6,23 +5,15 @@ interface NotificationCardProps {
   avatarUrl: string;
   id: string;
   initialStatus: string;
+  onUpdate: (newStatus: string) => void;
+  isOutgoing: boolean;
 }
 
-export const NotificationCard = ({
-  username,
-  avatarUrl,
-  id,
-  initialStatus,
-}: NotificationCardProps) => {
-  // 1. Initialize local state with the status passed from parent
-  // const [status, setStatus] = useState(initialStatus);
-  const [status] = useState(initialStatus);
-
-  if (!id) return null;
-  const changeStatus = async (status: "accepted" | "declined") => {
+export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpdate, isOutgoing }: NotificationCardProps) => {
+  const changeStatus = async (newStatus: "accepted" | "declined") => {
     try {
-      await statusUpdate(id, status);
-      alert(`Request ${status} successfully!`);
+      await statusUpdate(id, newStatus);
+      onUpdate(newStatus); // Tell ContactPage to re-filter the list
     } catch (error) {
       console.error("Failed to update status:", error);
     }
@@ -33,35 +24,50 @@ export const NotificationCard = ({
       <div className="card-body p-4">
         <div className="flex items-center gap-4">
           <div className="avatar">
-            <div className="w-14 rounded-full">
-              <img src={avatarUrl} alt={username} />
-            </div>
+            {!isOutgoing && avatarUrl && (
+              <div className="w-14 rounded-full">
+                <img src={avatarUrl} alt={username} />
+              </div>
+            )}
           </div>
           <div>
-            <h2 className="font-semibold">{username}</h2>
-            <p className="text-sm text-gray-500">wants to connect with you</p>
+            {!isOutgoing && username}
+            {/* if its not ougoing requests , have the user name*
+             Use a div or flex container instead of a <p> tag to keep it valid  */}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              {isOutgoing ? (
+                <>
+                  <span>
+                    <b>You</b> sent a request to
+                  </span>
+                  <span className="font-medium text-gray-800">{username}</span>
+                  {/* The small inline image/avatar */}
+                  <div className="avatar">
+                    <div className="w-14 rounded-full">
+                      <img src={avatarUrl} alt={username} />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                "Wants to connect with you"
+              )}
+            </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          {status === "pending" ? (
+          {initialStatus === "pending" && !isOutgoing ? (
             <>
-              <button
-                className="btn btn-sm btn-neutral rounded-xl"
-                onClick={() => changeStatus("accepted")}
-              >
+              <button className="btn btn-sm btn-neutral rounded-xl" onClick={() => changeStatus("accepted")}>
                 Accept
               </button>
-              <button
-                className="btn btn-sm btn-outline rounded-xl"
-                onClick={() => changeStatus("declined")}
-              >
+              <button className="btn btn-sm btn-outline rounded-xl" onClick={() => changeStatus("declined")}>
                 Decline
               </button>
             </>
           ) : (
             // 3. This shows instead of buttons once the state changes
-            <span className="font-bold capitalize text-primary">{status}</span>
+            <span className="font-bold capitalize text-primary">{initialStatus}</span>
           )}
         </div>
       </div>

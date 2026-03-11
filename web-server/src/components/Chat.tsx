@@ -75,6 +75,20 @@ export default function Chat() {
       setPrompt(""); // clear textarea after sending
     }
   };
+  function speakMessage(text: string) {
+    // function to read aloud a message using Web Speech API
+    if (!text) return;
+
+    const textToSpeech = new SpeechSynthesisUtterance(text);
+
+    speechSynthesis.speak(textToSpeech);
+  }
+  function stopPlayback() {
+    speechSynthesis.pause();
+  }
+  function resumePlayback() {
+    speechSynthesis.resume();
+  }
 
   return (
     <div
@@ -107,6 +121,34 @@ export default function Chat() {
                 }}
               >
                 <Markdown>{msg.content}</Markdown>
+                <div className="flex gap-2">
+                  {" "}
+                  {/* container for listen/stop buttons */}
+                  {isBot && (
+                    <button
+                      onClick={() => speakMessage(msg.content)} // btn to read message aloud
+                      className="mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl"
+                    >
+                      ▶️ Listen
+                    </button>
+                  )}
+                  {isBot && (
+                    <button
+                      onClick={() => stopPlayback()} // btn to stop speech
+                      className="  mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl justify-end"
+                    >
+                      ⏸️ pause
+                    </button>
+                  )}
+                  {isBot && (
+                    <button
+                      onClick={() => resumePlayback()} // btn to stop speech
+                      className="  mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl justify-end"
+                    >
+                      ⏯️ resume
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );

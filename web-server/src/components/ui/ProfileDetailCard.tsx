@@ -4,6 +4,7 @@ import { DAYS, SLOTS } from "../../profile/schedule";
 
 type Props = PropsWithChildren<{
   user: ApiUserProfile;
+  distanceKm?: number | null;
 }>;
 
 function computeAge(birthday?: string | Date | null): number | null {
@@ -29,7 +30,7 @@ function availabilityMap(user: ApiUserProfile): Record<string, Set<string>> {
   return map;
 }
 
-export const ProfileDetailCard = ({ user, children }: Props) => {
+export const ProfileDetailCard = ({ user, children, distanceKm }: Props) => {
   const hasImage = Boolean(user.profilePicture);
   const age = computeAge(user.birthday);
   const city = user.city ?? user.address?.city ?? null;
@@ -67,7 +68,10 @@ export const ProfileDetailCard = ({ user, children }: Props) => {
             </span>
           </h1>
 
-          <div className="mt-1 opacity-70">{city ?? "City -"}</div>
+          <div className="mt-1 opacity-70">
+            {city ?? "City -"}
+            {typeof distanceKm === "number" ? ` · ${distanceKm} km away` : ""}
+          </div>
         </div>
 
         <div className="mt-6">

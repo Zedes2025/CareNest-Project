@@ -83,10 +83,10 @@ export default function Chat() {
 
     speechSynthesis.speak(textToSpeech);
   }
-  function stopPlayback(text: string) {
+  function stopPlayback() {
     speechSynthesis.pause();
   }
-  function resumePlayback(text: string) {
+  function resumePlayback() {
     speechSynthesis.resume();
   }
 
@@ -134,7 +134,7 @@ export default function Chat() {
                   )}
                   {isBot && (
                     <button
-                      onClick={() => stopPlayback(msg.content)} // btn to stop speech
+                      onClick={() => stopPlayback()} // btn to stop speech
                       className="  mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl justify-end"
                     >
                       ⏸️ pause
@@ -142,7 +142,7 @@ export default function Chat() {
                   )}
                   {isBot && (
                     <button
-                      onClick={() => resumePlayback(msg.content)} // btn to stop speech
+                      onClick={() => resumePlayback()} // btn to stop speech
                       className="  mt-2 p-2 text-xs   opacity-70 hover:opacity-100 bg-orange-200 rounded-2xl justify-end"
                     >
                       ⏯️ resume

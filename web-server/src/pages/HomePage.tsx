@@ -14,6 +14,9 @@ import {
   type HomeFiltersState,
 } from "../utils/homeFiltersStorage";
 
+import { useMyCoordinates } from "../hooks/useMyCoordinates";
+import { getDistanceKmRounded } from "../utils/distance";
+
 type HomeLoaderData = { users: ApiUserProfile[]; error?: string };
 
 export async function homeLoader(): Promise<HomeLoaderData> {
@@ -67,6 +70,7 @@ export const HomePage = () => {
     initial?.serviceFilter ?? "",
   );
   const [page, setPage] = useState(initial?.page ?? 1);
+  const myCoords = useMyCoordinates();
 
   const PAGE_SIZE = 25;
 
@@ -278,9 +282,24 @@ export const HomePage = () => {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {pageUsers.map((u) => (
-            <ProfileCard key={u._id} user={u} />
-          ))}
+          {pageUsers.map((u) => {
+            const otherLat = u.latitude ?? null;
+            const otherLon = u.longitude ?? null;
+
+            const distanceKm =
+              myCoords &&
+              typeof otherLat === "number" &&
+              typeof otherLon === "number"
+                ? getDistanceKmRounded(
+                    myCoords.lat,
+                    myCoords.lon,
+                    otherLat,
+                    otherLon,
+                  )
+                : null;
+
+            return <ProfileCard key={u._id} user={u} distanceKm={distanceKm} />;
+          })}
         </div>
 
         {filtered.length === 0 && !data.error && (

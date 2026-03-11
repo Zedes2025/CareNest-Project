@@ -21,12 +21,16 @@ export type ApiUserProfile = {
   aboutMe?: string;
 
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 
   address?: {
     street: string;
     houseNumber: string;
     city: string;
     plz: string;
+    latitude?: number | null;
+    longitude?: number | null;
   } | null;
 
   availability?: Array<{ day: Weekday; slots: string[] }>;

@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-
+import {
+  extractPdfText,
+  extractDocxText,
+  extractTxtText,
+} from "../components/DocComponents";
 function fileToBase64(file: File): Promise<string> {
   // helper function to convert file to base64 string
   return new Promise((resolve, reject) => {
@@ -30,20 +34,42 @@ export function Documents() {
     if (!file) return;
 
     const base64 = await fileToBase64(file); // Convert file to Base64 as string
-    setMyDocs((prev) => [...prev, { name: file.name, file: base64 }]); // Add the new document to the list of documents in state
 
-    // TODO: save in local storagesend file to backend / extract text / call AI server here
-    const savedDocs = JSON.parse(localStorage.getItem("myDocuments") || "[]"); //save file to local storage (for persistence across refreshes)
-    localStorage.setItem(
-      "myDocuments",
-      JSON.stringify([...savedDocs, { name: file.name, file: base64 }]),
-    );
-    if (savedDocs) setMyDocs(savedDocs); // Update state with saved documents from local storage (in case there were already some)
-    setFile(null); // Clear the file state (disables the Upload button)
+    //extarct text from the file (for AI processing later):
+    let textContent = "";
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Clear the actual file input
+    if (file.type === "application/pdf") {
+      // if it's a PDF
+      textContent = await extractPdfText(file);
+    } else if (
+      // if it's a Word doc
+      file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
+      textContent = await extractDocxText(file);
+    } else if (file.type === "text/plain") {
+      // txt files
+      textContent = await extractTxtText(file);
+    } else {
+      console.log("Unsupported file type:", file.type);
     }
+
+    console.log(file.type);
+    console.log("Extracted text content:", textContent);
+    const newDoc = { name: file.name, file: base64, text: textContent };
+
+    // Update State immediately using the functional update
+    setMyDocs((prev) => {
+      const updatedDocs = [...prev, newDoc];
+
+      // Sync localStorage using the same updated array
+      localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
+
+      return updatedDocs;
+    });
+
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     alert("File uploaded successfully!");
   };
   // allow clicking on them to see details / call AI server with document content

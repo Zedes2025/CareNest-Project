@@ -16,7 +16,7 @@ export const userUpdateSchema = z.object({
 
   birthday: z.coerce.date().nullish(),
 
-  profilePicture: z.string().default(""),
+  profilePicture: z.string().url().or(z.literal("")),
   //Age: z.number().optional(),
 
   aboutMe: z.string().min(10, "Tell us more about you"),

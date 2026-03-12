@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import type { Weekday, TimeSlot, DailySchedule } from "../types";
+import { file } from "zod";
 
 const DailyScheduleSchema = new Schema<DailySchedule>(
   {
@@ -39,7 +40,7 @@ const userSchema = new Schema(
     password: { type: String, required: true, select: false },
 
     birthday: { type: Date, required: false },
-    profilePicture: { type: String, default: "" },
+    profilePicture: { type: String, default: "", trim: true },
     // Age: { type: Number },
 
     aboutMe: { type: String, default: "" },

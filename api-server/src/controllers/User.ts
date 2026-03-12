@@ -4,8 +4,16 @@ import { type RequestHandler } from "express";
 import { isValidObjectId, type Types } from "mongoose";
 import { userCreateSchema, userUpdateSchema } from "#schemas";
 import { z } from "zod";
-
+import { v2 as cloudinary } from "cloudinary";
 import { getCoordinatesFromAddress } from "../services/geo.services.ts";
+
+// cloudinary configuration
+cloudinary.config({
+  secure: true,
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 interface Address {
   //interface for user address
@@ -29,8 +37,7 @@ export const getMyProfileById: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
-  if (!isValidObjectId(id))
-    throw new Error("Invalid id", { cause: { status: 400 } });
+  if (!isValidObjectId(id)) throw new Error("Invalid id", { cause: { status: 400 } });
   const user = await User.findById(id).lean();
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json(user);
@@ -43,11 +50,7 @@ export const updateUserProfile: RequestHandler<
 > = async (req, res) => {
   const { id } = req.params;
 
-  const updatedUserDoc = await User.findByIdAndUpdate(
-    id,
-    { $set: req.body },
-    { new: true },
-  );
+  const updatedUserDoc = await User.findByIdAndUpdate(id, { $set: req.body }, { new: true });
 
   if (!updatedUserDoc) {
     res.status(404).json({ message: "User not found" });
@@ -81,6 +84,8 @@ export const updateUserProfile: RequestHandler<
   const userProfile: UserProfile = {
     ...updatedUser,
     _id: updatedUser._id.toString(),
+    profilePicture: typeof updatedUser.profilePicture === "string" ? updatedUser.profilePicture : "",
+    // availability: Array.isArray(updatedUser.availability) ? updatedUser.availability : [],
     isProfileComplete: !!(
       updatedUser.firstName &&
       updatedUser.lastName &&
@@ -98,12 +103,48 @@ export const updateUserProfile: RequestHandler<
   });
 };
 
+export const updateProfilePicture: RequestHandler = async (req, res) => {
+  try {
+    //  Get the file attached by the middleware
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "No image file provided." });
+    }
+
+    // Upload to Cloudinary
+    // Note: use file.filepath which is the temp path on your server
+    const result = await cloudinary.uploader.upload(file.filepath, {
+      folder: "carenest/profile_pictures",
+      transformation: [{ width: 500, height: 500, crop: "fill" }],
+    });
+
+    // 3. Update the User profile in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user?.id, // this is run after authenticate middleware with accesstoken, so it brings back the id of the user who has logged in
+      { profilePicture: result.secure_url },
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // 4. Return success
+    res.status(200).json({
+      message: "Profile picture updated successfully!",
+      profilePicture: updatedUser.profilePicture,
+    });
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    res.status(500).json({ message: "Failed to update profile picture." });
+  }
+};
+
 export const deleteUser: RequestHandler = async (req, res) => {
   const {
     params: { id },
   } = req;
-  if (!isValidObjectId(id))
-    throw new Error("Invalid id", { cause: { status: 400 } });
+  if (!isValidObjectId(id)) throw new Error("Invalid id", { cause: { status: 400 } });
   const user = await User.findByIdAndDelete(id);
   if (!user) throw new Error("User not found", { cause: { status: 404 } });
   res.json({ message: "User deleted" });
@@ -131,10 +172,7 @@ export type PublicProfileDTO = Omit<BaseUser, "address"> & {
 //   city: string | null;
 // };
 
-export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (
-  req,
-  res,
-) => {
+export const getAllUsers: RequestHandler<{}, {}, PublicProfileDTO> = async (req, res) => {
   const users = await User.find().lean(); // plain objects
 
   const publicUsers = users.map((u) => {

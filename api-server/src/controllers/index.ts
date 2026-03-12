@@ -4,6 +4,7 @@ export {
   getOtherUserById,
   deleteUser,
   updateUserProfile,
+  updateProfilePicture,
   //createUser,
   getUsers,
 } from "./User.ts";

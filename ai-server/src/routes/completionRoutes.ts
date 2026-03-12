@@ -3,10 +3,10 @@ import { validateBody, authenticateOptional } from '#middleware';
 import { authenticateRequired } from '#middleware';
 import { promptSchema } from '#schemas';
 import { createAiChat } from '#controllers';
-import { createDoc } from '#controllers';
+import { createDoc, deleteDoc } from '#controllers';
 const completionRoutes = Router();
 
 completionRoutes.post('/chat', authenticateOptional, /*validateBody(promptSchema), */ createAiChat);
 completionRoutes.post('/docs', authenticateRequired, /*validateBody(docSchema), */ createDoc);
-
+completionRoutes.delete('/docs/:id', authenticateRequired, /*validateBody(docSchema), */ deleteDoc);
 export default completionRoutes;

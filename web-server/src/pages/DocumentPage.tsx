@@ -36,7 +36,7 @@ export function Documents() {
   const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
 
   const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
-
+  const [selectedSummary, setSelectedSummary] = useState<string | null>(null); // State to keep track of the currently selected document summary
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref to directly access the file input element in the DOM, needed to clear it after upload
   //Load saved documents on mount
   useEffect(() => {
@@ -113,7 +113,7 @@ export function Documents() {
       throw new Error(errorMessage);
     }
 
-    console.log("Summary from AI server:", data.summary);
+    console.log("Summary from AI server:", data._id, data.summary);
 
     // Update the document in the state with the summary and the ID from the database
     // we use the base64 string to identify which document to update. state update:
@@ -140,6 +140,30 @@ export function Documents() {
     localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
   };
   // allow clicking on them to see details / call AI server with document content
+
+  const handleDelete = async (id: string) => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    await fetch(`baseUrl/${id}`, {
+      // send delete request to AI server to delete the document from the database
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    setMyDocs((prev) => prev.filter((doc) => doc.id !== id)); // remove doc from array in state
+
+    const savedDocs: MyDoc[] = JSON.parse(
+      // get saved docs from localStorage
+      localStorage.getItem("myDocuments") || "[]",
+    );
+    // remove the deleted doc from localStorage as well
+    localStorage.setItem(
+      "myDocuments",
+      JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
+    );
+  };
 
   return (
     <div className="p-4">
@@ -179,18 +203,49 @@ export function Documents() {
       <h1 className="text-xl font-bold mb-4">My Documents</h1>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {myDocs.map((doc) => (
-          <div key={doc.id} className="border p-2 rounded">
+          <div key={doc.id} className="border p-2 rounded ">
             {" "}
             <p className="font-semibold">{doc.name}</p>
-            <button
-              className="btn btn-sm btn-primary mt-1"
+            <p>{doc.summary}</p>
+            <button // button to open the document in a new tab
+              className="btn btn-sm btn-primary mt-1 p-2"
               onClick={() => window.open(doc.file, "_blank")}
             >
               Open
             </button>
+            <button
+              className="btn btn-sm btn-secondary m-1 ml-2 p-2"
+              disabled={!doc.summary}
+              onClick={() => setSelectedSummary(doc.summary || "")}
+            >
+              View Summary
+            </button>
+            <button
+              className="btn btn-sm btn-active m-1 ml-2 p-2"
+              onClick={() => handleDelete(doc.id!)} // i am sure doc.id exists!
+            >
+              Delete{" "}
+            </button>
           </div>
         ))}
       </div>
+      {/* Modal to show the selected document summary, appears when a summary is selected and can be closed with a button */}
+      {selectedSummary && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg max-w-lg">
+            <h2 className="text-lg font-bold mb-2">Summary</h2>
+
+            <p className="text-sm">{selectedSummary}</p>
+
+            <button
+              className="btn btn-sm btn-primary mt-4"
+              onClick={() => setSelectedSummary(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

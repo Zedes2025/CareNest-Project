@@ -1,7 +1,7 @@
 import { Doc } from '#models';
 import { type RequestHandler } from 'express';
 import { isValidObjectId } from 'mongoose';
-import { summarizeText } from './DocAnalyzer';
+import { summarizeText } from './DocAnalyzer.ts';
 
 export const getDocs: RequestHandler = async (req, res) => {
   const docs = await Doc.find().lean();

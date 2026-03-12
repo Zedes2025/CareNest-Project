@@ -1,14 +1,6 @@
-const apiServerURL =
-  import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhost:3000";
+const apiServerURL = import.meta.env.VITE_APP_API_SERVER_URL ?? "http://localhost:3000";
 
-type Weekday =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
+type Weekday = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
 export type ApiUserProfile = {
   _id: string;
@@ -17,7 +9,7 @@ export type ApiUserProfile = {
   lastName: string;
 
   birthday?: string | Date | null;
-  profilePicture?: string;
+  profilePicture?: File | null;
   aboutMe?: string;
 
   city?: string | null;
@@ -69,10 +61,7 @@ export async function getMyProfileById(id: string): Promise<ApiUserProfile> {
 }
 
 // PUT /users/profile/:id  (requires full body)
-export async function updateMyProfileById(
-  id: string,
-  body: unknown,
-): Promise<ApiUserProfile> {
+export async function updateMyProfileById(id: string, body: unknown): Promise<ApiUserProfile> {
   const res = await fetch(`${apiServerURL}/users/profile/${id}`, {
     method: "PUT",
     headers: withAuthHeaders({ "Content-Type": "application/json" }),
@@ -86,9 +75,7 @@ export async function updateMyProfileById(
 }
 
 // DELETE /users/profile/:id (requires auth)
-export async function deleteMyProfileById(
-  id: string,
-): Promise<{ message: string }> {
+export async function deleteMyProfileById(id: string): Promise<{ message: string }> {
   const res = await fetch(`${apiServerURL}/users/profile/${id}`, {
     method: "DELETE",
     headers: withAuthHeaders(),
@@ -119,6 +106,17 @@ export async function getPublicUsers(): Promise<ApiUserProfile[]> {
 export async function getPublicUserById(id: string): Promise<ApiUserProfile> {
   const res = await fetch(`${apiServerURL}/users/${id}`, {
     headers: maybeAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return (await res.json()) as ApiUserProfile;
+}
+
+//POST/users/profile/picture
+export async function profilePictureUpdate(_id: string, formData: FormData): Promise<ApiUserProfile> {
+  const res = await fetch(`${apiServerURL}/users/profile/picture`, {
+    method: "POST",
+    headers: withAuthHeaders(),
+    body: formData,
   });
   if (!res.ok) throw new Error(await readError(res));
   return (await res.json()) as ApiUserProfile;

@@ -6,7 +6,7 @@ export type FormState = {
   firstName: string;
   lastName: string;
   birthday: string; // YYYY-MM-DD
-  profilePicture: string;
+  profilePicture: string | File | null;
   aboutMe: string;
   address: {
     street: string;
@@ -39,7 +39,7 @@ export const userUpdateSchema = z.object({
   firstName: z.string().trim().min(1, "Enter a valid name"),
   lastName: z.string().trim().min(1, "Enter a valid last name"),
   birthday: z.coerce.date(),
-  profilePicture: z.string().default(""),
+  profilePicture: z.string().trim().default(""),
   aboutMe: z.string().min(10, "Tell us more about you"),
   address: z.object({
     street: z.string().min(3),
@@ -155,7 +155,7 @@ export function formToApiBody(f: FormState) {
     firstName: f.firstName,
     lastName: f.lastName,
     birthday: f.birthday,
-    profilePicture: f.profilePicture,
+    profilePicture: typeof f.profilePicture === "string" ? f.profilePicture : undefined,
     aboutMe: f.aboutMe,
     address: {
       street: f.address?.street ?? "",

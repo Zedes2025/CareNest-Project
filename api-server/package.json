@@ -1,5 +1,5 @@
 {
-  "name": "file-upload",
+  "name": "api-server",
   "version": "1.0.0",
   "description": "",
   "main": "app.ts",
@@ -45,6 +45,7 @@
   "type": "module",
   "dependencies": {
     "@types/mongoose": "^5.11.96",
+    "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "formidable": "^3.5.4",

@@ -46,4 +46,39 @@ const authenticateOptional: RequestHandler = (req, _res, next) => {
   }
 };
 
+const authenticateRequired: RequestHandler = (req, res, next) => {
+  // required, so that only authenticated users can upload documents and see their summaries
+  const authHeader = req.header('authorization');
+  const accessToken = authHeader && authHeader.split(' ')[1];
+
+  if (!accessToken) {
+    // No token — reject the request
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const decoded = jwt.verify(accessToken, ACCESS_JWT_SECRET) as jwt.JwtPayload;
+
+    if (!decoded.sub) {
+      // Token invalid — reject the request
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const user = {
+      id: decoded.sub,
+      roles: decoded.roles || []
+    };
+
+    req.user = user;
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ error: 'Token expired' });
+    } else {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+  }
+};
+
 export default authenticateOptional;
+export { authenticateRequired };

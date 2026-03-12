@@ -3,7 +3,23 @@ import {
   extractPdfText,
   extractDocxText,
   extractTxtText,
+  speakMessage,
+  stopPlayback,
+  resumePlayback,
 } from "../components/DocComponents";
+
+const AI_SERVER_URL = import.meta.env.VITE_AI_SERVER_URL;
+if (!AI_SERVER_URL)
+  throw new Error("AI_SERVER_URL is required, are you missing a .env file?");
+const baseURL = `${AI_SERVER_URL}/ai/docs`;
+
+type MyDoc = {
+  id?: string;
+  name: string;
+  file: string;
+  summary?: string;
+};
+
 function fileToBase64(file: File): Promise<string> {
   // helper function to convert file to base64 string
   return new Promise((resolve, reject) => {
@@ -17,7 +33,7 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export function Documents() {
-  const [myDocs, setMyDocs] = useState<{ name: string; file: string }[]>([]);
+  const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
 
   const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
 
@@ -56,21 +72,72 @@ export function Documents() {
 
     console.log(file.type);
     console.log("Extracted text content:", textContent);
-    const newDoc = { name: file.name, file: base64, text: textContent };
 
-    // Update State immediately using the functional update
+    // Update State immediately using the functional update, tempo before ai response comes back
+    // Stage 1: temporary document before AI response
+    const tempDoc: MyDoc = {
+      id: crypto.randomUUID(), // to have a unique id for the document in the frontend before we get the real ID
+      name: file.name,
+      file: base64,
+      summary: "Processing...",
+    };
+
     setMyDocs((prev) => {
-      const updatedDocs = [...prev, newDoc];
-
-      // Sync localStorage using the same updated array
-      localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
-
-      return updatedDocs;
+      const updated = [...prev, tempDoc];
+      localStorage.setItem("myDocuments", JSON.stringify(updated));
+      return updated;
     });
 
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     alert("File uploaded successfully!");
+
+    const accessToken = localStorage.getItem("accessToken");
+
+    const res = await fetch(baseURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        text: textContent,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const errorMessage = data.message || "Failed to send connection request.";
+      throw new Error(errorMessage);
+    }
+
+    console.log("Summary from AI server:", data.summary);
+
+    // Update the document in the state with the summary and the ID from the database
+    // we use the base64 string to identify which document to update. state update:
+
+    // Stage 2: update document with summary and id
+    setMyDocs((prev: MyDoc[]) =>
+      prev.map((doc: MyDoc) =>
+        doc.id === tempDoc.id // Match by the UUID we just made
+          ? { ...doc, summary: data.summary, id: data._id }
+          : doc,
+      ),
+    );
+
+    const savedDocs: MyDoc[] = JSON.parse(
+      localStorage.getItem("myDocuments") || "[]",
+    ) as MyDoc[];
+
+    const updatedDocs: MyDoc[] = savedDocs.map((doc: MyDoc) =>
+      doc.id === tempDoc.id
+        ? { ...doc, summary: data.summary, id: data._id }
+        : doc,
+    );
+
+    localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
   };
   // allow clicking on them to see details / call AI server with document content
 
@@ -112,7 +179,8 @@ export function Documents() {
       <h1 className="text-xl font-bold mb-4">My Documents</h1>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {myDocs.map((doc) => (
-          <div key={doc.name} className="border p-2 rounded">
+          <div key={doc.id} className="border p-2 rounded">
+            {" "}
             <p className="font-semibold">{doc.name}</p>
             <button
               className="btn btn-sm btn-primary mt-1"

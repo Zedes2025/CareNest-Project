@@ -5,6 +5,11 @@ import { useState, useRef, useEffect } from "react"; // added useRef + useEffect
 import Markdown from "react-markdown";
 import { ToastContainer } from "react-toastify";
 import { createChat } from "../data/ai.ts";
+import {
+  speakMessage,
+  stopPlayback,
+  resumePlayback,
+} from "../components/DocComponents.tsx";
 
 // structure of each message in the chat
 interface Message {
@@ -75,23 +80,6 @@ export default function Chat() {
       setPrompt(""); // clear textarea after sending
     }
   };
-  function speakMessage(text: string) {
-    // function to read aloud a message using Web Speech API
-    if (!text) return;
-    window.speechSynthesis.cancel(); // Clear any stuck queue or previous speech
-
-    window.speechSynthesis.resume(); // Force a resume in case the engine was left in a paused state
-
-    const textToSpeech = new SpeechSynthesisUtterance(text);
-
-    speechSynthesis.speak(textToSpeech);
-  }
-  function stopPlayback() {
-    speechSynthesis.pause();
-  }
-  function resumePlayback() {
-    speechSynthesis.resume();
-  }
 
   return (
     <div

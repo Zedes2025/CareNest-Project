@@ -23,3 +23,21 @@ export async function extractDocxText(file: File) {
 export async function extractTxtText(file: File) {
   return await file.text();
 }
+
+export function speakMessage(text: string) {
+  // function to read aloud a message using Web Speech API
+  if (!text) return;
+  window.speechSynthesis.cancel(); // Clear any stuck queue or previous speech
+
+  window.speechSynthesis.resume(); // Force a resume in case the engine was left in a paused state
+
+  const textToSpeech = new SpeechSynthesisUtterance(text);
+
+  speechSynthesis.speak(textToSpeech);
+}
+export function stopPlayback() {
+  speechSynthesis.pause();
+}
+export function resumePlayback() {
+  speechSynthesis.resume();
+}

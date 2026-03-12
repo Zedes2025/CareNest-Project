@@ -9,7 +9,7 @@ export type ApiUserProfile = {
   lastName: string;
 
   birthday?: string | Date | null;
-  profilePicture?: File | null;
+  profilePicture?: string | File | null;
   aboutMe?: string;
 
   city?: string | null;

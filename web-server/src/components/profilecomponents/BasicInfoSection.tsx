@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { FieldErrors, FormState } from "../../profile/myProfileForm";
 
 type Props = {
@@ -67,7 +66,7 @@ export const BasicInfoSection = ({ form, age, fieldErrors, setField }: Props) =>
             }
           }}
         />
-
+        {/* // so here URL.createObjectURL is done, bcos we want to see the preview of changing our profile pic before it gets saved, so instantly it is creating an placeholder(in your browser current session memory}) to preview our changed profilepic, after it is saved, it gets sent to cloudinary */}
         {form.profilePicture ? <img src={form.profilePicture instanceof File ? URL.createObjectURL(form.profilePicture) : form.profilePicture} alt="Profile Preview" className="mt-4 h-32 w-32 rounded-full object-cover" /> : <p className="mt-2 text-sm text-gray-500">No image selected</p>}
       </div>
     </div>

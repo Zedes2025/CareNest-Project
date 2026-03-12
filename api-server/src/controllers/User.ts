@@ -132,7 +132,7 @@ export const updateProfilePicture: RequestHandler = async (req, res) => {
     // 4. Return success
     res.status(200).json({
       message: "Profile picture updated successfully!",
-      profilePicture: updatedUser.profilePicture,
+      profilePicture: updatedUser.profilePicture, // used to instantly update the useravatar image in frontend
     });
   } catch (error) {
     console.error("Cloudinary upload error:", error);

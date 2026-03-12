@@ -10,7 +10,7 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
   const services = user.servicesOffered ?? [];
   const servicesPreview = services.slice(0, 3);
   const extraCount = Math.max(0, services.length - servicesPreview.length);
-  const hasImage = Boolean(user.profilePicture);
+  const hasImage = typeof user.profilePicture === "string" && user.profilePicture.length > 0;
 
   return (
     <div className="card bg-base-100 shadow h-full">
@@ -18,10 +18,7 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
         <div className="avatar">
           {hasImage ? (
             <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-              <img
-                src={user.profilePicture}
-                alt={`${user.firstName} ${user.lastName}`}
-              />
+              <img src={user.profilePicture as string} alt={`${user.firstName} ${user.lastName}`} />
             </div>
           ) : (
             <div className="placeholder w-24 rounded-full bg-base-200 ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center">
@@ -50,9 +47,7 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
                   {s}
                 </span>
               ))}
-              {extraCount > 0 && (
-                <span className="badge badge-ghost">+{extraCount}</span>
-              )}
+              {extraCount > 0 && <span className="badge badge-ghost">+{extraCount}</span>}
             </>
           ) : (
             <span className="opacity-60 text-sm">No services listed</span>

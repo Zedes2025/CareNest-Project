@@ -108,16 +108,16 @@ export const MyProfilePage = () => {
     setSaving(true);
     setMessage("");
     setFieldErrors({});
-    let final = form.profilePicture;
+    let finalPic = form.profilePicture;
     try {
       // Step 1: Upload File if it's a File object
-      if (form.profilePicture instanceof File) {
+      if (finalPic instanceof File) {
         const formData = new FormData();
-        formData.append("profilePicture", form.profilePicture);
+        formData.append("profilePicture", finalPic);
         const updatedUser = await profilePictureUpdate(user._id, formData);
-        final = updatedUser.profilePicture ?? null;
+        finalPic = updatedUser.profilePicture ?? null;
       }
-      const updatedForm = { ...form, profilePicture: final };
+      const updatedForm = { ...form, profilePicture: finalPic };
 
       const body = formToApiBody(updatedForm);
       const parsed = userUpdateSchema.safeParse(body);

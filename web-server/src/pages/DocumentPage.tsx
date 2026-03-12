@@ -206,7 +206,6 @@ export function Documents() {
           <div key={doc.id} className="border p-2 rounded ">
             {" "}
             <p className="font-semibold">{doc.name}</p>
-            <p>{doc.summary}</p>
             <button // button to open the document in a new tab
               className="btn btn-sm btn-primary mt-1 p-2"
               onClick={() => window.open(doc.file, "_blank")}
@@ -214,14 +213,36 @@ export function Documents() {
               Open
             </button>
             <button
-              className="btn btn-sm btn-secondary m-1 ml-2 p-2"
+              className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
               disabled={!doc.summary}
               onClick={() => setSelectedSummary(doc.summary || "")}
             >
               View Summary
             </button>
+            <div className="inline-block bg-orange-200 rounded px-1 py-0 ml-0">
+              <button
+                onClick={() => speakMessage(doc.summary || "")}
+                className="inline-flex items-center justify-center h-8  text-lg opacity-70 hover:opacity-100 rounded"
+              >
+                ▶️
+              </button>
+
+              <button
+                onClick={() => stopPlayback()}
+                className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+              >
+                ⏸️
+              </button>
+
+              <button
+                onClick={() => resumePlayback()}
+                className="inline-flex items-center justify-center h-8  text-lg opacity-70 hover:opacity-100 rounded"
+              >
+                ⏯️
+              </button>
+            </div>
             <button
-              className="btn btn-sm btn-active m-1 ml-2 p-2"
+              className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
               onClick={() => handleDelete(doc.id!)} // i am sure doc.id exists!
             >
               Delete{" "}

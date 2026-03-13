@@ -9,48 +9,44 @@ type Idparams = { id: string };
 type GetConnectionReqRes = (Omit<connectionDTO, "_id"> & { _id: string })[] | { message: string };
 type updatingStatusReqRes = (Omit<connectionDTO, "_id"> & { _id: string }) | { message: string };
 
-const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
+export const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, connectionInputDTO> = async (req, res): Promise<void> => {
   const { fromUserId, toUserId } = req.body;
   if (fromUserId === toUserId) {
     throw new Error("You cannot send a request to yourself", { cause: { status: 400 } });
   }
-
-  // 2. Existence check (The most important part)
-  const existingRequest = await ConnectionReq.findOne({
-    $or: [
-      { fromUserId, toUserId },
-      { fromUserId: toUserId, toUserId: fromUserId },
-    ],
-    status: { $in: ["pending", "accepted"] },
-  });
+  const existingRequest = await ConnectionReq.findOne({ fromUserId, toUserId });
 
   if (existingRequest) {
-    // Scenario 1: It's still pending
     if (existingRequest.status === "pending") {
       res.status(400).json({ message: "Connection request is already pending." });
       return;
     }
-
-    // Scenario 2: They are already connected
     if (existingRequest.status === "accepted") {
-      res.status(400).json({ message: "You are already connected with this user." });
+      res.status(400).json({ message: "Already connected." });
+      return;
+    }
+    if (existingRequest.status === "declined") {
+      existingRequest.status = "pending";
+      await existingRequest.save();
+      res.status(200).json({ message: "Request re-sent successfully." });
       return;
     }
   }
 
-  // 3. Create the request
-  const connectionRequest = new ConnectionReq({
-    fromUserId,
-    toUserId,
-    status: "pending", // Always hardcode this on creation
-  });
+  //  the OTHER direction?still need to prevent creating a request if the OTHER user already sent one that is pending.
+  const reverseRequest = await ConnectionReq.findOne({ fromUserId: toUserId, toUserId: fromUserId });
+  if (reverseRequest && reverseRequest.status === "pending") {
+    res.status(400).json({ message: "The other user already sent you a request!" });
+    return;
+  }
 
+  // 3. Create the new request
+  const connectionRequest = new ConnectionReq({ fromUserId, toUserId, status: "pending" });
   await connectionRequest.save();
-
   res.status(201).json({ message: "Connection request sent successfully" });
 };
 
-const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
+export const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
   const { id } = req.params;
 
   // 1. Fetch the data
@@ -81,7 +77,7 @@ const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = asyn
   res.json(formattedReqs);
 };
 
-const myConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
+export const myConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
   const { id } = req.params;
 
   // 1. Fetch the data
@@ -115,7 +111,7 @@ const myConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async
   res.json(formattedReqs);
 };
 
-const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req, res): Promise<void> => {
+export const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req, res): Promise<void> => {
   const { id } = req.params;
   const { status } = req.body;
 
@@ -139,5 +135,3 @@ const statusUpdate: RequestHandler<Idparams, updatingStatusReqRes> = async (req,
   };
   res.json(formattedResponse);
 };
-
-export { sendConnectionRequest, getConnectionRequest, statusUpdate, myConnectionRequest };

@@ -45,7 +45,8 @@ export const getMessages: RequestHandler<{ id: string }, msgDTO[] | { message: s
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
-    const { id: toUserId } = getMsgSchema.parse(req.params);
+    const { id } = getMsgSchema.parse(req.params);
+    const toUserId = id;
     const fromUserId = req.user.id;
     // We sort by createdAt: -1 to get the newest messages first
     const messages = await msgContact

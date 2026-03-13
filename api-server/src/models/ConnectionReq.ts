@@ -10,9 +10,9 @@ const connectionReqSchema = new Schema(
   },
   { timestamps: true },
 );
-// 1. Speeds up the "Inbox" view
+// It kind of holds everything in ascending order as status,toUserId is 1 , and makes the search easy when we do it in controller.
 connectionReqSchema.index({ toUserId: 1, status: 1 });
-// 2. Prevents duplicate requests
+// Prevents duplicate requests
 connectionReqSchema.index({ fromUserId: 1, toUserId: 1 }, { unique: true });
 
 export default model("ConnectionReq", connectionReqSchema);

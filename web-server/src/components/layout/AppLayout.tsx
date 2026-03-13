@@ -3,6 +3,7 @@ import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { Outlet, useNavigation } from "react-router";
 import { ChatBtn } from "../ui/aiChatBtn";
+import { DocBtn } from "../ui/aiDocBtn";
 
 export const AppLayout = () => {
   const navigation = useNavigation();
@@ -33,7 +34,10 @@ export const AppLayout = () => {
         <ChatBtn />
         <Footer />
       </div>
-    </AuthProvider>
+      <ChatBtn />
+      <DocBtn />
+      <Footer />
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
 export { userCreateSchema, userUpdateSchema } from "./UserSchema.ts";
 export { chatCreateSchema } from "./AiConversationSchema.ts";
 export { connectionReqSchema, connectionReqInputSchema } from "./ConnectionReqSchema.ts";
-export { msgContactSchema, msgContactInputSchema } from "./msgContactSchema.ts";
+export { msgContactSchema, msgContactInputSchema, getMsgSchema } from "./msgContactSchema.ts";

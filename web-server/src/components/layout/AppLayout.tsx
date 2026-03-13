@@ -3,6 +3,7 @@ import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { Outlet, useNavigation } from "react-router";
 import { ChatBtn } from "../ui/aiChatBtn";
+import { DocBtn } from "../ui/aiDocBtn";
 
 export const AppLayout = () => {
   const navigation = useNavigation();
@@ -13,7 +14,6 @@ export const AppLayout = () => {
       <div className="min-h-dvh flex flex-col">
         <Header />
 
-        {/* make main a flex container */}
         <main className="flex-1 min-h-0 flex flex-col">
           {isLoading && (
             <div className="container py-3">
@@ -25,12 +25,13 @@ export const AppLayout = () => {
             </div>
           )}
 
-          {/* outlet area needs to be flex-1 */}
           <div className="flex-1 min-h-0">
             <Outlet />
           </div>
         </main>
+
         <ChatBtn />
+        <DocBtn />
         <Footer />
       </div>
     </AuthProvider>

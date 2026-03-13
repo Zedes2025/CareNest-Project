@@ -9,14 +9,7 @@ interface NotificationCardProps {
   isOutgoing: boolean;
 }
 
-export const NotificationCard = ({
-  username,
-  avatarUrl,
-  id,
-  initialStatus,
-  onUpdate,
-  isOutgoing,
-}: NotificationCardProps) => {
+export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpdate, isOutgoing }: NotificationCardProps) => {
   const changeStatus = async (newStatus: "accepted" | "declined") => {
     try {
       await statusUpdate(id, newStatus);
@@ -24,6 +17,10 @@ export const NotificationCard = ({
     } catch (error) {
       console.error("Failed to update status:", error);
     }
+  };
+
+  const handleMessages = async () => {
+    // logic need to be implemented by callind "sendMsg" from data->msg.ts
   };
 
   const isAccepted = initialStatus === "accepted";
@@ -57,10 +54,7 @@ export const NotificationCard = ({
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm opacity-70">{requestLabel}</span>
 
-            <button
-              type="button"
-              className="btn btn-sm btn-outline rounded-xl transition-colors hover:text-blue-50 hover:bg-blue-800"
-            >
+            <button type="button" onClick={() => handleMessages()} className="btn btn-sm btn-outline rounded-xl transition-colors hover:text-blue-50 hover:bg-blue-800">
               Message
             </button>
           </div>
@@ -83,20 +77,19 @@ export const NotificationCard = ({
           </div>
 
           <div className="min-w-0">
-            {!isOutgoing && (
-              <div className="font-medium truncate">{username}</div>
-            )}
+            {!isOutgoing && <div className="font-medium truncate">{username}</div>}
 
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center jjustify-between w-full gap-4 p-2">
               {isOutgoing ? (
                 <>
-                  <span>
-                    <b>You</b> sent a request to
-                  </span>
-                  <span className="font-medium text-gray-800 truncate">
-                    {username}
-                  </span>
-                  <div className="avatar">
+                  <div className="flex flex-col text-sm text-gray-500">
+                    <span>
+                      <b>You</b> sent a request to
+                    </span>
+                    <span className="font-medium text-gray-800 truncate max-w-25">{username}</span>
+                  </div>
+
+                  <div className="avatar shrink-0">
                     <div className="w-14 rounded-full">
                       <img src={avatarUrl} alt={username} />
                     </div>
@@ -112,23 +105,15 @@ export const NotificationCard = ({
         <div className="flex justify-end gap-2 mt-4">
           {initialStatus === "pending" && !isOutgoing ? (
             <>
-              <button
-                className="btn btn-sm btn-neutral rounded-xl"
-                onClick={() => changeStatus("accepted")}
-              >
+              <button className="btn btn-sm btn-neutral rounded-xl" onClick={() => changeStatus("accepted")}>
                 Accept
               </button>
-              <button
-                className="btn btn-sm btn-outline rounded-xl"
-                onClick={() => changeStatus("declined")}
-              >
+              <button className="btn btn-sm btn-outline rounded-xl" onClick={() => changeStatus("declined")}>
                 Decline
               </button>
             </>
           ) : (
-            <span className="font-bold capitalize text-primary">
-              {initialStatus}
-            </span>
+            <span className="font-bold capitalize text-primary">{initialStatus}</span>
           )}
         </div>
       </div>

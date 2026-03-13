@@ -32,15 +32,9 @@ export async function connectionLoader() {
   if (!aboutme) return;
 
   try {
-    const [incoming, outgoing] = await Promise.all([
-      getConnections(aboutme._id),
-      myConnectionRequest(aboutme._id),
-    ]);
+    const [incoming, outgoing] = await Promise.all([getConnections(aboutme._id), myConnectionRequest(aboutme._id)]);
 
-    const allRequests: ConnectionItem[] = [
-      ...incoming.map((req: any) => ({ ...req, type: "incoming" as const })),
-      ...outgoing.map((req: any) => ({ ...req, type: "outgoing" as const })),
-    ];
+    const allRequests: ConnectionItem[] = [...incoming.map((req: any) => ({ ...req, type: "incoming" as const })), ...outgoing.map((req: any) => ({ ...req, type: "outgoing" as const }))];
 
     return { user: allRequests };
   } catch {
@@ -60,81 +54,29 @@ export const ContactPage = () => {
     error: string | null;
   };
 
-  const [connections, setConnections] = useState<ConnectionItem[]>(
-    initialUser || [],
-  );
+  const [connections, setConnections] = useState<ConnectionItem[]>(initialUser || []);
 
-  const [activeTab, setActiveTab] = useState<"pending" | "sent" | "declined">(
-    "pending",
-  );
+  const [activeTab, setActiveTab] = useState<"pending" | "sent" | "declined">("pending");
 
-  const [acceptedTab, setAcceptedTab] = useState<
-    "all" | "incoming" | "outgoing"
-  >("all");
+  const [acceptedTab, setAcceptedTab] = useState<"all" | "incoming" | "outgoing">("all");
 
   const handleUpdate = (id: string, newStatus: ConnectionStatus) => {
-    setConnections((prev) =>
-      prev.map((conn) =>
-        conn._id === id ? { ...conn, status: newStatus } : conn,
-      ),
-    );
+    setConnections((prev) => prev.map((conn) => (conn._id === id ? { ...conn, status: newStatus } : conn)));
   };
 
   const isNotSelf = (c: ConnectionItem) => c.fromUserId !== c.toUserId;
 
-  const pendingIncoming = useMemo(
-    () =>
-      connections
-        .filter((c) => c.type === "incoming" && c.status === "pending")
-        .sort(newestFirst),
-    [connections],
-  );
+  const pendingIncoming = useMemo(() => connections.filter((c) => c.type === "incoming" && c.status === "pending").sort(newestFirst), [connections]);
 
-  const sentPending = useMemo(
-    () =>
-      connections
-        .filter((c) => c.type === "outgoing" && c.status === "pending")
-        .sort(newestFirst),
-    [connections],
-  );
+  const sentPending = useMemo(() => connections.filter((c) => c.type === "outgoing" && c.status === "pending").sort(newestFirst), [connections]);
 
-  const declinedArchive = useMemo(
-    () =>
-      connections
-        .filter((c) => c.status === "declined" && isNotSelf(c))
-        .sort(newestFirst),
-    [connections],
-  );
+  const declinedArchive = useMemo(() => connections.filter((c) => c.status === "declined" && isNotSelf(c)).sort(newestFirst), [connections]);
 
-  const acceptedRequests = useMemo(
-    () =>
-      connections
-        .filter((c) => c.status === "accepted" && isNotSelf(c))
-        .sort(newestFirst),
-    [connections],
-  );
+  const acceptedRequests = useMemo(() => connections.filter((c) => c.status === "accepted" && isNotSelf(c)).sort(newestFirst), [connections]);
 
-  const acceptedIncoming = useMemo(
-    () =>
-      connections
-        .filter(
-          (c) =>
-            c.status === "accepted" && c.type === "incoming" && isNotSelf(c),
-        )
-        .sort(newestFirst),
-    [connections],
-  );
+  const acceptedIncoming = useMemo(() => connections.filter((c) => c.status === "accepted" && c.type === "incoming" && isNotSelf(c)).sort(newestFirst), [connections]);
 
-  const acceptedOutgoing = useMemo(
-    () =>
-      connections
-        .filter(
-          (c) =>
-            c.status === "accepted" && c.type === "outgoing" && isNotSelf(c),
-        )
-        .sort(newestFirst),
-    [connections],
-  );
+  const acceptedOutgoing = useMemo(() => connections.filter((c) => c.status === "accepted" && c.type === "outgoing" && isNotSelf(c)).sort(newestFirst), [connections]);
 
   const acceptedToRender = useMemo(() => {
     if (acceptedTab === "incoming") return acceptedIncoming;
@@ -153,27 +95,11 @@ export const ContactPage = () => {
     return items.map((each) => {
       const isOutgoing = each.type === "outgoing";
 
-      const username = isOutgoing
-        ? `${each.receiverFirstName ?? ""} ${each.receiverLastName ?? ""}`.trim()
-        : `${each.senderFirstName ?? ""} ${each.senderLastName ?? ""}`.trim();
+      const username = isOutgoing ? `${each.receiverFirstName ?? ""} ${each.receiverLastName ?? ""}`.trim() : `${each.senderFirstName ?? ""} ${each.senderLastName ?? ""}`.trim();
 
-      const avatarUrl = isOutgoing
-        ? (each.receiverProfilePicture ?? "")
-        : (each.senderProfilePicture ?? "");
+      const avatarUrl = isOutgoing ? (each.receiverProfilePicture ?? "") : (each.senderProfilePicture ?? "");
 
-      return (
-        <NotificationCard
-          key={each._id}
-          id={each._id}
-          username={username || "Unknown"}
-          avatarUrl={avatarUrl}
-          initialStatus={each.status}
-          isOutgoing={isOutgoing}
-          onUpdate={(status) =>
-            handleUpdate(each._id, status as ConnectionStatus)
-          }
-        />
-      );
+      return <NotificationCard key={each._id} id={each._id} username={username || "Unknown"} avatarUrl={avatarUrl} initialStatus={each.status} isOutgoing={isOutgoing} onUpdate={(status) => handleUpdate(each._id, status as ConnectionStatus)} />;
     });
   };
 
@@ -187,42 +113,21 @@ export const ContactPage = () => {
           <div className="card bg-base-100 shadow border h-full min-h-0">
             <div className="card-body p-4 h-full min-h-0 flex flex-col justify-start">
               <div role="tablist" className="tabs tabs-boxed w-full">
-                <button
-                  type="button"
-                  role="tab"
-                  className={`tab flex-1 ${activeTab === "pending" ? "tab-active" : ""}`}
-                  onClick={() => setActiveTab("pending")}
-                >
+                <button type="button" role="tab" className={`tab flex-1 ${activeTab === "pending" ? "tab-active" : ""}`} onClick={() => setActiveTab("pending")}>
                   Pending ({pendingIncoming.length})
                 </button>
-                <button
-                  type="button"
-                  role="tab"
-                  className={`tab flex-1 ${activeTab === "sent" ? "tab-active" : ""}`}
-                  onClick={() => setActiveTab("sent")}
-                >
+                <button type="button" role="tab" className={`tab flex-1 ${activeTab === "sent" ? "tab-active" : ""}`} onClick={() => setActiveTab("sent")}>
                   Sent ({sentPending.length})
                 </button>
-                <button
-                  type="button"
-                  role="tab"
-                  className={`tab flex-1 ${activeTab === "declined" ? "tab-active" : ""}`}
-                  onClick={() => setActiveTab("declined")}
-                >
+                <button type="button" role="tab" className={`tab flex-1 ${activeTab === "declined" ? "tab-active" : ""}`} onClick={() => setActiveTab("declined")}>
                   Declined ({declinedArchive.length})
                 </button>
               </div>
 
               <div className="mt-4">
-                {activeTab === "pending" && (
-                  <h2 className="text-lg font-semibold">Pending requests</h2>
-                )}
-                {activeTab === "sent" && (
-                  <h2 className="text-lg font-semibold">Sent requests</h2>
-                )}
-                {activeTab === "declined" && (
-                  <h2 className="text-lg font-semibold">Declined</h2>
-                )}
+                {activeTab === "pending" && <h2 className="text-lg font-semibold">Pending requests</h2>}
+                {activeTab === "sent" && <h2 className="text-lg font-semibold">Sent requests</h2>}
+                {activeTab === "declined" && <h2 className="text-lg font-semibold">Declined</h2>}
               </div>
 
               <div className="mt-3 flex-1 min-h-0 overflow-y-auto pr-1">
@@ -239,28 +144,13 @@ export const ContactPage = () => {
           <div className="card bg-base-100 shadow border h-full min-h-0">
             <div className="card-body p-4 h-full min-h-0 flex flex-col justify-start">
               <div role="tablist" className="tabs tabs-boxed w-full">
-                <button
-                  type="button"
-                  role="tab"
-                  className={`tab flex-1 ${acceptedTab === "all" ? "tab-active" : ""}`}
-                  onClick={() => setAcceptedTab("all")}
-                >
+                <button type="button" className={`tab flex-1 ${acceptedTab === "all" ? "tab-active" : ""}`} onClick={() => setAcceptedTab("all")}>
                   All ({acceptedRequests.length})
                 </button>
-                <button
-                  type="button"
-                  role="tab"
-                  className={`tab flex-1 ${acceptedTab === "incoming" ? "tab-active" : ""}`}
-                  onClick={() => setAcceptedTab("incoming")}
-                >
+                <button type="button" role="tab" className={`tab flex-1 ${acceptedTab === "incoming" ? "tab-active" : ""}`} onClick={() => setAcceptedTab("incoming")}>
                   Incoming ({acceptedIncoming.length})
                 </button>
-                <button
-                  type="button"
-                  role="tab"
-                  className={`tab flex-1 ${acceptedTab === "outgoing" ? "tab-active" : ""}`}
-                  onClick={() => setAcceptedTab("outgoing")}
-                >
+                <button type="button" role="tab" className={`tab flex-1 ${acceptedTab === "outgoing" ? "tab-active" : ""}`} onClick={() => setAcceptedTab("outgoing")}>
                   Outgoing ({acceptedOutgoing.length})
                 </button>
               </div>
@@ -277,9 +167,7 @@ export const ContactPage = () => {
             <div className="card-body p-4 h-full min-h-0 flex items-center justify-center">
               <div className="text-center opacity-60">
                 <div className="text-xl font-semibold">Placeholder</div>
-                <div className="mt-1 text-sm">
-                  Chat functionality will appear here later.
-                </div>
+                <div className="mt-1 text-sm">Chat functionality will appear here later.</div>
               </div>
             </div>
           </div>

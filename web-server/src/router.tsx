@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ContactPage, connectionLoader } from "./pages/ContactPage";
 import { MyProfilePage } from "./pages/MyProfilePage";
@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     hydrateFallbackElement: <div>Loading...</div>,
     children: [
-      { index: true, loader: () => redirect("/login") },
+      { index: true, element: <Navigate to="/login" replace /> },
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegistrationPage /> },
 

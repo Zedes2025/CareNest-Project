@@ -20,6 +20,7 @@ type MyDoc = {
   summary?: string;
   deadline?: string;
   actionRequired?: string;
+  loading?: boolean; // optional field to indicate if the document is still being processed by the AI
 };
 
 function fileToBase64(file: File): Promise<string> {
@@ -82,6 +83,7 @@ export function Documents() {
       name: file.name,
       file: base64,
       summary: "Processing...",
+      loading: true, // indicate that this document is still being processed by the AI
     };
 
     setMyDocs((prev) => {
@@ -130,6 +132,7 @@ export function Documents() {
               deadline: data.deadline ?? null,
               actionRequired: data.actionRequired ?? null,
               id: data._id,
+              loading: false, // AI processing is done, we can set loading to false
             }
           : doc,
       ),
@@ -147,6 +150,7 @@ export function Documents() {
             deadline: data.deadline ?? null,
             actionRequired: data.actionRequired ?? null,
             id: data._id,
+            loading: false, // AI processing is done, we can set loading to false
           }
         : doc,
     );
@@ -240,6 +244,11 @@ export function Documents() {
             key={doc.id}
             className="border p-2 rounded flex flex-col h-full" // add flex and h-full
           >
+            {doc.loading && (
+              <p className="text-sm text-blue-500 animate-pulse">
+                Analyzing...
+              </p>
+            )}
             <div className="flex-1">
               {/* if deadline/action exist, show them in card*/}
               <p className="font-semibold">{doc.name}</p>

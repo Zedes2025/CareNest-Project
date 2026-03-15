@@ -37,15 +37,16 @@ export const createDoc: RequestHandler = async (req, res) => {
     throw new Error('User not authenticated', { cause: { status: 401 } });
   }
 
-  const summary = await summarizeText(text); // call AI to summarize the text content of the document
+  // call AI to analyze the text content of the document
+  const aiResult = await summarizeText(text); // { summary, deadline, actionRequired }
 
   const doc = await Doc.create({
-    // create a new document in the database with the user ID, file name, and summary
     userId: req.user.id,
     fileName,
-    summary
+    summary: aiResult.summary,
+    deadline: aiResult.deadline,
+    actionRequired: aiResult.actionRequired
   });
-
   res.status(201).json(doc);
 };
 

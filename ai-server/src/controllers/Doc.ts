@@ -61,6 +61,6 @@ export const deleteDoc: RequestHandler = async (req, res) => {
 
   const doc = await Doc.findByIdAndDelete(id);
   if (!doc) throw new Error('Document not found', { cause: { status: 404 } });
-
+  console.log('DELETE request params:', req.params);
   res.json({ message: 'User deleted' });
 };

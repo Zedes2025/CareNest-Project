@@ -17,7 +17,8 @@ Through the application, users can:
 - Assist people to summarize and read documents via AI  and TTS features
 - Participate in local activities and support initiatives
 - People should message each other, to get support. 
-For over 65 users, emphasize the assistance features, with warmer tone. `;
+- On home page, users are listed according to their proximity, with the closest ones at the top.
+ `;
 
 export const createAiChat: RequestHandler<{}, CompletionDTO, PromptDTO> = async (req, res) => {
   const { prompt, chatId } = req.body;
@@ -25,7 +26,8 @@ export const createAiChat: RequestHandler<{}, CompletionDTO, PromptDTO> = async 
   // --- get authenticated user from middleware ---
   const { user: userInfo } = req;
   const userId = userInfo?.id || null; // null if unauthenticated (blind chat)
-  console.log('User ID:', req.user?.id);
+
+  console.log('User ID:', req.user?.id); // log user info for debugging
   const client = new OpenAI({
     apiKey: process.env.AI_API_KEY,
     baseURL: process.env?.AI_URL

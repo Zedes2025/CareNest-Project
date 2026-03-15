@@ -21,8 +21,8 @@ Analyze the document and extract the following information.
 
 {
   "summary": "short summary (max 3 sentences)",
-  "deadline": "deadline mentioned in the document or null",
-  "actionRequired": "action the reader must take or null"
+  "deadline": "deadline mentioned in the document or null (max 3-4 words)",
+  "actionRequired": "action the reader must take or null (max 3-4 words)"
 }
 
 Rules:
@@ -39,7 +39,10 @@ ${text}
   const completion = await openai.chat.completions.create({
     model: process.env.AI_MODEL || 'gemini-2.5-flash',
     messages: [
-      { role: 'system', content: 'You analyze documents and return structured information.' },
+      {
+        role: 'system',
+        content: 'You analyze documents and return structured information in english language.'
+      },
       { role: 'user', content: prompt }
     ],
     max_tokens: 500,

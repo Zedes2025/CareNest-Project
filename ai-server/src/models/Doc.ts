@@ -13,6 +13,12 @@ const docSchema = new Schema(
     },
     summary: {
       type: String
+    },
+    deadline: {
+      type: String
+    },
+    actionRequired: {
+      type: String
     }
   },
   { timestamps: true }

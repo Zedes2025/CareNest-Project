@@ -18,6 +18,9 @@ type MyDoc = {
   name: string;
   file: string;
   summary?: string;
+  deadline?: string;
+  actionRequired?: string;
+  loading?: boolean; // optional field to indicate if the document is still being processed by the AI
 };
 
 function fileToBase64(file: File): Promise<string> {
@@ -80,6 +83,7 @@ export function Documents() {
       name: file.name,
       file: base64,
       summary: "Processing...",
+      loading: true, // indicate that this document is still being processed by the AI
     };
 
     setMyDocs((prev) => {
@@ -113,7 +117,7 @@ export function Documents() {
       throw new Error(errorMessage);
     }
 
-    console.log("Summary from AI server:", data._id, data.summary);
+    console.log("Summary from AI server:", data);
 
     // Update the document in the state with the summary and the ID from the database
     // we use the base64 string to identify which document to update. state update:
@@ -122,7 +126,14 @@ export function Documents() {
     setMyDocs((prev: MyDoc[]) =>
       prev.map((doc: MyDoc) =>
         doc.id === tempDoc.id // Match by the UUID we just made
-          ? { ...doc, summary: data.summary, id: data._id }
+          ? {
+              ...doc,
+              summary: data.summary,
+              deadline: data.deadline ?? null,
+              actionRequired: data.actionRequired ?? null,
+              id: data._id,
+              loading: false, // AI processing is done, we can set loading to false
+            }
           : doc,
       ),
     );
@@ -133,7 +144,14 @@ export function Documents() {
 
     const updatedDocs: MyDoc[] = savedDocs.map((doc: MyDoc) =>
       doc.id === tempDoc.id
-        ? { ...doc, summary: data.summary, id: data._id }
+        ? {
+            ...doc,
+            summary: data.summary,
+            deadline: data.deadline ?? null,
+            actionRequired: data.actionRequired ?? null,
+            id: data._id,
+            loading: false, // AI processing is done, we can set loading to false
+          }
         : doc,
     );
 
@@ -143,26 +161,45 @@ export function Documents() {
 
   const handleDelete = async (id: string) => {
     const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      console.error("No access token found. User might not be logged in.");
+      return;
+    }
 
-    await fetch(`baseUrl/${id}`, {
-      // send delete request to AI server to delete the document from the database
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    setMyDocs((prev) => prev.filter((doc) => doc.id !== id)); // remove doc from array in state
+    //  Immediately update UI and localStorage
+    setMyDocs((prev) => prev.filter((doc) => doc.id !== id));
 
     const savedDocs: MyDoc[] = JSON.parse(
-      // get saved docs from localStorage
       localStorage.getItem("myDocuments") || "[]",
     );
-    // remove the deleted doc from localStorage as well
     localStorage.setItem(
       "myDocuments",
       JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
     );
+
+    try {
+      //  Send DELETE request to server
+      const res = await fetch(`${baseURL}/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (!res.ok) {
+        let errorMsg = `Delete failed with status ${res.status}`;
+        try {
+          const errorData = await res.json();
+          if (errorData?.message) errorMsg += `: ${errorData.message}`;
+        } catch (_) {}
+        console.error(errorMsg);
+
+        return;
+      }
+
+      console.log(`Document ${id} successfully deleted on server.`);
+    } catch (err) {
+      console.error("Delete request failed:", err);
+      // optional: rollback UI/localStorage if needed
+    }
   };
 
   return (
@@ -203,50 +240,69 @@ export function Documents() {
       <h1 className="text-xl font-bold mb-4">My Documents</h1>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {myDocs.map((doc) => (
-          <div key={doc.id} className="border p-2 rounded ">
-            {" "}
-            <p className="font-semibold">{doc.name}</p>
-            <button // button to open the document in a new tab
-              className="btn btn-sm btn-primary mt-1 p-2"
-              onClick={() => window.open(doc.file, "_blank")}
-            >
-              Open
-            </button>
-            <button
-              className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
-              disabled={!doc.summary}
-              onClick={() => setSelectedSummary(doc.summary || "")}
-            >
-              View Summary
-            </button>
-            <div className="inline-block bg-orange-200 rounded px-1 py-0 ml-0">
-              <button
-                onClick={() => speakMessage(doc.summary || "")}
-                className="inline-flex items-center justify-center h-8  text-lg opacity-70 hover:opacity-100 rounded"
-              >
-                ▶️
-              </button>
+          <div
+            key={doc.id}
+            className="border p-2 rounded flex flex-col h-full" // add flex and h-full
+          >
+            {doc.loading && (
+              <p className="text-sm font-bold text-gray-500 animate-pulse">
+                Analyzing...
+              </p>
+            )}
+            <div className="flex-1">
+              {/* if deadline/action exist, show them in card*/}
+              <p className="font-semibold">{doc.name}</p>
+              {doc.deadline && (
+                <p className="text-sm text-red-500">Deadline: {doc.deadline}</p>
+              )}
+              {doc.actionRequired && (
+                <p className="text-sm text-green-700">
+                  Action: {doc.actionRequired}
+                </p>
+              )}
+            </div>
 
+            <div className="mt-2">
               <button
-                onClick={() => stopPlayback()}
-                className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+                className="btn btn-sm btn-primary mt-1 p-2"
+                onClick={() => window.open(doc.file, "_blank")}
               >
-                ⏸️
+                Open
               </button>
-
               <button
-                onClick={() => resumePlayback()}
-                className="inline-flex items-center justify-center h-8  text-lg opacity-70 hover:opacity-100 rounded"
+                className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
+                disabled={!doc.summary}
+                onClick={() => setSelectedSummary(doc.summary || "")}
               >
-                ⏯️
+                View Summary
+              </button>
+              <div className="inline-block bg-orange-200 rounded px-1 py-0 ml-0">
+                <button
+                  onClick={() => speakMessage(doc.summary || "")}
+                  className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+                >
+                  ▶️
+                </button>
+                <button
+                  onClick={() => stopPlayback()}
+                  className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+                >
+                  ⏸️
+                </button>
+                <button
+                  onClick={() => resumePlayback()}
+                  className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+                >
+                  ⏯️
+                </button>
+              </div>
+              <button
+                className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
+                onClick={() => handleDelete(doc.id!)}
+              >
+                Delete
               </button>
             </div>
-            <button
-              className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
-              onClick={() => handleDelete(doc.id!)} // i am sure doc.id exists!
-            >
-              Delete{" "}
-            </button>
           </div>
         ))}
       </div>

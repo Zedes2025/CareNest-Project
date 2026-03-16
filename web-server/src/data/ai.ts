@@ -15,7 +15,7 @@ type ChatRes = {
 
 export const createChat = async (body: ChatBody): Promise<ChatRes> => {
   const accessToken = localStorage.getItem("accessToken"); // in case user is logged in, save token
-  const response = await fetch(`${baseURL}`, {
+  const response = await fetch(`${baseURL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

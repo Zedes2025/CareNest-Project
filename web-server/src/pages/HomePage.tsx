@@ -111,13 +111,35 @@ export const HomePage = () => {
       .filter((u) => matchesService(u, serviceFilter));
   }, [data.users, myId, cityQuery, dayFilter, slotFilter, serviceFilter]);
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const sorted = useMemo(() => {
+    // ohne eigene Koordinaten keine Distanz-Sortierung möglich
+    if (!myCoords) return filtered;
+
+    // Distanz einmal pro User berechnen (schneller als im sort-Comparator)
+    const enriched = filtered.map((u) => {
+      const lat = u.latitude ?? null;
+      const lon = u.longitude ?? null;
+
+      const distanceKm =
+        typeof lat === "number" && typeof lon === "number"
+          ? getDistanceKmRounded(myCoords.lat, myCoords.lon, lat, lon)
+          : Number.POSITIVE_INFINITY; // keine coords -> ganz nach hinten
+
+      return { u, distanceKm };
+    });
+
+    enriched.sort((a, b) => a.distanceKm - b.distanceKm);
+
+    return enriched.map((x) => x.u);
+  }, [filtered, myCoords]);
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
 
   const pageUsers = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, currentPage]);
+    return sorted.slice(start, start + PAGE_SIZE);
+  }, [sorted, currentPage]);
 
   const canPrev = currentPage > 1;
   const canNext = currentPage < pageCount;

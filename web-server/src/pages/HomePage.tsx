@@ -72,7 +72,7 @@ export const HomePage = () => {
   const [page, setPage] = useState(initial?.page ?? 1);
   const myCoords = useMyCoordinates();
 
-  const PAGE_SIZE = 25;
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     const state: HomeFiltersState = {

@@ -245,7 +245,7 @@ export function Documents() {
             className="border p-2 rounded flex flex-col h-full" // add flex and h-full
           >
             {doc.loading && (
-              <p className="text-sm text-blue-500 animate-pulse">
+              <p className="text-sm font-bold text-gray-500 animate-pulse">
                 Analyzing...
               </p>
             )}

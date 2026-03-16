@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express';
+import { flattenError, z } from 'zod/v4';
 
 const validateParam =
   (schema: any): RequestHandler =>
@@ -7,7 +8,7 @@ const validateParam =
     if (!result.success) {
       return res.status(400).json({
         message: 'Validation failed',
-        errors: result.error.format()
+        errors: z.flattenError(result.error).fieldErrors //gives  field-level mapping
       });
     }
     req.params = result.data;

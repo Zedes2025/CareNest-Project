@@ -53,6 +53,12 @@ export function Documents() {
   const handleUpload = async () => {
     // Handler for the Upload button
     if (!file) return;
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("Session expired. Please login again.");
+      return;
+    }
 
     const base64 = await fileToBase64(file); // Convert file to Base64 as string
 
@@ -77,28 +83,6 @@ export function Documents() {
       });
       return; // stop upload
     }
-
-    // Update State immediately using the functional update, tempo before ai response comes back
-    // Stage 1: temporary document before AI response
-    const tempDoc: MyDoc = {
-      id: crypto.randomUUID(), // to have a unique id for the document in the frontend before we get the real ID
-      name: file.name,
-      file: base64,
-      summary: "Processing...",
-      loading: true, // indicate that this document is still being processed by the AI
-    };
-
-    setMyDocs((prev) => {
-      const updated = [...prev, tempDoc];
-      localStorage.setItem("myDocuments", JSON.stringify(updated));
-      return updated;
-    });
-
-    setFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (!uploadErr) alert("File uploaded successfully!");
-
-    const accessToken = localStorage.getItem("accessToken");
 
     const res = await fetch(baseURL, {
       method: "POST",
@@ -127,6 +111,27 @@ export function Documents() {
     }
     setUploadErr({}); // clear previous errors
     console.log("Summary from AI server:", data);
+
+    // Update State immediately using the functional update, tempo before ai response comes back
+    // Stage 1: temporary document before AI response
+    const tempDoc: MyDoc = {
+      id: crypto.randomUUID(), // to have a unique id for the document in the frontend before we get the real ID
+      name: file.name,
+      file: base64,
+      summary: "Processing...",
+      loading: true, // indicate that this document is still being processed by the AI
+    };
+
+    setMyDocs((prev) => {
+      const updated = [...prev, tempDoc];
+      localStorage.setItem("myDocuments", JSON.stringify(updated));
+      return updated;
+    });
+
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (!uploadErr || Object.keys(uploadErr).length === 0)
+      alert("File uploaded successfully!");
 
     // Update the document in the state with the summary and the ID from the database
     // we use the base64 string to identify which document to update. state update:
@@ -290,10 +295,10 @@ export function Documents() {
             <div className="flex-1">
               {/* if deadline/action exist, show them in card*/}
               <p className="font-semibold">{doc.name}</p>
-              {doc.deadline && (
+              {doc.deadline && doc.deadline !== "null" && (
                 <p className="text-sm text-red-500">Deadline: {doc.deadline}</p>
               )}
-              {doc.actionRequired && (
+              {doc.actionRequired && doc.actionRequired !== "null" && (
                 <p className="text-sm text-green-700">
                   Action: {doc.actionRequired}
                 </p>

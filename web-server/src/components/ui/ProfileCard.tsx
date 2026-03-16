@@ -8,9 +8,10 @@ type Props = {
 
 export const ProfileCard = ({ user, distanceKm }: Props) => {
   const services = user.servicesOffered ?? [];
-  const servicesPreview = services.slice(0, 3);
+  const servicesPreview = services.slice(0, 2);
   const extraCount = Math.max(0, services.length - servicesPreview.length);
-  const hasImage = typeof user.profilePicture === "string" && user.profilePicture.length > 0;
+  const hasImage =
+    typeof user.profilePicture === "string" && user.profilePicture.length > 0;
 
   return (
     <div className="card bg-base-100 shadow h-full">
@@ -18,7 +19,10 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
         <div className="avatar">
           {hasImage ? (
             <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-              <img src={user.profilePicture as string} alt={`${user.firstName} ${user.lastName}`} />
+              <img
+                src={user.profilePicture as string}
+                alt={`${user.firstName} ${user.lastName}`}
+              />
             </div>
           ) : (
             <div className="placeholder w-24 rounded-full bg-base-200 ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center">
@@ -30,16 +34,20 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
           )}
         </div>
 
-        <h3 className="text-lg font-semibold leading-tight min-h-13 line-clamp-2">
+        <h3 className="text-lg font-semibold leading-tight h-10 flex items-center justify-center text-center line-clamp-2">
           {user.firstName} {user.lastName}
         </h3>
 
-        <div className="mt-1 text-sm opacity-70">
+        <div className="text-sm opacity-70 h-2 flex items-center justify-center text-center">
           {user.city ?? "City -"}
-          {typeof distanceKm === "number" ? ` · ${distanceKm} km away` : ""}
         </div>
-
-        <div className="flex flex-wrap justify-center gap-2 min-h-18 content-start">
+        <div className="text-sm opacity-70 h-2 flex items-center justify-center text-center">
+          {typeof distanceKm === "number" ? ` ${distanceKm} km away` : ""}
+        </div>
+        <div className="flex flex-wrap justify-center gap-2 content-start">
+          Services:
+        </div>
+        <div className="flex flex-col items-center gap-2 min-h-18">
           {services.length ? (
             <>
               {servicesPreview.map((s) => (
@@ -47,7 +55,10 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
                   {s}
                 </span>
               ))}
-              {extraCount > 0 && <span className="badge badge-ghost">+{extraCount}</span>}
+
+              {extraCount > 0 && (
+                <span className="badge badge-ghost">+{extraCount} more</span>
+              )}
             </>
           ) : (
             <span className="opacity-60 text-sm">No services listed</span>
@@ -55,7 +66,10 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
         </div>
 
         <div className="card-actions mt-auto w-full justify-center">
-          <Link to={`/details/${user._id}`} className="btn btn-primary w-full">
+          <Link
+            to={`/details/${user._id}`}
+            className="btn btn-primary rounded-3xl w-3/4"
+          >
             View more
           </Link>
         </div>

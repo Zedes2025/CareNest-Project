@@ -310,7 +310,7 @@ export const HomePage = () => {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
           {pageUsers.map((u) => {
             const otherLat = u.latitude ?? null;
             const otherLon = u.longitude ?? null;

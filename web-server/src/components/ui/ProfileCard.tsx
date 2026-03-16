@@ -34,7 +34,7 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
           )}
         </div>
 
-        <h3 className="text-lg font-semibold leading-tight h-10 flex items-center justify-center text-center line-clamp-2">
+        <h3 className="text-lg font-semibold leading-tight h-12 flex items-center justify-center text-center line-clamp-2">
           {user.firstName} {user.lastName}
         </h3>
 

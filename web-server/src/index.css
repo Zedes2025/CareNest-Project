@@ -12,3 +12,125 @@
   --chat-btn-text: #ffffff; /* button text */
   --chat-btn-hover: #4338ca; /* button hover */
 }
+
+/* ---------- CareNest global UI overrides (Hex-based) ---------- */
+.min-h-dvh {
+  background-color: #e6d9b5;
+  color: #3b2f25;
+}
+
+/* Cards */
+.card {
+  background-color: #f2e9d1; /* lighter cream than background */
+  border: 1px solid rgba(179, 148, 116, 0.75);
+}
+
+.card.shadow,
+.card.shadow-xl,
+.card.shadow-lg {
+  box-shadow: 0 10px 28px rgba(59, 47, 37, 0.16);
+}
+
+/* Buttons (default + primary) */
+.btn {
+  border-radius: 1.5rem; /* consistent rounded look */
+}
+
+/* Primary button look */
+.btn-primary,
+.btn.btn-primary {
+  background-color: #c7d69a;
+  border-color: #c7d69a;
+  color: #1f2a1f;
+}
+.btn-primary:hover,
+.btn.btn-primary:hover {
+  background-color: #97b384;
+  border-color: #97b384;
+  color: #1f2a1f;
+}
+
+/* Outline button: use brown border and subtle cream hover */
+.btn-outline,
+.btn.btn-outline {
+  background-color: transparent;
+  border-color: #b39474;
+  color: #3b2f25;
+}
+.btn-outline:hover,
+.btn.btn-outline:hover {
+  background-color: rgba(179, 148, 116, 0.18);
+  border-color: #b39474;
+  color: #3b2f25;
+}
+
+/* Ghost button (e.g. pagination label) */
+.btn-ghost,
+.btn.btn-ghost {
+  color: #3b2f25;
+}
+.btn-ghost:hover,
+.btn.btn-ghost:hover {
+  background-color: rgba(179, 148, 116, 0.18);
+}
+
+/* Inputs / selects / textareas */
+.input,
+.select,
+.textarea {
+  background-color: #e6d9b5;
+  border-color: #b39474;
+  color: #3b2f25;
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: rgba(59, 47, 37, 0.65);
+}
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: 2px solid #f4b89f;
+  outline-offset: 2px;
+  border-color: #f4b89f;
+}
+
+/* Badges */
+.badge {
+  border-radius: 9999px;
+}
+.badge-outline {
+  border-color: #b39474;
+  color: #3b2f25;
+  background-color: transparent;
+}
+.badge-ghost {
+  background-color: rgba(179, 148, 116, 0.18);
+  color: #3b2f25;
+  border-color: transparent;
+}
+
+/* Alerts (optional) */
+.alert {
+  border: 1px solid #b39474;
+  background-color: rgba(230, 217, 181, 0.75);
+  color: #3b2f25;
+}
+.alert-error {
+  border-color: #c86b5a;
+  background-color: rgba(244, 184, 159, 0.35);
+}
+.alert-warning {
+  border-color: #f4b89f;
+  background-color: rgba(244, 184, 159, 0.25);
+}
+
+/* Tables (optional for availability tables) */
+.table {
+  background-color: transparent;
+}
+.table th {
+  color: #3b2f25;
+}
+.table td {
+  border-color: rgba(179, 148, 116, 0.35);
+}

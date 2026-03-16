@@ -25,8 +25,8 @@ export const createChat = async (body: ChatBody): Promise<ChatRes> => {
   });
 
   if (!response.ok) {
-    const { error } = await response.json();
-    throw new Error(error || "Something went wrong");
+    const data = await response.json();
+    throw new Error(data.error || data.message || "Something went wrong");
   }
 
   const aiResponse = (await response.json()) as ChatRes;

@@ -7,9 +7,10 @@ interface NotificationCardProps {
   initialStatus: string;
   onUpdate: (newStatus: string) => void;
   isOutgoing: boolean;
+  onMessage?: () => void;
 }
 
-export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpdate, isOutgoing }: NotificationCardProps) => {
+export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpdate, isOutgoing, onMessage }: NotificationCardProps) => {
   const changeStatus = async (newStatus: "accepted" | "declined") => {
     try {
       await statusUpdate(id, newStatus);
@@ -17,10 +18,6 @@ export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpd
     } catch (error) {
       console.error("Failed to update status:", error);
     }
-  };
-
-  const handleMessages = async () => {
-    // logic need to be implemented by callind "sendMsg" from data->msg.ts
   };
 
   const isAccepted = initialStatus === "accepted";
@@ -54,7 +51,7 @@ export const NotificationCard = ({ username, avatarUrl, id, initialStatus, onUpd
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm opacity-70">{requestLabel}</span>
 
-            <button type="button" onClick={() => handleMessages()} className="btn btn-sm btn-outline rounded-xl transition-colors hover:text-blue-50 hover:bg-blue-800">
+            <button type="button" onClick={onMessage} className="btn btn-sm btn-outline rounded-xl transition-colors hover:text-blue-50 hover:bg-blue-800">
               Message
             </button>
           </div>

@@ -31,7 +31,7 @@ export const Nav = () => {
       <div className="navbar-end gap-2">
         {signedIn ? (
           <>
-            <span className="hidden sm:inline text-sm opacity-70">Welcome back, {user?.firstName}</span>
+            <span className="hidden sm:inline text-sm opacity-70">Welcome, {user?.firstName}</span>
 
             <NavLink to="/home" className={({ isActive }) => navBtnClass(isActive)}>
               Home

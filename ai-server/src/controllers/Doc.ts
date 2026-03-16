@@ -37,15 +37,16 @@ export const createDoc: RequestHandler = async (req, res) => {
     throw new Error('User not authenticated', { cause: { status: 401 } });
   }
 
-  const summary = await summarizeText(text); // call AI to summarize the text content of the document
+  // call AI to analyze the text content of the document
+  const aiResult = await summarizeText(text); // { summary, deadline, actionRequired }
 
   const doc = await Doc.create({
-    // create a new document in the database with the user ID, file name, and summary
     userId: req.user.id,
     fileName,
-    summary
+    summary: aiResult.summary,
+    deadline: aiResult.deadline,
+    actionRequired: aiResult.actionRequired
   });
-
   res.status(201).json(doc);
 };
 
@@ -60,6 +61,6 @@ export const deleteDoc: RequestHandler = async (req, res) => {
 
   const doc = await Doc.findByIdAndDelete(id);
   if (!doc) throw new Error('Document not found', { cause: { status: 404 } });
-
+  console.log('DELETE request params:', req.params);
   res.json({ message: 'User deleted' });
 };

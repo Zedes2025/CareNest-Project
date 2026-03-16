@@ -177,17 +177,8 @@ export const HomePage = () => {
 
         <div className="mt-8">
           {/* Row 1: Reset + Filters */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[auto_1fr_1fr_1fr] md:items-end">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
             {/* Reset (only as wide as text) */}
-            <div className="flex md:justify-start">
-              <button
-                className="btn btn-outline whitespace-nowrap"
-                type="button"
-                onClick={resetFilters}
-              >
-                Reset filters
-              </button>
-            </div>
 
             {/* City */}
             <div className="form-control">
@@ -272,39 +263,49 @@ export const HomePage = () => {
                 ))}
               </select>
             </div>
+            <div className="flex justify-center md:justify-end">
+              <button
+                className="btn btn-outline whitespace-nowrap"
+                type="button"
+                onClick={resetFilters}
+              >
+                Reset filters
+              </button>
+            </div>
           </div>
 
           {/* Row 2: Showing + Pagination (right) */}
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="opacity-70">
+            <div className="opacity-70 text-center sm:text-left">
               Showing <span className="font-semibold">{pageUsers.length}</span>{" "}
               of <span className="font-semibold">{filtered.length}</span>{" "}
               results
             </div>
-
-            <div className="join">
-              <button
-                className="btn join-item"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={!canPrev}
-                type="button"
-              >
-                Prev
-              </button>
-              <button
-                className="btn join-item btn-ghost pointer-events-none"
-                type="button"
-              >
-                Page {currentPage} / {pageCount}
-              </button>
-              <button
-                className="btn join-item"
-                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-                disabled={!canNext}
-                type="button"
-              >
-                Next
-              </button>
+            <div className="join justify-center sm:justify-end">
+              <div className="join">
+                <button
+                  className="btn join-item"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={!canPrev}
+                  type="button"
+                >
+                  Prev
+                </button>
+                <button
+                  className="btn join-item btn-ghost pointer-events-none"
+                  type="button"
+                >
+                  Page {currentPage} / {pageCount}
+                </button>
+                <button
+                  className="btn join-item"
+                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                  disabled={!canNext}
+                  type="button"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         </div>

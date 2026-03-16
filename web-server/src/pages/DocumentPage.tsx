@@ -38,6 +38,8 @@ function fileToBase64(file: File): Promise<string> {
 export function Documents() {
   const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
 
+  const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // State to keep track of any errors during upload or AI processing
+  const [DeletErr, setDeleteErr] = useState<{ [key: string]: string[] }>({}); // State to keep track of any errors during deletion
   const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
   const [selectedSummary, setSelectedSummary] = useState<string | null>(null); // State to keep track of the currently selected document summary
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref to directly access the file input element in the DOM, needed to clear it after upload
@@ -70,11 +72,11 @@ export function Documents() {
       // txt files
       textContent = await extractTxtText(file);
     } else {
-      console.log("Unsupported file type:", file.type);
+      setUploadErr({
+        fileName: [`Unsupported file type: ${file.type}`],
+      });
+      return; // stop upload
     }
-
-    console.log(file.type);
-    console.log("Extracted text content:", textContent);
 
     // Update State immediately using the functional update, tempo before ai response comes back
     // Stage 1: temporary document before AI response
@@ -94,7 +96,7 @@ export function Documents() {
 
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    alert("File uploaded successfully!");
+    if (!uploadErr) alert("File uploaded successfully!");
 
     const accessToken = localStorage.getItem("accessToken");
 
@@ -113,10 +115,17 @@ export function Documents() {
     const data = await res.json();
 
     if (!res.ok) {
-      const errorMessage = data.message || "Failed to send connection request.";
-      throw new Error(errorMessage);
-    }
+      // if the response is not ok, show the error message from zod validation or a general error message
 
+      if (data.errors) {
+        setUploadErr(data.errors); // set field-specific errors
+      } else {
+        setUploadErr({ general: [data.message || "Something went wrong"] });
+      }
+
+      return;
+    }
+    setUploadErr({}); // clear previous errors
     console.log("Summary from AI server:", data);
 
     // Update the document in the state with the summary and the ID from the database
@@ -188,8 +197,12 @@ export function Documents() {
         let errorMsg = `Delete failed with status ${res.status}`;
         try {
           const errorData = await res.json();
+
+          setDeleteErr({}); // clear previous errors
           if (errorData?.message) errorMsg += `: ${errorData.message}`;
-        } catch (_) {}
+        } catch (_) {
+          setDeleteErr({ general: ["Delete failed. Connection error."] }); // set a general error message if parsing fails
+        }
         console.error(errorMsg);
 
         return;
@@ -211,7 +224,6 @@ export function Documents() {
           Upload your documents and let our AI analyze them for you!
         </span>
       </h1>
-
       {/* File upload section */}
       <fieldset className="fieldset flex flex-row gap-4 mt-4">
         <legend className="fieldset-legend">Upload a file</legend>
@@ -235,6 +247,25 @@ export function Documents() {
           Upload
         </button>
       </fieldset>
+      {/* show zod schema errors */}
+      {/* Field-level errors */}
+      {uploadErr.fileName?.map((msg, i) => (
+        <p key={i} className="text-red-500 mt-2">
+          {msg}
+        </p>
+      ))}
+      {uploadErr.text?.map((msg, i) => (
+        <p key={i} className="text-red-500 mt-2">
+          {msg}
+        </p>
+      ))}
+
+      {/* General backend errors */}
+      {uploadErr.general?.map((msg, i) => (
+        <p key={i} className="text-red-500 mt-2">
+          {msg}
+        </p>
+      ))}
       {/* show selected file name */}
       {file && <p className="text-sm mt-2">Selected: {file.name}</p>}
       <h1 className="text-xl font-bold mb-4">My Documents</h1>

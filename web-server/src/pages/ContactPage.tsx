@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLoaderData } from "react-router";
-
+import { ChatWindow } from "../components/contactcomponents/chatWindow";
 import { NotificationCard } from "../components/contactcomponents/notifCard";
 import { getConnections, myConnectionRequest } from "../data/connection";
 import { me } from "../data";
@@ -60,8 +60,14 @@ export const ContactPage = () => {
 
   const [acceptedTab, setAcceptedTab] = useState<"all" | "incoming" | "outgoing">("all");
 
+  const [selectedChat, setSelectedChat] = useState<{ id: string; username: string } | null>(null);
+
   const handleUpdate = (id: string, newStatus: ConnectionStatus) => {
     setConnections((prev) => prev.map((conn) => (conn._id === id ? { ...conn, status: newStatus } : conn)));
+  };
+
+  const handleSelectChat = (id: string, username: string) => {
+    setSelectedChat({ id, username });
   };
 
   const isNotSelf = (c: ConnectionItem) => c.fromUserId !== c.toUserId;
@@ -80,6 +86,7 @@ export const ContactPage = () => {
 
   const acceptedToRender = useMemo(() => {
     if (acceptedTab === "incoming") return acceptedIncoming;
+
     if (acceptedTab === "outgoing") return acceptedOutgoing;
     return acceptedRequests;
   }, [acceptedTab, acceptedIncoming, acceptedOutgoing, acceptedRequests]);
@@ -99,7 +106,10 @@ export const ContactPage = () => {
 
       const avatarUrl = isOutgoing ? (each.receiverProfilePicture ?? "") : (each.senderProfilePicture ?? "");
 
-      return <NotificationCard key={each._id} id={each._id} username={username || "Unknown"} avatarUrl={avatarUrl} initialStatus={each.status} isOutgoing={isOutgoing} onUpdate={(status) => handleUpdate(each._id, status as ConnectionStatus)} />;
+      // Find the OTHER person's ID (the person we are chatting with)
+      const chatPartnerId = isOutgoing ? each.toUserId : each.fromUserId;
+
+      return <NotificationCard key={each._id} id={each._id} username={username || "Unknown"} avatarUrl={avatarUrl} initialStatus={each.status} isOutgoing={isOutgoing} onUpdate={(status) => handleUpdate(each._id, status as ConnectionStatus)} onMessage={() => handleSelectChat(chatPartnerId, username)} />;
     });
   };
 
@@ -164,11 +174,30 @@ export const ContactPage = () => {
 
           {/* CHAT */}
           <div className="card bg-base-100 shadow border h-full min-h-0">
-            <div className="card-body p-4 h-full min-h-0 flex items-center justify-center">
-              <div className="text-center opacity-60">
-                <div className="text-xl font-semibold">Placeholder</div>
-                <div className="mt-1 text-sm">Chat functionality will appear here later.</div>
-              </div>
+            <div className="card-body p-4 h-full min-h-0 flex flex-col">
+              {selectedChat ? (
+                <div className="flex flex-col h-full">
+                  {/* Chat Header */}
+                  <div className="flex items-center justify-between border-b pb-2 mb-4">
+                    <h2 className="text-lg font-bold">Chat with {selectedChat.username}</h2>
+                    <button className="btn btn-ghost btn-xs" onClick={() => setSelectedChat(null)}>
+                      Close
+                    </button>
+                  </div>
+
+                  {/* The Actual Chat Window */}
+                  <div className="flex-1 min-h-0">
+                    <ChatWindow recipientId={selectedChat.id} />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-center opacity-60">
+                  <div>
+                    <div className="text-xl font-semibold">Messaging Window</div>
+                    <div className="mt-1 text-sm">Click "Message" on an accepted contact to start chatting.</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 interface RegisterFormProps {
   // fieldErrors: Partial<Record<keyof RegisterFormState, string>>;
@@ -13,11 +13,7 @@ interface RegisterFormProps {
 //For error message
 type FieldErrors = Partial<Record<keyof RegisterFormState, string>>;
 
-export default function RegisterForm({
-  onSubmit,
-  loading = false,
-  error = "",
-}: RegisterFormProps) {
+export default function RegisterForm({ onSubmit, loading = false, error = "" }: RegisterFormProps) {
   const [values, setValues] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",
@@ -31,13 +27,7 @@ export default function RegisterForm({
 
   //Makesure all fields are filled out
   const canSubmit = useMemo(() => {
-    return (
-      values.firstName.length > 0 &&
-      values.lastName.length > 0 &&
-      values.email.length > 0 &&
-      values.password.length > 0 &&
-      values.confirmPassword.length > 0
-    );
+    return values.firstName.length > 0 && values.lastName.length > 0 && values.email.length > 0 && values.password.length > 0 && values.confirmPassword.length > 0;
   }, [values]);
 
   //No more error message when user corrects input, onChange is a function that is used to handle dynamic field inputs
@@ -67,15 +57,21 @@ export default function RegisterForm({
     const result = registerSchema.safeParse(data);
 
     if (!result.success) {
-      const fe = z.flattenError(result.error).fieldErrors;
-
-      setFieldErrors({
-        firstName: fe.firstName?.[0],
-        lastName: fe.lastName?.[0],
-        email: fe.email?.[0],
-        password: fe.password?.[0],
-        confirmPassword: fe.confirmPassword?.[0],
+      console.log(result.error.issues);
+      const errors: Record<string, string> = {};
+      // result.error.issues contains ALL errors, including refinements
+      result.error.issues.forEach((issue) => {
+        // If the error has a path (like ["confirmPassword"]), use it
+        if (issue.path.length > 0) {
+          const fieldName = issue.path[0] as string;
+          errors[fieldName] = issue.message;
+        } else {
+          // If it's a general form error, you can show it as a global message
+          setFormMessage(issue.message);
+        }
       });
+
+      setFieldErrors(errors);
       return;
     }
 
@@ -105,19 +101,10 @@ export default function RegisterForm({
                 <label className="label">
                   <span className="label-text">First name</span>
                 </label>
-                <input
-                  name="firstName"
-                  type="text"
-                  className="input input-bordered w-full"
-                  value={values.firstName}
-                  onChange={onChange}
-                  autoComplete="given-name"
-                />
+                <input name="firstName" type="text" className="input input-bordered w-full" value={values.firstName} onChange={onChange} autoComplete="given-name" />
                 {fieldErrors.firstName && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {fieldErrors.firstName}
-                    </span>
+                    <span className="label-text-alt text-error">{fieldErrors.firstName}</span>
                   </label>
                 )}
               </div>
@@ -125,19 +112,10 @@ export default function RegisterForm({
                 <label className="label">
                   <span className="label-text">Last name</span>
                 </label>
-                <input
-                  name="lastName"
-                  type="text"
-                  className="input input-bordered w-full"
-                  value={values.lastName}
-                  onChange={onChange}
-                  autoComplete="given-name"
-                />
+                <input name="lastName" type="text" className="input input-bordered w-full" value={values.lastName} onChange={onChange} autoComplete="given-name" />
                 {fieldErrors.lastName && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {fieldErrors.lastName}
-                    </span>
+                    <span className="label-text-alt text-error">{fieldErrors.lastName}</span>
                   </label>
                 )}
               </div>
@@ -146,19 +124,10 @@ export default function RegisterForm({
                 <label className="label">
                   <span className="label-text">Email</span>
                 </label>
-                <input
-                  name="email"
-                  type="email"
-                  className="input input-bordered w-full"
-                  value={values.email}
-                  onChange={onChange}
-                  autoComplete="email"
-                />
+                <input name="email" type="email" className="input input-bordered w-full" value={values.email} onChange={onChange} autoComplete="email" />
                 {fieldErrors.email && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {fieldErrors.email}
-                    </span>
+                    <span className="label-text-alt text-error">{fieldErrors.email}</span>
                   </label>
                 )}
               </div>
@@ -167,19 +136,10 @@ export default function RegisterForm({
                 <label className="label">
                   <span className="label-text">Password</span>
                 </label>
-                <input
-                  name="password"
-                  type="password"
-                  className="input input-bordered w-full"
-                  value={values.password}
-                  onChange={onChange}
-                  autoComplete="new-password"
-                />
+                <input name="password" type="password" className="input input-bordered w-full" value={values.password} onChange={onChange} autoComplete="new-password" />
                 {fieldErrors.password && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {fieldErrors.password}
-                    </span>
+                    <span className="label-text-alt text-error">{fieldErrors.password}</span>
                   </label>
                 )}
               </div>
@@ -188,29 +148,16 @@ export default function RegisterForm({
                 <label className="label">
                   <span className="label-text">Confirm password</span>
                 </label>
-                <input
-                  name="confirmPassword"
-                  type="password"
-                  className="input input-bordered w-full"
-                  value={values.confirmPassword}
-                  onChange={onChange}
-                  autoComplete="new-password"
-                />
+                <input name="confirmPassword" type="password" className="input input-bordered w-full" value={values.confirmPassword} onChange={onChange} autoComplete="new-password" />
                 {fieldErrors.confirmPassword && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {fieldErrors.confirmPassword}
-                    </span>
+                    <span className="label-text-alt text-error">{fieldErrors.confirmPassword}</span>
                   </label>
                 )}
               </div>
 
               <div className="card-actions mt-2">
-                <button
-                  className="btn btn-primary w-full"
-                  type="submit"
-                  disabled={!canSubmit || loading}
-                >
+                <button className="btn btn-primary w-full" type="submit" disabled={!canSubmit || loading}>
                   {loading ? (
                     <>
                       <span className="loading loading-spinner loading-sm"></span>

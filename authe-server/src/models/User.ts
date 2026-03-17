@@ -5,15 +5,7 @@ const DailyScheduleSchema = new Schema<DailySchedule>(
   {
     day: {
       type: String,
-      enum: [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-      ],
+      enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       required: true,
     },
     slots: { type: [String], default: [] }, // flexible slots like "morning", "noon", etc.
@@ -29,10 +21,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
       trim: true,
     },
     password: { type: String, required: true },
+    // confirmPassword: { type: String, required: true },
     //birthday: { type: Date, default: null },
     //profilePicture: { type: String, default: null },
     //age: { type: Number, default: null },

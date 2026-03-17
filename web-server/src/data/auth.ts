@@ -10,7 +10,13 @@ const login = async (formData: LoginInput): Promise<TokenRes> => {
     body: JSON.stringify(formData),
   });
 
-  if (!res.ok) throw new Error(`${res.status}. Something went wrong!`);
+  if (!res.ok) {
+    // 1. Get the actual error JSON from your backend/Zod
+    const errorData = await res.json();
+
+    // Throw the specific error message
+    throw new Error(errorData.message || "Login failed");
+  }
 
   const data = (await res.json()) as TokenRes;
 
@@ -25,7 +31,13 @@ const me = async (): Promise<User> => {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  if (!res.ok) throw new Error(`${res.status}. Something went wrong!`);
+  if (!res.ok) {
+    // 1. Get the actual error JSON from your backend/Zod
+    const errorData = await res.json();
+
+    // Throw the specific error message
+    throw new Error(errorData.message || "Authentication failed");
+  }
   const { user } = (await res.json()) as SuccessRes & { user: User };
 
   return user;
@@ -42,7 +54,13 @@ const logout = async (): Promise<SuccessRes> => {
     },
     body: JSON.stringify({ refreshToken }),
   });
-  if (!res.ok) throw new Error(`${res.status}. Something went wrong!`);
+  if (!res.ok) {
+    // 1. Get the actual error JSON from your backend/Zod
+    const errorData = await res.json();
+
+    // Throw the specific error message
+    throw new Error(errorData.message || "Logout failed");
+  }
   const data = (await res.json()) as SuccessRes;
 
   return data;
@@ -55,7 +73,14 @@ const register = async (formData: RegisterFormState): Promise<TokenRes> => {
     body: JSON.stringify(formData),
   });
 
-  if (!res.ok) throw new Error(`${res.status}. Something went wrong!`);
+  if (!res.ok) {
+    // 1. Get the actual error JSON from your backend/Zod
+    const errorData = await res.json();
+    console.log("SERVER ERROR DATA:", errorData); // DEBUG THIS
+
+    // Throw the specific error message
+    throw new Error(errorData.message || "Registration failed");
+  }
 
   const data = (await res.json()) as TokenRes;
 

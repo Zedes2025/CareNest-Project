@@ -41,7 +41,7 @@ export const userCreateSchema = z.object({
   firstName: z.string().trim().min(1, "Enter a valid name"),
   lastName: z.string().trim().min(1, "Enter a valid last name"),
 
-  email: z.email("Enter a valid email").trim().toLowerCase(),
+  email: z.email("Enter a valid email").trim(),
 
   password: z.string().min(8, "Password must be at least 8 characters long"),
 });

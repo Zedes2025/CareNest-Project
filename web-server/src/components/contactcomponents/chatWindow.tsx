@@ -21,6 +21,8 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
       }
     };
     loadMessages();
+    const intervalId = setInterval(loadMessages, 3000);
+    return () => clearInterval(intervalId);
   }, [recipientId]);
 
   const onSend = async (e: React.FormEvent) => {
@@ -46,8 +48,15 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
           </div>
         ) : (
           messages.map((m) => (
-            <div key={m._id} className={`chat ${m.toUserId === recipientId ? "chat-end" : "chat-start"}`}>
-              <div className={`chat-bubble ${m.toUserId === recipientId ? "chat-bubble-primary" : "bg-gray-200 text-black"}`}>{m.msg}</div>
+            <div
+              key={m._id}
+              className={`chat ${m.toUserId === recipientId ? "chat-end" : "chat-start"}`}
+            >
+              <div
+                className={`chat-bubble ${m.toUserId === recipientId ? "chat-bubble-primary" : "chat-bubble-secondary"}`}
+              >
+                {m.msg}
+              </div>
             </div>
           ))
         )}
@@ -55,7 +64,13 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
 
       {/* Input Field */}
       <form onSubmit={onSend} className="flex gap-2 border-t pt-4">
-        <input type="text" placeholder="Type a message..." className="input input-bordered flex-1 rounded-xl" value={text} onChange={(e) => setText(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Type a message..."
+          className="input input-bordered flex-1 rounded-xl"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
         <button type="submit" className="btn btn-primary rounded-xl px-6">
           Send
         </button>

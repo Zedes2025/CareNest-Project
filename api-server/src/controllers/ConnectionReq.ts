@@ -47,34 +47,38 @@ export const sendConnectionRequest: RequestHandler<{}, GetConnectionReqRes, conn
 };
 
 export const getConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  // 1. Fetch the data
-  const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName profilePicture").lean().exec();
+    // 1. Fetch the data
+    const myReqs = await ConnectionReq.find({ toUserId: id }).populate("fromUserId", "firstName lastName profilePicture").lean().exec();
 
-  // 2. Check if the array is empty
-  if (!myReqs || myReqs.length === 0) {
-    res.status(404).json({ message: "No requests found for this user" });
-    return;
+    // 2. Check if the array is empty
+    if (!myReqs || myReqs.length === 0) {
+      res.status(404).json({ message: "No requests found for this user" });
+      return;
+    }
+    // 3. Return the array (Convert to plain objects with string IDs)
+    const formattedReqs = myReqs.map((req) => {
+      const sender = req.fromUserId as any;
+
+      return {
+        ...req,
+        // Use ?. to prevent 500 crashes if the sender was deleted
+        senderFirstName: sender?.firstName || "Deleted",
+        senderLastName: sender?.lastName || "User",
+        senderProfilePicture: sender?.profilePicture || "",
+        fromUserId: sender?._id?.toString() || "",
+        toUserId: req.toUserId.toString(),
+        _id: req._id.toString(),
+      };
+    });
+    // console.log(formattedReqs);
+    res.json(formattedReqs);
+  } catch (error) {
+    console.error("GET CONNECTIONS ERROR:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-  // 3. Return the array (Convert to plain objects with string IDs)
-  const formattedReqs = myReqs.map((req) => {
-    const sender = req.fromUserId as any;
-
-    return {
-      ...req,
-      // Now you can safely access the fields
-      senderFirstName: sender.firstName,
-      senderLastName: sender.lastName,
-      senderProfilePicture: sender.profilePicture,
-      // Now you can safely turn the ID into a string
-      fromUserId: sender._id.toString(),
-      toUserId: req.toUserId.toString(),
-      _id: req._id.toString(),
-    };
-  });
-  // console.log(formattedReqs);
-  res.json(formattedReqs);
 };
 
 export const myConnectionRequest: RequestHandler<Idparams, GetConnectionReqRes> = async (req, res): Promise<void> => {

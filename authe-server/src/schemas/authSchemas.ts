@@ -1,10 +1,10 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const emailError = "Please provide a valid email address.";
 const emailSchema = z
-  .string({ error: emailError })
+  .string()
   .trim()
-  .email({ error: emailError });
+  .email({ message: "Please provide a valid email address." });
 
 const basePasswordSchema = z
   .string({ error: "Password must be a string" })
@@ -12,7 +12,7 @@ const basePasswordSchema = z
   .max(30, { error: "The length of this Password is excessive." });
 
 export const registerSchema = z
-  .strictObject(
+  .object(
     {
       firstName: z
         .string()
@@ -40,7 +40,8 @@ export const registerSchema = z
   )
 
   .refine((data) => data.password === data.confirmPassword, {
-    error: "Passwords don't match",
+    message: "Passwords don't match",
+    path: ["confirmPassword"], // to set the error at that field
   });
 
 export const loginSchema = z.object({

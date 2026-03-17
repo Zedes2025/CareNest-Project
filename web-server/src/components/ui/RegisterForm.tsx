@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
-import { z } from "zod/v4";
 
 interface RegisterFormProps {
   // fieldErrors: Partial<Record<keyof RegisterFormState, string>>;

@@ -16,7 +16,7 @@ export function DocBtn() {
   return (
     <button
       onClick={handleClick}
-      className="fixed bottom-14 left-8 z-[9999] btn btn-primary btn-circle"
+      className="fixed bottom-14 left-8 z-[9999] btn btn-ai btn-circle"
     >
       📁
     </button>

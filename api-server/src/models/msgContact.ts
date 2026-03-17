@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 const msgContactSchema = new Schema({
   fromUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   toUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  msg: { type: String, required: true, minLength: 10, trim: true },
+  msg: { type: String, required: true, minLength: 1, trim: true },
   createdAt: { type: Date, default: Date.now },
 });
 

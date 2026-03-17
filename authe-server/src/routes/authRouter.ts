@@ -1,7 +1,14 @@
 import { Router } from "express";
-import { login, logout, me, refresh, register } from "#controllers";
+import {
+  login,
+  logout,
+  me,
+  refresh,
+  register,
+  changePassword,
+} from "#controllers";
 import { validateBodyZod } from "#middlewares";
-import { loginSchema, registerSchema } from "#schemas"; // TODO: use the schemas for validation
+import { loginSchema, registerSchema, changePasswordSchema } from "#schemas"; // TODO: use the schemas for validation
 
 const authRouter = Router();
 
@@ -15,4 +22,9 @@ authRouter.delete("/logout", logout);
 
 authRouter.get("/me", me);
 
+authRouter.post(
+  "/password",
+  validateBodyZod(changePasswordSchema),
+  changePassword,
+);
 export default authRouter;

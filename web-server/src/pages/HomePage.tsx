@@ -167,8 +167,8 @@ export const HomePage = () => {
           can use the search filters to search by city, availability, and type
           of help, such as helping with groceries. Click “View more” to see the
           full profile, and click “Connect” if you would like to get in touch.
-          Your connections can then be managed on the "Contacts" page in the top
-          right the navigation bar.
+          Your connections can then be managed on the "Contacts" page in the top-
+          right of the navigation bar.
         </p>
 
         {data.error && (

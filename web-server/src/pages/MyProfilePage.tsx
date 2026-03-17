@@ -32,7 +32,7 @@ import { AvailabilitySection } from "../components/profilecomponents/Availabilit
 import { MultiSelectChips } from "../components/profilecomponents/MultiSelectChips";
 
 import { ProfileDetailCard } from "../components/ui/ProfileDetailCard";
-import { ChangePassBtn } from "../components/ui/changePassBtn";
+import { ChangePassBtn } from "../components/profilecomponents/changePassBtn";
 
 type Mode = "view" | "edit";
 

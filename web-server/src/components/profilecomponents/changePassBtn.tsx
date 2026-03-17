@@ -1,26 +1,59 @@
 import { useState } from "react";
-
+import { authServiceURL } from "../../utils";
 export function ChangePassBtn() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
-    // Replace this with real password change logic (API call)
-    console.log("Current Password:", currentPassword);
-    console.log("New Password:", newPassword);
-
-    // Simple validation example
+  const handleSave = async () => {
+    // ✅ Validate FIRST
     if (!currentPassword || !newPassword) {
       alert("Please fill both fields.");
       return;
     }
 
-    alert("Password change submitted!");
-    // Reset form
-    setCurrentPassword("");
-    setNewPassword("");
-    setIsOpen(false);
+    if (currentPassword === newPassword) {
+      alert("New password must be different from current password.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const accessToken = localStorage.getItem("accessToken");
+
+      const res = await fetch(`${authServiceURL}/me`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to change password.");
+        return;
+      }
+
+      alert("Password changed successfully!");
+
+      //  Reset
+      setCurrentPassword("");
+      setNewPassword("");
+      setIsOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,7 +61,7 @@ export function ChangePassBtn() {
       {/* Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="ml-2 btn btn-primary px-6 py-3 text-lg font-semibold w-60 justify-end"
+        className="ml-2 btn btn-primary px-6 py-3 text-lg font-semibold w-60 justify-center"
       >
         Change Password
       </button>
@@ -59,8 +92,9 @@ export function ChangePassBtn() {
               <button
                 onClick={handleSave}
                 className="btn btn-primary w-full mt-2"
+                disabled={loading}
               >
-                Save
+                {loading ? "Saving..." : "Save"}
               </button>
 
               <button

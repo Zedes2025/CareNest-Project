@@ -13,7 +13,7 @@ export const promptSchema = z.strictObject({
 export const docSchema = z.strictObject({
   fileName: z
     .string()
-    .min(7, 'File name is required')
+    .min(5, 'File name is required')
     .regex(/\.[a-zA-Z0-9]+$/, 'File name must include a file extension'),
   text: z.string().min(1, 'Document text is empty')
 });

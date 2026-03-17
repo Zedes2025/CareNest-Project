@@ -162,3 +162,16 @@
 .footer {
   background-color: #f2e9d1;
 }
+
+.textpending {
+  color: #3b2f25;
+}
+
+.chat-bubble-primary {
+  background-color: #c7d69a;
+  color: #1f2a1f;
+}
+.chat-bubble-secondary {
+  background-color: #e6d9b5;
+  color: #1f2a1f;
+}

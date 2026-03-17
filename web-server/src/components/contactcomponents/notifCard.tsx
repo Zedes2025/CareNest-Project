@@ -132,7 +132,7 @@ export const NotificationCard = ({
               </button>
             </>
           ) : (
-            <span className="font-bold capitalize text-primary">
+            <span className="font-bold capitalize textpending">
               {initialStatus}
             </span>
           )}

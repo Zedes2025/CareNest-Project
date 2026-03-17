@@ -178,3 +178,60 @@ export const me: RequestHandler<{}, MeResBody> = async (req, res, next) => {
     }
   }
 };
+// change password controller that takes in the current password and new password.
+export const changePassword: RequestHandler<
+  {},
+  SuccessResMessage,
+  { currentPassword: string; newPassword: string }
+> = async (req, res, next) => {
+  const authHeader = req.header("authorization");
+  const accessToken = authHeader && authHeader.split(" ")[1];
+
+  if (!accessToken)
+    throw new Error("Please sign in", { cause: { status: 401 } });
+
+  try {
+    // verify the access token
+    const decoded = jwt.verify(
+      accessToken,
+      ACCESS_JWT_SECRET,
+    ) as jwt.JwtPayload;
+
+    if (!decoded.sub)
+      throw new Error("Invalid or expired access token", {
+        cause: { status: 401 },
+      });
+    // query the DB to find user by id that matches decoded.sub
+    const user = await User.findById(decoded.sub);
+
+    if (!user) throw new Error("User not found", { cause: { status: 404 } });
+
+    const { currentPassword, newPassword } = req.body; // destructure currentPassword and newPassword from request body
+
+    const match = await bcrypt.compare(currentPassword, user.password); // compare the current password to the hashed password in the DB with bcrypt
+
+    if (!match)
+      throw new Error("Incorrect password", { cause: { status: 401 } });
+
+    const salt = await bcrypt.genSalt(SALT_ROUNDS); // generate a salt with bcrypt
+    const hashedPW = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPW;
+    await user.save();
+
+    await RefreshToken.deleteMany({ userId: user._id });
+
+    res.json({ message: "Password updated" });
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      // if error is an because token was expired, call next with a 401 and `ACCESS_TOKEN_EXPIRED' code
+      next(
+        new Error("Expired access token", {
+          cause: { status: 401, code: "ACCESS_TOKEN_EXPIRED" },
+        }),
+      );
+    } else {
+      next(new Error("Invalid access token.", { cause: { status: 401 } }));
+    }
+  }
+};

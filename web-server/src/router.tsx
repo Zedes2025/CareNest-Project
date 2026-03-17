@@ -9,6 +9,7 @@ import { HomePage, homeLoader } from "./pages/HomePage";
 import { Documents } from "./pages/DocumentPage";
 import { DetailsPage, detailsLoader } from "./pages/DetailsPage";
 import ErrorPage from "./pages/ErrorPage";
+import { NotFoundPage } from "./pages/notFound";
 
 export const router = createBrowserRouter([
   {
@@ -43,5 +44,9 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);

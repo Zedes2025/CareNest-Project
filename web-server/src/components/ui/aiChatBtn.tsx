@@ -9,7 +9,7 @@ export function ChatBtn() {
       {open && <Chat />}{" "}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="fixed bottom-8 right-8 z-[9999] btn btn-circle btn-primary"
+        className="fixed bottom-14 right-8 z-[9999] btn btn-circle btn-primary"
       >
         Chat
       </button>

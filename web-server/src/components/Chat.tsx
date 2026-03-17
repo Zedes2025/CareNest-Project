@@ -84,7 +84,7 @@ export default function Chat() {
   return (
     <div
       // fixed chat window positioned at bottom-right
-      className="fixed bottom-20 right-8 w-80 max-h-[70vh] rounded-lg shadow-lg flex flex-col z-[9998]"
+      className="fixed bottom-26 right-8 w-80 max-h-[70vh] rounded-lg shadow-lg flex flex-col z-[9998]"
       style={{
         backgroundColor: "var(--chat-bg)",
         color: "var(--chat-text)",

@@ -6,29 +6,55 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-
+  const isInitialLoad = useRef(true);
   // Load history when the chat opens or changes
   useEffect(() => {
-    const loadMessages = async () => {
-      setLoading(true);
+    const loadMessages = async (isFirstTime = false) => {
+      // Only show spinner on the initial load
+      if (isFirstTime) {
+        setLoading(true);
+        isInitialLoad.current = true; // Reset for new recipient}
+      }
+
       try {
         const data = await getMsg(recipientId);
-        // We reverse because chat usually shows oldest at top, newest at bottom
-        setMessages(data.reverse());
+        // // We reverse because chat usually shows oldest at top, newest at bottom
+        const reversed = data.reverse();
+
+        // Use the functional update (prev) to get the LATEST messages
+        setMessages((prev) => {
+          // ONLY update state if the length is different
+          // This prevents the "scroll" effect from triggering if no new mail arrived
+          if (reversed.length !== prev.length) {
+            return reversed;
+          }
+          return prev; // Returning the exact same reference prevents re-renders
+        });
       } catch (err) {
         console.error("Chat load error:", err);
       } finally {
-        setLoading(false);
+        if (isFirstTime) setLoading(false);
       }
     };
-    loadMessages();
+    // Initial load with spinner
+    loadMessages(true);
 
-    // const intervalId = setInterval(loadMessages, 3000);
-    // return () => clearInterval(intervalId);
+    const intervalId = setInterval(() => {
+      loadMessages(false);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
   }, [recipientId]);
 
+  // Handle scrolling
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0) {
+      bottomRef.current?.scrollIntoView({
+        // Snap instantly on first load, slide smoothly for new messages
+        behavior: isInitialLoad.current ? "auto" : "smooth",
+      });
+      isInitialLoad.current = false;
+    }
   }, [messages]);
 
   const onSend = async (e: React.FormEvent) => {

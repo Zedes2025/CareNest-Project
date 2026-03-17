@@ -52,7 +52,7 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
-const passwordSchema = registerSchema.shape.password; // reuse the password validation from the register schema
+const passwordSchema = registerSchema.shape.password; // reuses the password validation from the register schema
 
 export const changePasswordSchema = z
   .object({

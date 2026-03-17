@@ -21,6 +21,8 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
       }
     };
     loadMessages();
+    const intervalId = setInterval(loadMessages, 3000);
+    return () => clearInterval(intervalId);
   }, [recipientId]);
 
   const onSend = async (e: React.FormEvent) => {

@@ -23,7 +23,7 @@ export function ChangePassBtn() {
 
       const accessToken = localStorage.getItem("accessToken");
 
-      const res = await fetch(`${authServiceURL}/me`, {
+      const res = await fetch(`${authServiceURL}/password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

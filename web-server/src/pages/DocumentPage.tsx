@@ -1,3 +1,5 @@
+import { authServiceURL } from "../utils/index";
+import { redirect } from "react-router";
 import { useState, useRef, useEffect } from "react";
 import {
   extractPdfText,
@@ -7,6 +9,7 @@ import {
   stopPlayback,
   resumePlayback,
 } from "../components/DocComponents";
+import { useLoaderData } from "react-router";
 
 const AI_SERVER_URL = import.meta.env.VITE_AI_SERVER_URL;
 if (!AI_SERVER_URL)
@@ -34,24 +37,47 @@ function fileToBase64(file: File): Promise<string> {
     reader.onerror = reject; // if there's an error, reject the promise
   });
 }
+//loader function to check authentication and fetch current user data for the Documents page.
+export const documentsLoader = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+  if (!accessToken) return redirect("/login");
+
+  const res = await fetch(`${authServiceURL}/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) return redirect("/login");
+
+  const { user } = await res.json();
+  return user;
+};
 
 export function Documents() {
+  const currentUser = useLoaderData() as { id: string; name: string } | null;
+  if (!currentUser) {
+    return <p className="text-gray-500">Loading user data...</p>;
+  }
+
   const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
 
-  const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // State to keep track of any errors during upload or AI processing
-  const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({});
-  const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
-  const [selectedSummary, setSelectedSummary] = useState<string | null>(null); // State to keep track of the currently selected document summary
-  const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref to directly access the file input element in the DOM, needed to clear it after upload
-  //Load saved documents on mount
+  const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // Upload errors
+  const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({}); // Delete errors per card
+  const [file, setFile] = useState<File | null>(null);
+  const [selectedSummary, setSelectedSummary] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // load documents only when currentUser.id is available
   useEffect(() => {
-    const saved = localStorage.getItem("myDocuments");
-    if (saved) {
-      setMyDocs(JSON.parse(saved));
-    }
-  }, []);
+    const saved = localStorage.getItem(`myDocuments_${currentUser.id}`);
+    if (saved) setMyDocs(JSON.parse(saved));
+  }, [currentUser.id]);
+
+  // --- NEW: store current userId ---
+
+  // --- NEW: fetch current user on mount and load per-user documents ---
+
   const handleUpload = async () => {
-    // Handler for the Upload button
+    if (!currentUser) return alert("Loading... please wait.");
     if (!file) return;
     const accessToken = localStorage.getItem("accessToken");
 
@@ -60,28 +86,21 @@ export function Documents() {
       return;
     }
 
-    const base64 = await fileToBase64(file); // Convert file to Base64 as string
-
-    //extarct text from the file (for AI processing later):
+    const base64 = await fileToBase64(file);
     let textContent = "";
 
     if (file.type === "application/pdf") {
-      // if it's a PDF
       textContent = await extractPdfText(file);
     } else if (
-      // if it's a Word doc
       file.type ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
       textContent = await extractDocxText(file);
     } else if (file.type === "text/plain") {
-      // txt files
       textContent = await extractTxtText(file);
     } else {
-      setUploadErr({
-        fileName: [`Unsupported file type: ${file.type}`],
-      });
-      return; // stop upload
+      setUploadErr({ fileName: [`Unsupported file type: ${file.type}`] });
+      return;
     }
 
     const res = await fetch(baseURL, {
@@ -90,41 +109,35 @@ export function Documents() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({
-        fileName: file.name,
-        text: textContent,
-      }),
+      body: JSON.stringify({ fileName: file.name, text: textContent }),
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      // if the response is not ok, show the error message from zod validation or a general error message
-
-      if (data.errors) {
-        setUploadErr(data.errors); // set field-specific errors
-      } else {
-        setUploadErr({ general: [data.message || "Something went wrong"] });
-      }
-
+      if (data.errors) setUploadErr(data.errors);
+      else setUploadErr({ general: [data.message || "Something went wrong"] });
       return;
     }
-    setUploadErr({}); // clear previous errors
-    console.log("Summary from AI server:", data);
 
-    // Update State immediately using the functional update, tempo before ai response comes back
-    // Stage 1: temporary document before AI response
+    setUploadErr({});
+
+    // Stage 1: temporary document
     const tempDoc: MyDoc = {
-      id: crypto.randomUUID(), // to have a unique id for the document in the frontend before we get the real ID
+      id: crypto.randomUUID(),
       name: file.name,
       file: base64,
       summary: "Processing...",
-      loading: true, // indicate that this document is still being processed by the AI
+      loading: true,
     };
 
     setMyDocs((prev) => {
       const updated = [...prev, tempDoc];
-      localStorage.setItem("myDocuments", JSON.stringify(updated));
+      // --- NEW: save per-user ---
+      localStorage.setItem(
+        `myDocuments_${currentUser.id}`,
+        JSON.stringify(updated),
+      );
       return updated;
     });
 
@@ -133,30 +146,26 @@ export function Documents() {
     if (!uploadErr || Object.keys(uploadErr).length === 0)
       alert("File uploaded successfully!");
 
-    // Update the document in the state with the summary and the ID from the database
-    // we use the base64 string to identify which document to update. state update:
-
     // Stage 2: update document with summary and id
-    setMyDocs((prev: MyDoc[]) =>
-      prev.map((doc: MyDoc) =>
-        doc.id === tempDoc.id // Match by the UUID we just made
+    setMyDocs((prev) =>
+      prev.map((doc) =>
+        doc.id === tempDoc.id
           ? {
               ...doc,
               summary: data.summary,
               deadline: data.deadline ?? null,
               actionRequired: data.actionRequired ?? null,
               id: data._id,
-              loading: false, // AI processing is done, we can set loading to false
+              loading: false,
             }
           : doc,
       ),
     );
 
     const savedDocs: MyDoc[] = JSON.parse(
-      localStorage.getItem("myDocuments") || "[]",
-    ) as MyDoc[];
-
-    const updatedDocs: MyDoc[] = savedDocs.map((doc: MyDoc) =>
+      localStorage.getItem(`myDocuments_${currentUser.id}`) || "[]",
+    );
+    const updatedDocs = savedDocs.map((doc) =>
       doc.id === tempDoc.id
         ? {
             ...doc,
@@ -164,18 +173,19 @@ export function Documents() {
             deadline: data.deadline ?? null,
             actionRequired: data.actionRequired ?? null,
             id: data._id,
-            loading: false, // AI processing is done, we can set loading to false
+            loading: false,
           }
         : doc,
     );
-
-    localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
+    localStorage.setItem(
+      `myDocuments_${currentUser.id}`,
+      JSON.stringify(updatedDocs),
+    );
   };
-  // Handler for deleting a document, takes the document ID as a parameter
+
   const handleDelete = async (id: string) => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      // if there's no access token, user is not logged in, show error
       setDeleteErr((prev) => ({
         ...prev,
         [id]: "No access token. Login required.",
@@ -183,7 +193,12 @@ export function Documents() {
       return;
     }
 
-    // send DELETE request first
+    // --- NEW: check user loaded ---
+    if (!currentUser.id) {
+      setDeleteErr((prev) => ({ ...prev, [id]: "User not loaded yet." }));
+      return;
+    }
+
     const res = await fetch(`${baseURL}/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -208,14 +223,13 @@ export function Documents() {
       return;
     }
 
-    //  now remove card from state/localStorage
+    // remove from state and per-user localStorage
     setMyDocs((prev) => prev.filter((doc) => doc.id !== id));
-
     const savedDocs: MyDoc[] = JSON.parse(
-      localStorage.getItem("myDocuments") || "[]",
+      localStorage.getItem(`myDocuments_${currentUser.id}`) || "[]",
     );
     localStorage.setItem(
-      "myDocuments",
+      `myDocuments_${currentUser.id}`,
       JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
     );
 
@@ -373,3 +387,192 @@ export function Documents() {
     </div>
   );
 }
+
+// const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
+
+// const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // State to keep track of any errors during upload or AI processing
+// const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({});
+// const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
+// const [selectedSummary, setSelectedSummary] = useState<string | null>(null); // State to keep track of the currently selected document summary
+// const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref to directly access the file input element in the DOM, needed to clear it after upload
+// //Load saved documents on mount
+// useEffect(() => {
+//   const saved = localStorage.getItem("myDocuments");
+//   if (saved) {
+//     setMyDocs(JSON.parse(saved));
+//   }
+// }, []);
+// const handleUpload = async () => {
+//   // Handler for the Upload button
+//   if (!file) return;
+//   const accessToken = localStorage.getItem("accessToken");
+
+//   if (!accessToken) {
+//     alert("Session expired. Please login again.");
+//     return;
+//   }
+
+//   const base64 = await fileToBase64(file); // Convert file to Base64 as string
+
+//   //extarct text from the file (for AI processing later):
+//   let textContent = "";
+
+//   if (file.type === "application/pdf") {
+//     // if it's a PDF
+//     textContent = await extractPdfText(file);
+//   } else if (
+//     // if it's a Word doc
+//     file.type ===
+//     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+//   ) {
+//     textContent = await extractDocxText(file);
+//   } else if (file.type === "text/plain") {
+//     // txt files
+//     textContent = await extractTxtText(file);
+//   } else {
+//     setUploadErr({
+//       fileName: [`Unsupported file type: ${file.type}`],
+//     });
+//     return; // stop upload
+//   }
+
+//   const res = await fetch(baseURL, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${accessToken}`,
+//     },
+//     body: JSON.stringify({
+//       fileName: file.name,
+//       text: textContent,
+//     }),
+//   });
+
+//   const data = await res.json();
+
+//   if (!res.ok) {
+//     // if the response is not ok, show the error message from zod validation or a general error message
+
+//     if (data.errors) {
+//       setUploadErr(data.errors); // set field-specific errors
+//     } else {
+//       setUploadErr({ general: [data.message || "Something went wrong"] });
+//     }
+
+//     return;
+//   }
+//   setUploadErr({}); // clear previous errors
+//   console.log("Summary from AI server:", data);
+
+//   // Update State immediately using the functional update, tempo before ai response comes back
+//   // Stage 1: temporary document before AI response
+//   const tempDoc: MyDoc = {
+//     id: crypto.randomUUID(), // to have a unique id for the document in the frontend before we get the real ID
+//     name: file.name,
+//     file: base64,
+//     summary: "Processing...",
+//     loading: true, // indicate that this document is still being processed by the AI
+//   };
+
+//   setMyDocs((prev) => {
+//     const updated = [...prev, tempDoc];
+//     localStorage.setItem("myDocuments", JSON.stringify(updated));
+//     return updated;
+//   });
+
+//   setFile(null);
+//   if (fileInputRef.current) fileInputRef.current.value = "";
+//   if (!uploadErr || Object.keys(uploadErr).length === 0)
+//     alert("File uploaded successfully!");
+
+//   // Update the document in the state with the summary and the ID from the database
+//   // we use the base64 string to identify which document to update. state update:
+
+//   // Stage 2: update document with summary and id
+//   setMyDocs((prev: MyDoc[]) =>
+//     prev.map((doc: MyDoc) =>
+//       doc.id === tempDoc.id // Match by the UUID we just made
+//         ? {
+//             ...doc,
+//             summary: data.summary,
+//             deadline: data.deadline ?? null,
+//             actionRequired: data.actionRequired ?? null,
+//             id: data._id,
+//             loading: false, // AI processing is done, we can set loading to false
+//           }
+//         : doc,
+//     ),
+//   );
+
+//   const savedDocs: MyDoc[] = JSON.parse(
+//     localStorage.getItem("myDocuments") || "[]",
+//   ) as MyDoc[];
+
+//   const updatedDocs: MyDoc[] = savedDocs.map((doc: MyDoc) =>
+//     doc.id === tempDoc.id
+//       ? {
+//           ...doc,
+//           summary: data.summary,
+//           deadline: data.deadline ?? null,
+//           actionRequired: data.actionRequired ?? null,
+//           id: data._id,
+//           loading: false, // AI processing is done, we can set loading to false
+//         }
+//       : doc,
+//   );
+
+//   localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
+// };
+// // Handler for deleting a document, takes the document ID as a parameter
+// const handleDelete = async (id: string) => {
+//   const accessToken = localStorage.getItem("accessToken");
+//   if (!accessToken) {
+//     // if there's no access token, user is not logged in, show error
+//     setDeleteErr((prev) => ({
+//       ...prev,
+//       [id]: "No access token. Login required.",
+//     }));
+//     return;
+//   }
+
+//   // send DELETE request first
+//   const res = await fetch(`${baseURL}/${id}`, {
+//     method: "DELETE",
+//     headers: { Authorization: `Bearer ${accessToken}` },
+//   });
+
+//   let data: any = {};
+//   const text = await res.text();
+//   if (text) {
+//     try {
+//       data = JSON.parse(text);
+//     } catch {}
+//   }
+
+//   if (!res.ok) {
+//     setDeleteErr((prev) => ({
+//       ...prev,
+//       [id]:
+//         data.errors?.id?.[0] || data.message || `Delete failed (${res.status})`,
+//     }));
+//     return;
+//   }
+
+//   //  now remove card from state/localStorage
+//   setMyDocs((prev) => prev.filter((doc) => doc.id !== id));
+
+//   const savedDocs: MyDoc[] = JSON.parse(
+//     localStorage.getItem("myDocuments") || "[]",
+//   );
+//   localStorage.setItem(
+//     "myDocuments",
+//     JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
+//   );
+
+//   // clear error for this card
+//   setDeleteErr((prev) => {
+//     const copy = { ...prev };
+//     delete copy[id];
+//     return copy;
+//   });
+// };

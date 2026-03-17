@@ -6,12 +6,11 @@ export function DocBtn() {
   const handleClick = () => {
     const accessToken = localStorage.getItem("accessToken");
 
-    if (!accessToken) {
-      alert("Please login to access your documents.");
-      return;
+    if (accessToken) navigate("/documents");
+    else {
+      navigate("/login");
+      alert("Please log in to access your documents.");
     }
-
-    navigate("/documents");
   };
 
   return (

@@ -5,6 +5,8 @@ import { router } from "./router.tsx";
 import "./index.css";
 import { AuthProvider } from "./contexts/AuthContext";
 
+document.documentElement.setAttribute("data-theme", "carenest");
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>

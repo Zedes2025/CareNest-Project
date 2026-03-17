@@ -18,14 +18,14 @@ export const ProfileCard = ({ user, distanceKm }: Props) => {
       <div className="card-body items-center text-center gap-3">
         <div className="avatar">
           {hasImage ? (
-            <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+            <div className="w-24 rounded-full ring ring-offset-2">
               <img
                 src={user.profilePicture as string}
                 alt={`${user.firstName} ${user.lastName}`}
               />
             </div>
           ) : (
-            <div className="placeholder w-24 rounded-full bg-base-200 ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center">
+            <div className="w-24 rounded-full bg-base-200 flex items-center justify-center">
               <span className="text-xl font-semibold">
                 {(user.firstName?.[0] ?? "?").toUpperCase()}
                 {(user.lastName?.[0] ?? "?").toUpperCase()}

@@ -44,11 +44,14 @@ export const ProfileDetailCard = ({ user, children, distanceKm }: Props) => {
         <div className="flex flex-col items-center text-center">
           <div className="avatar">
             {hasImage ? (
-              <div className="w-28 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                <img src={user.profilePicture as string} alt={`${user.firstName} ${user.lastName}`} />
+              <div className="w-28 rounded-full ring ring-offset-2">
+                <img
+                  src={user.profilePicture as string}
+                  alt={`${user.firstName} ${user.lastName}`}
+                />
               </div>
             ) : (
-              <div className="placeholder w-28 rounded-full bg-base-200 ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center">
+              <div className="w-28 rounded-full bg-base-200 flex items-center justify-center">
                 <span className="text-2xl font-semibold">
                   {(user.firstName?.[0] ?? "?").toUpperCase()}
                   {(user.lastName?.[0] ?? "?").toUpperCase()}
@@ -59,7 +62,10 @@ export const ProfileDetailCard = ({ user, children, distanceKm }: Props) => {
 
           <h1 className="mt-4 text-2xl font-semibold">
             {user.firstName} {user.lastName}
-            <span className="opacity-70"> {age === null ? "(Age -)" : `(Age ${age})`}</span>
+            <span className="opacity-70">
+              {" "}
+              {age === null ? "(Age -)" : `(Age ${age})`}
+            </span>
           </h1>
 
           <div className="mt-1 opacity-70">
@@ -70,7 +76,9 @@ export const ProfileDetailCard = ({ user, children, distanceKm }: Props) => {
 
         <div className="mt-6">
           <h2 className="text-lg font-semibold">About me</h2>
-          <p className="mt-2 whitespace-pre-line opacity-80">{user.aboutMe ?? "No description provided."}</p>
+          <p className="mt-2 whitespace-pre-line opacity-80">
+            {user.aboutMe ?? "No description provided."}
+          </p>
         </div>
 
         <div className="mt-6">
@@ -91,7 +99,17 @@ export const ProfileDetailCard = ({ user, children, distanceKm }: Props) => {
                     <td className="font-semibold">{d.label}</td>
                     {SLOTS.map((s) => {
                       const active = avail[d.key]?.has(s.key) ?? false;
-                      return <td key={s.key}>{active ? <span className="badge badge-primary badge-sm">✓</span> : <span className="opacity-40">—</span>}</td>;
+                      return (
+                        <td key={s.key}>
+                          {active ? (
+                            <span className="badge badge-primary badge-sm">
+                              ✓
+                            </span>
+                          ) : (
+                            <span className="opacity-40">—</span>
+                          )}
+                        </td>
+                      );
                     })}
                   </tr>
                 ))}

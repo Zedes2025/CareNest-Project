@@ -1,13 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
-import { getMyProfileById, updateMyProfileById, deleteMyProfileById, type ApiUserProfile, profilePictureUpdate } from "../data";
+import {
+  getMyProfileById,
+  updateMyProfileById,
+  deleteMyProfileById,
+  type ApiUserProfile,
+  profilePictureUpdate,
+} from "../data";
 import { useAuth } from "../contexts/AuthContext";
 
 import { SERVICE_OPTIONS, INTEREST_OPTIONS } from "../profile/profileOptions";
 import { type SlotKey, type Weekday } from "../profile/schedule";
 
-import { ageFromDateInput, countSelectedSlots, emptyFormState, formToApiBody, issuesToFieldErrors, profileToForm, type FieldErrors, type FormState, userUpdateSchema } from "../profile/myProfileForm";
+import {
+  ageFromDateInput,
+  countSelectedSlots,
+  emptyFormState,
+  formToApiBody,
+  issuesToFieldErrors,
+  profileToForm,
+  type FieldErrors,
+  type FormState,
+  userUpdateSchema,
+} from "../profile/myProfileForm";
 
 import { BasicInfoSection } from "../components/profilecomponents/BasicInfoSection";
 import { AboutSection } from "../components/profilecomponents/AboutSection";
@@ -16,6 +32,7 @@ import { AvailabilitySection } from "../components/profilecomponents/Availabilit
 import { MultiSelectChips } from "../components/profilecomponents/MultiSelectChips";
 
 import { ProfileDetailCard } from "../components/ui/ProfileDetailCard";
+import { ChangePassBtn } from "../components/profilecomponents/changePassBtn";
 
 type Mode = "view" | "edit";
 
@@ -41,7 +58,16 @@ export const MyProfilePage = () => {
   const canConfirmDelete = deleteText === "Delete";
 
   const canSave = useMemo(() => {
-    return form.firstName && form.lastName && form.birthday && form.aboutMe && form.address.street && form.address.houseNumber && form.address.city && form.address.plz;
+    return (
+      form.firstName &&
+      form.lastName &&
+      form.birthday &&
+      form.aboutMe &&
+      form.address.street &&
+      form.address.houseNumber &&
+      form.address.city &&
+      form.address.plz
+    );
   }, [form]);
 
   const age = useMemo(() => ageFromDateInput(form.birthday), [form.birthday]);
@@ -84,7 +110,9 @@ export const MyProfilePage = () => {
   function toggleSlot(day: Weekday, slot: SlotKey) {
     setForm((prev) => {
       const curr = prev.availability[day] ?? [];
-      const next = curr.includes(slot) ? curr.filter((s) => s !== slot) : [...curr, slot];
+      const next = curr.includes(slot)
+        ? curr.filter((s) => s !== slot)
+        : [...curr, slot];
       return { ...prev, availability: { ...prev.availability, [day]: next } };
     });
 
@@ -92,10 +120,15 @@ export const MyProfilePage = () => {
     setMessage("");
   }
 
-  function toggleArrayValue(key: "servicesOffered" | "interests", value: string) {
+  function toggleArrayValue(
+    key: "servicesOffered" | "interests",
+    value: string,
+  ) {
     setForm((prev) => {
       const curr = prev[key];
-      const next = curr.includes(value) ? curr.filter((x) => x !== value) : [...curr, value];
+      const next = curr.includes(value)
+        ? curr.filter((x) => x !== value)
+        : [...curr, value];
       return { ...prev, [key]: next };
     });
 
@@ -190,7 +223,9 @@ export const MyProfilePage = () => {
         <div className="card bg-base-100 shadow">
           <div className="card-body">
             <h1 className="card-title text-2xl">My Profile</h1>
-            <p className="opacity-70">You need to be logged in to view this page.</p>
+            <p className="opacity-70">
+              You need to be logged in to view this page.
+            </p>
             <div className="card-actions mt-4">
               <Link to="/login" className="btn btn-primary">
                 Go to login
@@ -225,7 +260,9 @@ export const MyProfilePage = () => {
             <>
               {!canSave && (
                 <div className="alert alert-warning mb-6" role="alert">
-                  <span>Your profile looks incomplete. Click “Edit” to finish it.</span>
+                  <span>
+                    Your profile looks incomplete. Click “Edit” to finish it.
+                  </span>
                 </div>
               )}
 
@@ -242,11 +279,18 @@ export const MyProfilePage = () => {
                     Delete Profile
                   </button>
 
-                  <Link to="/home" className="btn btn-outline justify-self-center">
+                  <Link
+                    to="/home"
+                    className="btn btn-outline justify-self-center"
+                  >
                     Find people
                   </Link>
 
-                  <button type="button" className="btn btn-primary justify-self-end" onClick={() => setMode("edit")}>
+                  <button
+                    type="button"
+                    className="btn btn-primary justify-self-end"
+                    onClick={() => setMode("edit")}
+                  >
                     Edit
                   </button>
                 </div>
@@ -261,7 +305,11 @@ export const MyProfilePage = () => {
                   <Link to="/home" className="btn btn-outline">
                     Find people
                   </Link>
-                  <button type="button" className="btn btn-primary" onClick={() => setMode("edit")}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setMode("edit")}
+                  >
                     Edit
                   </button>
                 </div>
@@ -272,23 +320,61 @@ export const MyProfilePage = () => {
           <div className="card bg-base-100 shadow">
             <div className="card-body">
               <h1 className="card-title text-2xl">Edit Profile</h1>
+              <ChangePassBtn />
+              <BasicInfoSection
+                form={form}
+                age={age}
+                fieldErrors={fieldErrors}
+                setField={setField}
+              />
+              <AboutSection
+                form={form}
+                fieldErrors={fieldErrors}
+                setField={setField}
+              />
+              <LocationSection
+                form={form}
+                fieldErrors={fieldErrors}
+                setField={setField}
+              />
 
-              <BasicInfoSection form={form} age={age} fieldErrors={fieldErrors} setField={setField} />
-              <AboutSection form={form} fieldErrors={fieldErrors} setField={setField} />
-              <LocationSection form={form} fieldErrors={fieldErrors} setField={setField} />
+              <AvailabilitySection
+                availability={form.availability}
+                error={fieldErrors.availability}
+                toggleSlot={toggleSlot}
+              />
 
-              <AvailabilitySection availability={form.availability} error={fieldErrors.availability} toggleSlot={toggleSlot} />
+              <MultiSelectChips
+                title="Services offered"
+                options={SERVICE_OPTIONS}
+                selected={form.servicesOffered}
+                error={fieldErrors.servicesOffered}
+                onToggle={(v) => toggleArrayValue("servicesOffered", v)}
+              />
 
-              <MultiSelectChips title="Services offered" options={SERVICE_OPTIONS} selected={form.servicesOffered} error={fieldErrors.servicesOffered} onToggle={(v) => toggleArrayValue("servicesOffered", v)} />
-
-              <MultiSelectChips title="Interests" options={INTEREST_OPTIONS} selected={form.interests} onToggle={(v) => toggleArrayValue("interests", v)} />
+              <MultiSelectChips
+                title="Interests"
+                options={INTEREST_OPTIONS}
+                selected={form.interests}
+                onToggle={(v) => toggleArrayValue("interests", v)}
+              />
 
               <div className="card-actions mt-8 justify-between">
-                <button type="button" className="btn btn-outline" onClick={onCancelEdit} disabled={saving}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={onCancelEdit}
+                  disabled={saving}
+                >
                   Cancel
                 </button>
 
-                <button className="btn btn-primary" type="button" onClick={onSave} disabled={!canSave || saving}>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={onSave}
+                  disabled={!canSave || saving}
+                >
                   {saving ? "Saving..." : "Save profile"}
                 </button>
               </div>
@@ -301,10 +387,17 @@ export const MyProfilePage = () => {
           <div className="modal-box">
             <h3 className="font-semibold text-lg">Delete profile</h3>
             <p className="mt-2">
-              Do you really want to delete your profile? Type <span className="font-mono">Delete</span> in the field below.
+              Do you really want to delete your profile? Type{" "}
+              <span className="font-mono">Delete</span> in the field below.
             </p>
 
-            <input className="input input-bordered w-full mt-4" value={deleteText} onChange={(e) => setDeleteText(e.target.value)} placeholder='Type "Delete"' disabled={deleting} />
+            <input
+              className="input input-bordered w-full mt-4"
+              value={deleteText}
+              onChange={(e) => setDeleteText(e.target.value)}
+              placeholder='Type "Delete"'
+              disabled={deleting}
+            />
 
             <div className="modal-action">
               <button
@@ -319,7 +412,12 @@ export const MyProfilePage = () => {
                 Cancel
               </button>
 
-              <button type="button" className="btn btn-error" onClick={onDelete} disabled={!canConfirmDelete || deleting}>
+              <button
+                type="button"
+                className="btn btn-error"
+                onClick={onDelete}
+                disabled={!canConfirmDelete || deleting}
+              >
                 {deleting ? "Deleting..." : "Confirm delete"}
               </button>
             </div>

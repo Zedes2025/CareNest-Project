@@ -4,13 +4,13 @@
 /* index.css */
 :root {
   /* Chat colors */
-  --chat-bg: #c8d2e0; /* main chat window background */
-  --chat-user-bubble: #a6aab4; /* user messages */
-  --chat-bot-bubble: #8eb2e4; /* bot messages */
+  --chat-bg: #f2e9d1; /* main chat window background */
+  --chat-user-bubble: #c7d69a; /* user messages */
+  --chat-bot-bubble: #e6d9b5; /* bot messages */
   --chat-text: #33373a; /* default text color */
-  --chat-btn-bg: #4f46e5; /* button background */
-  --chat-btn-text: #ffffff; /* button text */
-  --chat-btn-hover: #4338ca; /* button hover */
+  --chat-btn-bg: #c7d69a; /* button background */
+  --chat-btn-text: #1f2a1f; /* button text */
+  --chat-btn-hover: #97b384; /* button hover */
 }
 
 /* ---------- CareNest global UI overrides (Hex-based) ---------- */

@@ -1,9 +1,9 @@
 export const Footer = () => {
   return (
-    <>
-      <div className="container">
-        <div className="pb-4 mt-2 text-center">All rights reserved 2026</div>
+    <footer className="w-full footer">
+      <div className="mx-auto max-w-6xl px-4 py-4 text-center">
+        All rights reserved 2026
       </div>
-    </>
+    </footer>
   );
 };

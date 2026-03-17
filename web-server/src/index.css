@@ -4,11 +4,174 @@
 /* index.css */
 :root {
   /* Chat colors */
-  --chat-bg: #c8d2e0; /* main chat window background */
-  --chat-user-bubble: #a6aab4; /* user messages */
-  --chat-bot-bubble: #8eb2e4; /* bot messages */
+  --chat-bg: #f2e9d1; /* main chat window background */
+  --chat-user-bubble: #c7d69a; /* user messages */
+  --chat-bot-bubble: #e6d9b5; /* bot messages */
   --chat-text: #33373a; /* default text color */
-  --chat-btn-bg: #4f46e5; /* button background */
-  --chat-btn-text: #ffffff; /* button text */
-  --chat-btn-hover: #4338ca; /* button hover */
+  --chat-btn-bg: #c7d69a; /* button background */
+  --chat-btn-text: #1f2a1f; /* button text */
+  --chat-btn-hover: #97b384; /* button hover */
+}
+
+/* ---------- CareNest global UI overrides (Hex-based) ---------- */
+.min-h-dvh {
+  background-color: #e6d9b5;
+  color: #3b2f25;
+}
+
+/* Cards */
+.card {
+  background-color: #f2e9d1; /* lighter cream than background */
+  border: 1px solid rgba(179, 148, 116, 0.75);
+}
+
+.card.shadow,
+.card.shadow-xl,
+.card.shadow-lg {
+  box-shadow: 0 10px 28px rgba(59, 47, 37, 0.16);
+}
+
+/* Buttons (default + primary) */
+.btn {
+  border-radius: 1.5rem; /* consistent rounded look */
+}
+
+/* Primary button look */
+.btn-primary,
+.btn.btn-primary {
+  background-color: #c7d69a;
+  border-color: #c7d69a;
+  color: #1f2a1f;
+}
+.btn-primary:hover,
+.btn.btn-primary:hover {
+  background-color: #97b384;
+  border-color: #97b384;
+  color: #1f2a1f;
+}
+
+/* Outline button: use brown border and subtle cream hover */
+.btn-outline,
+.btn.btn-outline {
+  background-color: transparent;
+  border-color: #b39474;
+  color: #3b2f25;
+}
+.btn-outline:hover,
+.btn.btn-outline:hover {
+  background-color: rgba(179, 148, 116, 0.18);
+  border-color: #b39474;
+  color: #3b2f25;
+}
+
+/* Ghost button (e.g. pagination label) */
+.btn-ghost,
+.btn.btn-ghost {
+  color: #3b2f25;
+}
+.btn-ghost:hover,
+.btn.btn-ghost:hover {
+  background-color: rgba(179, 148, 116, 0.18);
+}
+
+/* Inputs / selects / textareas */
+.input,
+.select,
+.textarea {
+  background-color: #f2e9d1;
+  border-color: #b39474;
+  color: #3b2f25;
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: rgba(59, 47, 37, 0.65);
+}
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: 2px solid #f4b89f;
+  outline-offset: 2px;
+  border-color: #f4b89f;
+}
+
+/* Badges */
+.badge {
+  border-radius: 9999px;
+}
+.badge-outline {
+  border-color: #b39474;
+  color: #3b2f25;
+  background-color: transparent;
+}
+.badge-ghost {
+  background-color: rgba(179, 148, 116, 0.18);
+  color: #3b2f25;
+  border-color: transparent;
+}
+
+/* Alerts (optional) */
+.alert {
+  border: 1px solid #b39474;
+  background-color: rgba(230, 217, 181, 0.75);
+  color: #3b2f25;
+}
+.alert-error {
+  border-color: #c86b5a;
+  background-color: rgba(244, 184, 159, 0.35);
+}
+.alert-warning {
+  border-color: #f4b89f;
+  background-color: rgba(244, 184, 159, 0.25);
+}
+
+/* Tables (optional for availability tables) */
+.table {
+  background-color: transparent;
+}
+.table th {
+  color: #3b2f25;
+}
+.table td {
+  border-color: rgba(179, 148, 116, 0.35);
+}
+
+/*image background*/
+.ring-primary {
+  background-color: rgba(199, 214, 154, 0.5);
+  border-color: rgba(59, 47, 37, 0.16);
+}
+
+/*Checkmarks*/
+.badge-primary {
+  background-color: rgba(199, 214, 154, 0.5);
+  color: #1f2a1f;
+  border-color: #1f2a1f;
+}
+
+/*Modal box*/
+.modal-box {
+  background-color: #f2e9d1;
+  border-color: #b39474;
+  color: #3b2f25;
+}
+
+.navbar {
+  background-color: #f2e9d1;
+}
+
+.footer {
+  background-color: #f2e9d1;
+}
+
+.textpending {
+  color: #3b2f25;
+}
+
+.chat-bubble-primary {
+  background-color: #c7d69a;
+  color: #1f2a1f;
+}
+.chat-bubble-secondary {
+  background-color: #e6d9b5;
+  color: #1f2a1f;
 }

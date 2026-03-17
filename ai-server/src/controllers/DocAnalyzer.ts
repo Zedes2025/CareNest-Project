@@ -21,8 +21,8 @@ Analyze the document and extract the following information.
 
 {
   "summary": "short summary (max 3 sentences)",
-  "deadline": "deadline mentioned in the document or null (max 3-4 words)",
-  "actionRequired": "action the reader must take or null (max 3-4 words)"
+  "deadline": "deadline mentioned in the document or null (max 3-4 words). Avoid non-English words",
+  "actionRequired": "action the reader must take or null (max 3-4 words). Avoid non-English words"
 }
 
 Rules:

@@ -75,7 +75,7 @@ export const DetailsPage = () => {
               Back
             </Link>
             <button
-              className="btn bg-blue-800 text-white"
+              className="btn btn-primary"
               disabled={isSending}
               onClick={handleConnect}
             >
@@ -91,7 +91,7 @@ export const DetailsPage = () => {
                 </h3>
                 <div className="modal-action">
                   <form method="dialog">
-                    <button className="btn">Close</button>
+                    <button className="btn btn-primary">Close</button>
                   </form>
                 </div>
               </div>

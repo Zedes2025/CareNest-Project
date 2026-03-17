@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
+import bg from "../../assets/auth-bg.jpg";
 
 interface RegisterFormProps {
   onSubmit: (data: RegisterFormState) => void;
@@ -77,9 +78,9 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base-200 px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-cover bg-center" style={{ backgroundImage: `url(${bg})` }}>
       <div className="w-full max-w-md">
-        <div className="card bg-base-100 shadow-xl">
+        <div className="card bg-base-100/85 backdrop-blur shadow-xl">
           <div className="card-body">
             <h1 className="card-title justify-center text-2xl">Register</h1>
             {formMessage && (

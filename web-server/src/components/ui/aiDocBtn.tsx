@@ -6,18 +6,17 @@ export function DocBtn() {
   const handleClick = () => {
     const accessToken = localStorage.getItem("accessToken");
 
-    if (!accessToken) {
-      alert("Please login to access your documents.");
-      return;
+    if (accessToken) navigate("/documents");
+    else {
+      navigate("/login");
+      alert("Please log in to access your documents.");
     }
-
-    navigate("/documents");
   };
 
   return (
     <button
       onClick={handleClick}
-      className="fixed bottom-14 left-8 z-[9999] btn btn-primary btn-circle"
+      className="fixed bottom-14 left-8 z-[9999] btn btn-ai btn-circle"
     >
       📁
     </button>

@@ -23,21 +23,19 @@ type MyDoc = {
   summary?: string;
   deadline?: string;
   actionRequired?: string;
-  loading?: boolean; // optional field to indicate if the document is still being processed by the AI
+  loading?: boolean;
 };
 
 function fileToBase64(file: File): Promise<string> {
-  // helper function to convert file to base64 string
   return new Promise((resolve, reject) => {
-    const reader = new FileReader(); // create a new FileReader to read the file
-
-    reader.readAsDataURL(file); // read the file as a data URL (base64)
-
-    reader.onload = () => resolve(reader.result as string); // when reading is done, resolve the promise with the base64 string
-    reader.onerror = reject; // if there's an error, reject the promise
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
   });
 }
-//loader function to check authentication and fetch current user data for the Documents page.
+
+// Loader for Documents page
 export const documentsLoader = async () => {
   const accessToken = localStorage.getItem("accessToken");
   if (!accessToken) return redirect("/login");
@@ -45,7 +43,6 @@ export const documentsLoader = async () => {
   const res = await fetch(`${authServiceURL}/me`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-
   if (!res.ok) return redirect("/login");
 
   const { user } = await res.json();
@@ -54,51 +51,47 @@ export const documentsLoader = async () => {
 
 export function Documents() {
   const currentUser = useLoaderData() as { id: string; name: string } | null;
-  if (!currentUser) {
+
+  if (!currentUser)
     return <p className="text-gray-500">Loading user data...</p>;
-  }
+
+  const savedDocsKey = `myDocuments_${currentUser.id}`;
 
   const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
-
-  const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // Upload errors
-  const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({}); // Delete errors per card
+  const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({});
+  const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({});
   const [file, setFile] = useState<File | null>(null);
   const [selectedSummary, setSelectedSummary] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // load documents only when currentUser.id is available
+  // Load documents for current user
   useEffect(() => {
-    const saved = localStorage.getItem(`myDocuments_${currentUser.id}`);
+    const saved = localStorage.getItem(savedDocsKey);
     if (saved) setMyDocs(JSON.parse(saved));
-  }, [currentUser.id]);
-
-  // --- NEW: store current userId ---
-
-  // --- NEW: fetch current user on mount and load per-user documents ---
+  }, [savedDocsKey]);
 
   const handleUpload = async () => {
-    if (!currentUser) return alert("Loading... please wait.");
     if (!file) return;
-    const accessToken = localStorage.getItem("accessToken");
 
+    const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       alert("Session expired. Please login again.");
       return;
     }
 
     const base64 = await fileToBase64(file);
-    let textContent = "";
 
-    if (file.type === "application/pdf") {
+    let textContent = "";
+    if (file.type === "application/pdf")
       textContent = await extractPdfText(file);
-    } else if (
+    else if (
       file.type ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ) {
+    )
       textContent = await extractDocxText(file);
-    } else if (file.type === "text/plain") {
+    else if (file.type === "text/plain")
       textContent = await extractTxtText(file);
-    } else {
+    else {
       setUploadErr({ fileName: [`Unsupported file type: ${file.type}`] });
       return;
     }
@@ -122,7 +115,7 @@ export function Documents() {
 
     setUploadErr({});
 
-    // Stage 1: temporary document
+    // Stage 1: temporary doc
     const tempDoc: MyDoc = {
       id: crypto.randomUUID(),
       name: file.name,
@@ -131,41 +124,15 @@ export function Documents() {
       loading: true,
     };
 
-    setMyDocs((prev) => {
-      const updated = [...prev, tempDoc];
-      // --- NEW: save per-user ---
-      localStorage.setItem(
-        `myDocuments_${currentUser.id}`,
-        JSON.stringify(updated),
-      );
-      return updated;
-    });
+    const updatedTempDocs = [...myDocs, tempDoc];
+    setMyDocs(updatedTempDocs);
+    localStorage.setItem(savedDocsKey, JSON.stringify(updatedTempDocs));
 
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    if (!uploadErr || Object.keys(uploadErr).length === 0)
-      alert("File uploaded successfully!");
 
-    // Stage 2: update document with summary and id
-    setMyDocs((prev) =>
-      prev.map((doc) =>
-        doc.id === tempDoc.id
-          ? {
-              ...doc,
-              summary: data.summary,
-              deadline: data.deadline ?? null,
-              actionRequired: data.actionRequired ?? null,
-              id: data._id,
-              loading: false,
-            }
-          : doc,
-      ),
-    );
-
-    const savedDocs: MyDoc[] = JSON.parse(
-      localStorage.getItem(`myDocuments_${currentUser.id}`) || "[]",
-    );
-    const updatedDocs = savedDocs.map((doc) =>
+    // Stage 2: update with real data
+    const updatedDocs = updatedTempDocs.map((doc) =>
       doc.id === tempDoc.id
         ? {
             ...doc,
@@ -177,10 +144,11 @@ export function Documents() {
           }
         : doc,
     );
-    localStorage.setItem(
-      `myDocuments_${currentUser.id}`,
-      JSON.stringify(updatedDocs),
-    );
+
+    setMyDocs(updatedDocs);
+    localStorage.setItem(savedDocsKey, JSON.stringify(updatedDocs));
+
+    alert("File uploaded successfully!");
   };
 
   const handleDelete = async (id: string) => {
@@ -190,12 +158,6 @@ export function Documents() {
         ...prev,
         [id]: "No access token. Login required.",
       }));
-      return;
-    }
-
-    // --- NEW: check user loaded ---
-    if (!currentUser.id) {
-      setDeleteErr((prev) => ({ ...prev, [id]: "User not loaded yet." }));
       return;
     }
 
@@ -223,17 +185,17 @@ export function Documents() {
       return;
     }
 
-    // remove from state and per-user localStorage
-    setMyDocs((prev) => prev.filter((doc) => doc.id !== id));
+    const filteredDocs = myDocs.filter((doc) => doc.id !== id);
+    setMyDocs(filteredDocs);
+
     const savedDocs: MyDoc[] = JSON.parse(
-      localStorage.getItem(`myDocuments_${currentUser.id}`) || "[]",
+      localStorage.getItem(savedDocsKey) || "[]",
     );
     localStorage.setItem(
-      `myDocuments_${currentUser.id}`,
+      savedDocsKey,
       JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
     );
 
-    // clear error for this card
     setDeleteErr((prev) => {
       const copy = { ...prev };
       delete copy[id];
@@ -243,38 +205,30 @@ export function Documents() {
 
   return (
     <div className="p-4">
-      {/* Page header with title and description */}
       <h1 className="flex flex-col gap-2 p-6 font-bold mb-4 bg-blue-200 rounded-2xl w-full">
         Doc Analyser Bot
         <span className="text-sm font-normal text-gray-600">
           Upload your documents and let our AI analyze them for you!
         </span>
       </h1>
-      {/* File upload section */}
+
       <fieldset className="fieldset flex flex-row gap-4 mt-4">
         <legend className="fieldset-legend">Upload a file</legend>
-
-        {/* File input element */}
         <input
           type="file"
           className="file-input"
-          ref={fileInputRef} // attach ref so that it can be cleared  later
-          onChange={(e) => setFile(e.target.files?.[0] || null)} // store selected file in state
+          ref={fileInputRef}
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
         />
-
-        {/* <label className="label">Max size 2MB</label> */}
-
-        {/* Upload button */}
         <button
           className="btn btn-primary mt-2"
-          onClick={handleUpload} // call handler when clicked
-          disabled={!file} // disabled until a file is selected
+          onClick={handleUpload}
+          disabled={!file}
         >
           Upload
         </button>
       </fieldset>
-      {/* show zod schema errors */}
-      {/* Field-level errors */}
+
       {uploadErr.fileName?.map((msg, i) => (
         <p key={i} className="text-red-500 mt-2">
           {msg}
@@ -285,29 +239,24 @@ export function Documents() {
           {msg}
         </p>
       ))}
-
-      {/* General backend errors */}
       {uploadErr.general?.map((msg, i) => (
         <p key={i} className="text-red-500 mt-2">
           {msg}
         </p>
       ))}
-      {/* show selected file name */}
+
       {file && <p className="text-sm mt-2">Selected: {file.name}</p>}
+
       <h1 className="text-xl font-bold mb-4">My Documents</h1>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {myDocs.map((doc) => (
-          <div
-            key={doc.id}
-            className="border p-2 rounded flex flex-col h-full" // add flex and h-full
-          >
+          <div key={doc.id} className="border p-2 rounded flex flex-col h-full">
             {doc.loading && (
               <p className="text-sm font-bold text-gray-500 animate-pulse">
                 Analyzing...
               </p>
             )}
             <div className="flex-1">
-              {/* if deadline/action exist, show them in card*/}
               <p className="font-semibold">{doc.name}</p>
               {doc.deadline && doc.deadline !== "null" && (
                 <p className="text-sm text-red-500">Deadline: {doc.deadline}</p>
@@ -367,14 +316,11 @@ export function Documents() {
         ))}
       </div>
 
-      {/* Modal to show the selected document summary, appears when a summary is selected and can be closed with a button */}
       {selectedSummary && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg max-w-lg">
             <h2 className="text-lg font-bold mb-2">Summary</h2>
-
             <p className="text-sm">{selectedSummary}</p>
-
             <button
               className="btn btn-sm btn-primary mt-4"
               onClick={() => setSelectedSummary(null)}
@@ -388,191 +334,375 @@ export function Documents() {
   );
 }
 
-// const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
+// import { authServiceURL } from "../utils/index";
+// import { redirect } from "react-router";
+// import { useState, useRef, useEffect } from "react";
+// import {
+//   extractPdfText,
+//   extractDocxText,
+//   extractTxtText,
+//   speakMessage,
+//   stopPlayback,
+//   resumePlayback,
+// } from "../components/DocComponents";
+// import { useLoaderData } from "react-router";
 
-// const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // State to keep track of any errors during upload or AI processing
-// const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({});
-// const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
-// const [selectedSummary, setSelectedSummary] = useState<string | null>(null); // State to keep track of the currently selected document summary
-// const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref to directly access the file input element in the DOM, needed to clear it after upload
-// //Load saved documents on mount
-// useEffect(() => {
-//   const saved = localStorage.getItem("myDocuments");
-//   if (saved) {
-//     setMyDocs(JSON.parse(saved));
-//   }
-// }, []);
-// const handleUpload = async () => {
-//   // Handler for the Upload button
-//   if (!file) return;
-//   const accessToken = localStorage.getItem("accessToken");
+// const AI_SERVER_URL = import.meta.env.VITE_AI_SERVER_URL;
+// if (!AI_SERVER_URL)
+//   throw new Error("AI_SERVER_URL is required, are you missing a .env file?");
+// const baseURL = `${AI_SERVER_URL}/ai/docs`;
 
-//   if (!accessToken) {
-//     alert("Session expired. Please login again.");
-//     return;
-//   }
-
-//   const base64 = await fileToBase64(file); // Convert file to Base64 as string
-
-//   //extarct text from the file (for AI processing later):
-//   let textContent = "";
-
-//   if (file.type === "application/pdf") {
-//     // if it's a PDF
-//     textContent = await extractPdfText(file);
-//   } else if (
-//     // if it's a Word doc
-//     file.type ===
-//     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-//   ) {
-//     textContent = await extractDocxText(file);
-//   } else if (file.type === "text/plain") {
-//     // txt files
-//     textContent = await extractTxtText(file);
-//   } else {
-//     setUploadErr({
-//       fileName: [`Unsupported file type: ${file.type}`],
-//     });
-//     return; // stop upload
-//   }
-
-//   const res = await fetch(baseURL, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${accessToken}`,
-//     },
-//     body: JSON.stringify({
-//       fileName: file.name,
-//       text: textContent,
-//     }),
-//   });
-
-//   const data = await res.json();
-
-//   if (!res.ok) {
-//     // if the response is not ok, show the error message from zod validation or a general error message
-
-//     if (data.errors) {
-//       setUploadErr(data.errors); // set field-specific errors
-//     } else {
-//       setUploadErr({ general: [data.message || "Something went wrong"] });
-//     }
-
-//     return;
-//   }
-//   setUploadErr({}); // clear previous errors
-//   console.log("Summary from AI server:", data);
-
-//   // Update State immediately using the functional update, tempo before ai response comes back
-//   // Stage 1: temporary document before AI response
-//   const tempDoc: MyDoc = {
-//     id: crypto.randomUUID(), // to have a unique id for the document in the frontend before we get the real ID
-//     name: file.name,
-//     file: base64,
-//     summary: "Processing...",
-//     loading: true, // indicate that this document is still being processed by the AI
-//   };
-
-//   setMyDocs((prev) => {
-//     const updated = [...prev, tempDoc];
-//     localStorage.setItem("myDocuments", JSON.stringify(updated));
-//     return updated;
-//   });
-
-//   setFile(null);
-//   if (fileInputRef.current) fileInputRef.current.value = "";
-//   if (!uploadErr || Object.keys(uploadErr).length === 0)
-//     alert("File uploaded successfully!");
-
-//   // Update the document in the state with the summary and the ID from the database
-//   // we use the base64 string to identify which document to update. state update:
-
-//   // Stage 2: update document with summary and id
-//   setMyDocs((prev: MyDoc[]) =>
-//     prev.map((doc: MyDoc) =>
-//       doc.id === tempDoc.id // Match by the UUID we just made
-//         ? {
-//             ...doc,
-//             summary: data.summary,
-//             deadline: data.deadline ?? null,
-//             actionRequired: data.actionRequired ?? null,
-//             id: data._id,
-//             loading: false, // AI processing is done, we can set loading to false
-//           }
-//         : doc,
-//     ),
-//   );
-
-//   const savedDocs: MyDoc[] = JSON.parse(
-//     localStorage.getItem("myDocuments") || "[]",
-//   ) as MyDoc[];
-
-//   const updatedDocs: MyDoc[] = savedDocs.map((doc: MyDoc) =>
-//     doc.id === tempDoc.id
-//       ? {
-//           ...doc,
-//           summary: data.summary,
-//           deadline: data.deadline ?? null,
-//           actionRequired: data.actionRequired ?? null,
-//           id: data._id,
-//           loading: false, // AI processing is done, we can set loading to false
-//         }
-//       : doc,
-//   );
-
-//   localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
+// type MyDoc = {
+//   id?: string;
+//   name: string;
+//   file: string;
+//   summary?: string;
+//   deadline?: string;
+//   actionRequired?: string;
+//   loading?: boolean; // optional field to indicate if the document is still being processed by the AI
 // };
-// // Handler for deleting a document, takes the document ID as a parameter
-// const handleDelete = async (id: string) => {
-//   const accessToken = localStorage.getItem("accessToken");
-//   if (!accessToken) {
-//     // if there's no access token, user is not logged in, show error
-//     setDeleteErr((prev) => ({
-//       ...prev,
-//       [id]: "No access token. Login required.",
-//     }));
-//     return;
-//   }
 
-//   // send DELETE request first
-//   const res = await fetch(`${baseURL}/${id}`, {
-//     method: "DELETE",
+// function fileToBase64(file: File): Promise<string> {
+//   // helper function to convert file to base64 string
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader(); // create a new FileReader to read the file
+
+//     reader.readAsDataURL(file); // read the file as a data URL (base64)
+
+//     reader.onload = () => resolve(reader.result as string); // when reading is done, resolve the promise with the base64 string
+//     reader.onerror = reject; // if there's an error, reject the promise
+//   });
+// }
+// //loader function to check authentication and fetch current user data for the Documents page.
+// export const documentsLoader = async () => {
+//   const accessToken = localStorage.getItem("accessToken");
+//   if (!accessToken) return redirect("/login");
+
+//   const res = await fetch(`${authServiceURL}/me`, {
 //     headers: { Authorization: `Bearer ${accessToken}` },
 //   });
 
-//   let data: any = {};
-//   const text = await res.text();
-//   if (text) {
-//     try {
-//       data = JSON.parse(text);
-//     } catch {}
-//   }
+//   if (!res.ok) return redirect("/login");
 
-//   if (!res.ok) {
-//     setDeleteErr((prev) => ({
-//       ...prev,
-//       [id]:
-//         data.errors?.id?.[0] || data.message || `Delete failed (${res.status})`,
-//     }));
-//     return;
-//   }
-
-//   //  now remove card from state/localStorage
-//   setMyDocs((prev) => prev.filter((doc) => doc.id !== id));
-
-//   const savedDocs: MyDoc[] = JSON.parse(
-//     localStorage.getItem("myDocuments") || "[]",
-//   );
-//   localStorage.setItem(
-//     "myDocuments",
-//     JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
-//   );
-
-//   // clear error for this card
-//   setDeleteErr((prev) => {
-//     const copy = { ...prev };
-//     delete copy[id];
-//     return copy;
-//   });
+//   const { user } = await res.json();
+//   return user;
 // };
+
+// export function Documents() {
+//   const currentUser = useLoaderData() as { id: string; name: string } | null;
+
+//   if (!currentUser) {
+//     return <p className="text-gray-500">Loading user data...</p>;
+//   }
+
+//   const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
+//   const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({});
+//   const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({});
+//   const [file, setFile] = useState<File | null>(null);
+//   const [selectedSummary, setSelectedSummary] = useState<string | null>(null);
+//   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+//   // Load ONLY per-user documents
+//   useEffect(() => {
+//     const saved = localStorage.getItem(`myDocuments_${currentUser.id}`);
+//     if (saved) setMyDocs(JSON.parse(saved));
+//     else setMyDocs([]); //  ensure clean state if none exist
+//   }, [currentUser.id]);
+
+//   const handleUpload = async () => {
+//     if (!file) return;
+
+//     const accessToken = localStorage.getItem("accessToken");
+//     if (!accessToken) {
+//       alert("Session expired. Please login again.");
+//       return;
+//     }
+
+//     const base64 = await fileToBase64(file);
+//     let textContent = "";
+
+//     if (file.type === "application/pdf") {
+//       textContent = await extractPdfText(file);
+//     } else if (
+//       file.type ===
+//       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+//     ) {
+//       textContent = await extractDocxText(file);
+//     } else if (file.type === "text/plain") {
+//       textContent = await extractTxtText(file);
+//     } else {
+//       setUploadErr({ fileName: [`Unsupported file type: ${file.type}`] });
+//       return;
+//     }
+
+//     const res = await fetch(baseURL, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${accessToken}`,
+//       },
+//       body: JSON.stringify({ fileName: file.name, text: textContent }),
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       if (data.errors) setUploadErr(data.errors);
+//       else setUploadErr({ general: [data.message || "Something went wrong"] });
+//       return;
+//     }
+
+//     setUploadErr({});
+
+//     //  Stage 1: temporary document
+//     const tempDoc: MyDoc = {
+//       id: crypto.randomUUID(),
+//       name: file.name,
+//       file: base64,
+//       summary: "Processing...",
+//       loading: true,
+//     };
+
+//     setMyDocs((prev) => {
+//       const updated = [...prev, tempDoc];
+
+//       // Save per-user immediately
+//       localStorage.setItem(
+//         `myDocuments_${currentUser.id}`,
+//         JSON.stringify(updated),
+//       );
+
+//       return updated;
+//     });
+
+//     setFile(null);
+//     if (fileInputRef.current) fileInputRef.current.value = "";
+
+//     // Stage 2: update with server response (ONLY ONE setMyDocs — FIXED)
+//     setMyDocs((prev) => {
+//       const updated = prev.map((doc) =>
+//         doc.id === tempDoc.id
+//           ? {
+//               ...doc,
+//               summary: data.summary,
+//               deadline: data.deadline ?? null,
+//               actionRequired: data.actionRequired ?? null,
+//               id: data._id,
+//               loading: false,
+//             }
+//           : doc,
+//       );
+
+//       localStorage.setItem(
+//         `myDocuments_${currentUser.id}`,
+//         JSON.stringify(updated),
+//       );
+
+//       return updated;
+//     });
+
+//     // ✅ Alert AFTER success
+//     alert("File uploaded successfully!");
+//   };
+
+//   const handleDelete = async (id: string) => {
+//     const accessToken = localStorage.getItem("accessToken");
+
+//     if (!accessToken) {
+//       setDeleteErr((prev) => ({
+//         ...prev,
+//         [id]: "No access token. Login required.",
+//       }));
+//       return;
+//     }
+
+//     const res = await fetch(`${baseURL}/${id}`, {
+//       method: "DELETE",
+//       headers: { Authorization: `Bearer ${accessToken}` },
+//     });
+
+//     let data: any = {};
+//     const text = await res.text();
+//     if (text) {
+//       try {
+//         data = JSON.parse(text);
+//       } catch {}
+//     }
+
+//     if (!res.ok) {
+//       setDeleteErr((prev) => ({
+//         ...prev,
+//         [id]:
+//           data.errors?.id?.[0] ||
+//           data.message ||
+//           `Delete failed (${res.status})`,
+//       }));
+//       return;
+//     }
+
+//     // ✅ Update state + storage together
+//     setMyDocs((prev) => {
+//       const updated = prev.filter((doc) => doc.id !== id);
+
+//       localStorage.setItem(
+//         `myDocuments_${currentUser.id}`,
+//         JSON.stringify(updated),
+//       );
+
+//       return updated;
+//     });
+
+//     // clear error
+//     setDeleteErr((prev) => {
+//       const copy = { ...prev };
+//       delete copy[id];
+//       return copy;
+//     });
+//   };
+//   // localStorage.clear(); // ✅ Clear localStorage on every reload for testing (remove in production!)
+//   return (
+//     <div className="p-4">
+//       {/* Page header with title and description */}
+//       <h1 className="flex flex-col gap-2 p-6 font-bold mb-4 bg-blue-200 rounded-2xl w-full">
+//         Doc Analyser Bot
+//         <span className="text-sm font-normal text-gray-600">
+//           Upload your documents and let our AI analyze them for you!
+//         </span>
+//       </h1>
+//       {/* File upload section */}
+//       <fieldset className="fieldset flex flex-row gap-4 mt-4">
+//         <legend className="fieldset-legend">Upload a file</legend>
+
+//         {/* File input element */}
+//         <input
+//           type="file"
+//           className="file-input"
+//           ref={fileInputRef} // attach ref so that it can be cleared  later
+//           onChange={(e) => setFile(e.target.files?.[0] || null)} // store selected file in state
+//         />
+
+//         {/* <label className="label">Max size 2MB</label> */}
+
+//         {/* Upload button */}
+//         <button
+//           className="btn btn-primary mt-2"
+//           onClick={handleUpload} // call handler when clicked
+//           disabled={!file} // disabled until a file is selected
+//         >
+//           Upload
+//         </button>
+//       </fieldset>
+//       {/* show zod schema errors */}
+//       {/* Field-level errors */}
+//       {uploadErr.fileName?.map((msg, i) => (
+//         <p key={i} className="text-red-500 mt-2">
+//           {msg}
+//         </p>
+//       ))}
+//       {uploadErr.text?.map((msg, i) => (
+//         <p key={i} className="text-red-500 mt-2">
+//           {msg}
+//         </p>
+//       ))}
+
+//       {/* General backend errors */}
+//       {uploadErr.general?.map((msg, i) => (
+//         <p key={i} className="text-red-500 mt-2">
+//           {msg}
+//         </p>
+//       ))}
+//       {/* show selected file name */}
+//       {file && <p className="text-sm mt-2">Selected: {file.name}</p>}
+//       <h1 className="text-xl font-bold mb-4">My Documents</h1>
+//       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+//         {myDocs.map((doc) => (
+//           <div
+//             key={doc.id}
+//             className="border p-2 rounded flex flex-col h-full" // add flex and h-full
+//           >
+//             {doc.loading && (
+//               <p className="text-sm font-bold text-gray-500 animate-pulse">
+//                 Analyzing...
+//               </p>
+//             )}
+//             <div className="flex-1">
+//               {/* if deadline/action exist, show them in card*/}
+//               <p className="font-semibold">{doc.name}</p>
+//               {doc.deadline && doc.deadline !== "null" && (
+//                 <p className="text-sm text-red-500">Deadline: {doc.deadline}</p>
+//               )}
+//               {doc.actionRequired && doc.actionRequired !== "null" && (
+//                 <p className="text-sm text-green-700">
+//                   Action: {doc.actionRequired}
+//                 </p>
+//               )}
+//             </div>
+
+//             <div className="mt-2">
+//               <button
+//                 className="btn btn-sm btn-primary mt-1 p-2"
+//                 onClick={() => window.open(doc.file, "_blank")}
+//               >
+//                 Open
+//               </button>
+//               <button
+//                 className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
+//                 disabled={!doc.summary}
+//                 onClick={() => setSelectedSummary(doc.summary || "")}
+//               >
+//                 View Summary
+//               </button>
+//               <div className="inline-block bg-orange-200 rounded px-1 py-0 ml-0">
+//                 <button
+//                   onClick={() => speakMessage(doc.summary || "")}
+//                   className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+//                 >
+//                   ▶️
+//                 </button>
+//                 <button
+//                   onClick={() => stopPlayback()}
+//                   className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+//                 >
+//                   ⏸️
+//                 </button>
+//                 <button
+//                   onClick={() => resumePlayback()}
+//                   className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+//                 >
+//                   ⏯️
+//                 </button>
+//               </div>
+//               <button
+//                 className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
+//                 onClick={() => handleDelete(doc.id!)}
+//               >
+//                 Delete
+//               </button>
+//             </div>
+//             {doc.id && deleteErr[doc.id] && (
+//               <p className="text-red-500 mt-1">{deleteErr[doc.id]}</p>
+//             )}
+//           </div>
+//         ))}
+//       </div>
+
+//       {/* Modal to show the selected document summary, appears when a summary is selected and can be closed with a button */}
+//       {selectedSummary && (
+//         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+//           <div className="bg-white p-6 rounded-lg max-w-lg">
+//             <h2 className="text-lg font-bold mb-2">Summary</h2>
+
+//             <p className="text-sm">{selectedSummary}</p>
+
+//             <button
+//               className="btn btn-sm btn-primary mt-4"
+//               onClick={() => setSelectedSummary(null)}
+//             >
+//               Close
+//             </button>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }

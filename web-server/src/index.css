@@ -50,6 +50,20 @@
   color: #1f2a1f;
 }
 
+/*Ai Button */
+.btn-ai,
+.btn.btn-ai {
+  background-color: #97b384;
+  border-color: #c7d69a;
+  color: #1f2a1f;
+}
+.btn-ai:hover,
+.btn.btn-ai:hover {
+  background-color: #c7d69a;
+  border-color: #97b384;
+  color: #1f2a1f;
+}
+
 /* Outline button: use brown border and subtle cream hover */
 .btn-outline,
 .btn.btn-outline {

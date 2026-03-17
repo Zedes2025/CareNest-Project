@@ -160,13 +160,15 @@ export const HomePage = () => {
           Welcome to CareNest!
         </h1>
         <p className="mt-3 text-center opacity-70">
-          Find the right caregiver for your needs! Browse our directory and find
-          the perfect match for you. You can search by city, availability, and
-          services offered. Need somebody to walk your dog in Berlin on Monday
-          morning? Just set the right search critera and we got you covered!
-          Klick on "View more" to learn more about each of our members! If you
-          think the Person could help you, click on "Connect" on their profile!
-          They will be notified that you're interested in meeting them!
+          CareNest helps you find people in your community who offer volunteer
+          support. On the homepage, you can browse member profiles, starting
+          with the people closest to you. Each profile shows basic information,
+          the services a person offers, and when they are usually available. You
+          can use the search filters to search by city, availability, and type
+          of help, such as helping with groceries. Click “View more” to see the
+          full profile, and click “Connect” if you would like to get in touch.
+          Your connections can then be managed on the "Contacts" page in the top
+          right the navigation bar.
         </p>
 
         {data.error && (
@@ -336,6 +338,34 @@ export const HomePage = () => {
             No profiles match your filters.
           </div>
         )}
+      </div>
+      <div className="mt-6 flex flex-col gap-4">
+        <div className="join justify-center">
+          <div className="join">
+            <button
+              className="btn join-item"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={!canPrev}
+              type="button"
+            >
+              Prev
+            </button>
+            <button
+              className="btn join-item btn-ghost pointer-events-none"
+              type="button"
+            >
+              Page {currentPage} / {pageCount}
+            </button>
+            <button
+              className="btn join-item"
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={!canNext}
+              type="button"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -184,9 +184,8 @@ export const ContactPage = () => {
                       Close
                     </button>
                   </div>
-
-                  {/* The Actual Chat Window */}
-                  <div className="flex-1 min-h-0">
+                  {/* The Actual Chat Window */} {/* // length of that chat window */}
+                  <div className="h-[calc(100vh-100px)]">
                     <ChatWindow recipientId={selectedChat.id} />
                   </div>
                 </div>

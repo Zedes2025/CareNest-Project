@@ -5,11 +5,7 @@ import { useState, useRef, useEffect } from "react"; // added useRef + useEffect
 import Markdown from "react-markdown";
 import { ToastContainer } from "react-toastify";
 import { createChat } from "../data/ai.ts";
-import {
-  speakMessage,
-  stopPlayback,
-  resumePlayback,
-} from "../components/DocComponents.tsx";
+import { speakMessage, stopPlayback, resumePlayback } from "../components/DocComponents.tsx";
 
 // structure of each message in the chat
 interface Message {
@@ -76,7 +72,6 @@ export default function Chat() {
       console.error(err);
     } finally {
       setLoading(false); // stop loading state
-
       setPrompt(""); // clear textarea after sending
     }
   };
@@ -105,9 +100,7 @@ export default function Chat() {
                 className="chat-bubble"
                 style={{
                   // different color for user and assistant bubbles
-                  backgroundColor: isBot
-                    ? "var(--chat-bot-bubble)"
-                    : "var(--chat-user-bubble)",
+                  backgroundColor: isBot ? "var(--chat-bot-bubble)" : "var(--chat-user-bubble)",
                   color: "var(--chat-text)",
                 }}
               >
@@ -150,10 +143,7 @@ export default function Chat() {
       </div>
 
       {/* message input form */}
-      <form
-        onSubmit={handleSend}
-        className="p-4 border-t border-gray-500 flex flex-col gap-2"
-      >
+      <form onSubmit={handleSend} className="p-4 border-t border-gray-500 flex flex-col gap-2">
         {/* textarea for typing prompt */}
         <textarea
           value={prompt}
@@ -183,12 +173,8 @@ export default function Chat() {
             backgroundColor: "var(--chat-btn-bg)",
             color: "var(--chat-btn-text)",
           }}
-          onMouseOver={(e) =>
-            (e.currentTarget.style.backgroundColor = "var(--chat-btn-hover)")
-          }
-          onMouseOut={(e) =>
-            (e.currentTarget.style.backgroundColor = "var(--chat-btn-bg)")
-          }
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "var(--chat-btn-hover)")}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "var(--chat-btn-bg)")}
         >
           Send
         </button>

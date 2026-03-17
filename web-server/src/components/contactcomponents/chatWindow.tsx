@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { sendMsg, getMsg } from "../../data";
 
 export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Load history when the chat opens or changes
   useEffect(() => {
@@ -21,9 +22,14 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
       }
     };
     loadMessages();
-    const intervalId = setInterval(loadMessages, 3000);
-    return () => clearInterval(intervalId);
+
+    // const intervalId = setInterval(loadMessages, 3000);
+    // return () => clearInterval(intervalId);
   }, [recipientId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const onSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,38 +45,26 @@ export const ChatWindow = ({ recipientId }: { recipientId: string }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-h-full">
       {/* Scrollable Message List */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-4">
+      <div className="flex-1 overflow-y-auto  min-h-0 space-y-3 pr-2 mb-4">
         {loading ? (
           <div className="flex justify-center py-10">
             <span className="loading loading-dots"></span>
           </div>
         ) : (
           messages.map((m) => (
-            <div
-              key={m._id}
-              className={`chat ${m.toUserId === recipientId ? "chat-end" : "chat-start"}`}
-            >
-              <div
-                className={`chat-bubble ${m.toUserId === recipientId ? "chat-bubble-primary" : "chat-bubble-secondary"}`}
-              >
-                {m.msg}
-              </div>
+            <div key={m._id} className={`chat ${m.toUserId === recipientId ? "chat-end" : "chat-start"}`}>
+              <div className={`chat-bubble ${m.toUserId === recipientId ? "chat-bubble-primary" : "chat-bubble-secondary"}`}>{m.msg}</div>
             </div>
           ))
         )}
+        <div ref={bottomRef} />
       </div>
 
       {/* Input Field */}
       <form onSubmit={onSend} className="flex gap-2 border-t pt-4">
-        <input
-          type="text"
-          placeholder="Type a message..."
-          className="input input-bordered flex-1 rounded-xl"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+        <input type="text" placeholder="Type a message..." className="input input-bordered flex-1 rounded-xl" value={text} onChange={(e) => setText(e.target.value)} />
         <button type="submit" className="btn btn-primary rounded-xl px-6">
           Send
         </button>

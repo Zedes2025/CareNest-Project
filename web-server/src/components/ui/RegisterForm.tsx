@@ -3,14 +3,12 @@ import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
 
 interface RegisterFormProps {
-  // fieldErrors: Partial<Record<keyof RegisterFormState, string>>;
-  // // onChange: (field: RegisterFormState, value: string) => void;
   onSubmit: (data: RegisterFormState) => void;
   loading?: boolean;
   error?: string;
 }
 //For error message
-type FieldErrors = Partial<Record<keyof RegisterFormState, string>>;
+type FieldErrors = Partial<Record<keyof RegisterFormState, string>>; // Record is to store dictionary data type with key and value.
 
 export default function RegisterForm({ onSubmit, loading = false, error = "" }: RegisterFormProps) {
   const [values, setValues] = useState<RegisterFormState>({

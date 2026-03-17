@@ -35,20 +35,32 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-// Loader for Documents page
 export const documentsLoader = async () => {
   const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) return redirect("/login");
 
-  const res = await fetch(`${authServiceURL}/me`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!res.ok) return redirect("/login");
+  // 1. Check local storage
+  if (!accessToken) {
+    throw redirect("/login");
+  }
 
-  const { user } = await res.json();
-  return user;
+  try {
+    const res = await fetch(`${authServiceURL}/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    // 2. Check if the token is actually valid/expired
+    if (!res.ok) {
+      localStorage.removeItem("accessToken"); // Clean up dead tokens
+      throw redirect("/login");
+    }
+
+    const { user } = await res.json();
+    return user;
+  } catch (error) {
+    // 3. Handle network errors (also prevents white page)
+    throw redirect("/login");
+  }
 };
-
 export function Documents() {
   const currentUser = useLoaderData() as { id: string; name: string } | null;
 

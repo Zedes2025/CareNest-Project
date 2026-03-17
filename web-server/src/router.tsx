@@ -9,6 +9,7 @@ import { HomePage, homeLoader } from "./pages/HomePage";
 import { Documents } from "./pages/DocumentPage";
 import { DetailsPage, detailsLoader } from "./pages/DetailsPage";
 import ErrorPage from "./pages/ErrorPage";
+import { documentsLoader } from "./pages/DocumentPage";
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
           {
             path: "/documents",
             element: <Documents />,
+            loader: documentsLoader,
           },
         ],
       },

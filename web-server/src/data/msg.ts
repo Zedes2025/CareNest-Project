@@ -4,7 +4,7 @@ export async function sendMsg(toUserId: string, msg: string) {
   //   const aboutme = await me();
   const accessToken = localStorage.getItem("accessToken");
   // const fromUserId = aboutme._id;
-  const res = await fetch(`${apiServerURL}/chat/${toUserId}`, {
+  const res = await fetch(`${apiServerURL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,6 +17,23 @@ export async function sendMsg(toUserId: string, msg: string) {
   });
   if (!res.ok) {
     throw new Error("Failed to update request status");
+  }
+
+  const data = await res.json();
+  return data;
+}
+
+export async function getMsg(toUserId: string) {
+  const accessToken = localStorage.getItem("accessToken");
+  // const fromUserId = aboutme._id;
+  const res = await fetch(`${apiServerURL}/chat/${toUserId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch messages: ${res.statusText}`);
   }
 
   const data = await res.json();

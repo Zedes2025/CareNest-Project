@@ -38,6 +38,8 @@ function fileToBase64(file: File): Promise<string> {
 export function Documents() {
   const [myDocs, setMyDocs] = useState<MyDoc[]>([]);
 
+  const [uploadErr, setUploadErr] = useState<{ [key: string]: string[] }>({}); // State to keep track of any errors during upload or AI processing
+  const [deleteErr, setDeleteErr] = useState<{ [docId: string]: string }>({});
   const [file, setFile] = useState<File | null>(null); // State to keep track of the selected file
   const [selectedSummary, setSelectedSummary] = useState<string | null>(null); // State to keep track of the currently selected document summary
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref to directly access the file input element in the DOM, needed to clear it after upload
@@ -51,6 +53,12 @@ export function Documents() {
   const handleUpload = async () => {
     // Handler for the Upload button
     if (!file) return;
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("Session expired. Please login again.");
+      return;
+    }
 
     const base64 = await fileToBase64(file); // Convert file to Base64 as string
 
@@ -70,11 +78,39 @@ export function Documents() {
       // txt files
       textContent = await extractTxtText(file);
     } else {
-      console.log("Unsupported file type:", file.type);
+      setUploadErr({
+        fileName: [`Unsupported file type: ${file.type}`],
+      });
+      return; // stop upload
     }
 
-    console.log(file.type);
-    console.log("Extracted text content:", textContent);
+    const res = await fetch(baseURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        text: textContent,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // if the response is not ok, show the error message from zod validation or a general error message
+
+      if (data.errors) {
+        setUploadErr(data.errors); // set field-specific errors
+      } else {
+        setUploadErr({ general: [data.message || "Something went wrong"] });
+      }
+
+      return;
+    }
+    setUploadErr({}); // clear previous errors
+    console.log("Summary from AI server:", data);
 
     // Update State immediately using the functional update, tempo before ai response comes back
     // Stage 1: temporary document before AI response
@@ -94,30 +130,8 @@ export function Documents() {
 
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    alert("File uploaded successfully!");
-
-    const accessToken = localStorage.getItem("accessToken");
-
-    const res = await fetch(baseURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        fileName: file.name,
-        text: textContent,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      const errorMessage = data.message || "Failed to send connection request.";
-      throw new Error(errorMessage);
-    }
-
-    console.log("Summary from AI server:", data);
+    if (!uploadErr || Object.keys(uploadErr).length === 0)
+      alert("File uploaded successfully!");
 
     // Update the document in the state with the summary and the ID from the database
     // we use the base64 string to identify which document to update. state update:
@@ -157,16 +171,44 @@ export function Documents() {
 
     localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
   };
-  // allow clicking on them to see details / call AI server with document content
-
+  // Handler for deleting a document, takes the document ID as a parameter
   const handleDelete = async (id: string) => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      console.error("No access token found. User might not be logged in.");
+      // if there's no access token, user is not logged in, show error
+      setDeleteErr((prev) => ({
+        ...prev,
+        [id]: "No access token. Login required.",
+      }));
       return;
     }
 
-    //  Immediately update UI and localStorage
+    // send DELETE request first
+    const res = await fetch(`${baseURL}/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    let data: any = {};
+    const text = await res.text();
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {}
+    }
+
+    if (!res.ok) {
+      setDeleteErr((prev) => ({
+        ...prev,
+        [id]:
+          data.errors?.id?.[0] ||
+          data.message ||
+          `Delete failed (${res.status})`,
+      }));
+      return;
+    }
+
+    //  now remove card from state/localStorage
     setMyDocs((prev) => prev.filter((doc) => doc.id !== id));
 
     const savedDocs: MyDoc[] = JSON.parse(
@@ -177,29 +219,12 @@ export function Documents() {
       JSON.stringify(savedDocs.filter((doc) => doc.id !== id)),
     );
 
-    try {
-      //  Send DELETE request to server
-      const res = await fetch(`${baseURL}/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      if (!res.ok) {
-        let errorMsg = `Delete failed with status ${res.status}`;
-        try {
-          const errorData = await res.json();
-          if (errorData?.message) errorMsg += `: ${errorData.message}`;
-        } catch (_) {}
-        console.error(errorMsg);
-
-        return;
-      }
-
-      console.log(`Document ${id} successfully deleted on server.`);
-    } catch (err) {
-      console.error("Delete request failed:", err);
-      // optional: rollback UI/localStorage if needed
-    }
+    // clear error for this card
+    setDeleteErr((prev) => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
   };
 
   return (
@@ -211,7 +236,6 @@ export function Documents() {
           Upload your documents and let our AI analyze them for you!
         </span>
       </h1>
-
       {/* File upload section */}
       <fieldset className="fieldset flex flex-row gap-4 mt-4">
         <legend className="fieldset-legend">Upload a file</legend>
@@ -235,6 +259,25 @@ export function Documents() {
           Upload
         </button>
       </fieldset>
+      {/* show zod schema errors */}
+      {/* Field-level errors */}
+      {uploadErr.fileName?.map((msg, i) => (
+        <p key={i} className="text-red-500 mt-2">
+          {msg}
+        </p>
+      ))}
+      {uploadErr.text?.map((msg, i) => (
+        <p key={i} className="text-red-500 mt-2">
+          {msg}
+        </p>
+      ))}
+
+      {/* General backend errors */}
+      {uploadErr.general?.map((msg, i) => (
+        <p key={i} className="text-red-500 mt-2">
+          {msg}
+        </p>
+      ))}
       {/* show selected file name */}
       {file && <p className="text-sm mt-2">Selected: {file.name}</p>}
       <h1 className="text-xl font-bold mb-4">My Documents</h1>
@@ -252,10 +295,10 @@ export function Documents() {
             <div className="flex-1">
               {/* if deadline/action exist, show them in card*/}
               <p className="font-semibold">{doc.name}</p>
-              {doc.deadline && (
+              {doc.deadline && doc.deadline !== "null" && (
                 <p className="text-sm text-red-500">Deadline: {doc.deadline}</p>
               )}
-              {doc.actionRequired && (
+              {doc.actionRequired && doc.actionRequired !== "null" && (
                 <p className="text-sm text-green-700">
                   Action: {doc.actionRequired}
                 </p>
@@ -303,9 +346,13 @@ export function Documents() {
                 Delete
               </button>
             </div>
+            {doc.id && deleteErr[doc.id] && (
+              <p className="text-red-500 mt-1">{deleteErr[doc.id]}</p>
+            )}
           </div>
         ))}
       </div>
+
       {/* Modal to show the selected document summary, appears when a summary is selected and can be closed with a button */}
       {selectedSummary && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">

@@ -217,15 +217,19 @@ export function Documents() {
 
   return (
     <div className="p-4">
-      <h1 className="flex flex-col gap-2 p-6 font-bold mb-4 bg-blue-200 rounded-2xl w-full">
+      <h1 className="flex flex-col gap-2 p-6 font-bold mb-4 card rounded-2xl w-full">
         Doc Analyser Bot
         <span className="text-sm font-normal text-gray-600">
           Upload your documents and let our AI analyze them for you!
         </span>
       </h1>
-
       <fieldset className="fieldset flex flex-row gap-4 mt-4">
-        <legend className="fieldset-legend">Upload a file</legend>
+        <legend className="fieldset-legend">
+          Upload a file:
+          <span className="text-xs text-gray-500 ml-2 font-normal">
+            (pdf, word and text files are supported)
+          </span>
+        </legend>
         <input
           type="file"
           className="file-input"
@@ -240,7 +244,6 @@ export function Documents() {
           Upload
         </button>
       </fieldset>
-
       {uploadErr.fileName?.map((msg, i) => (
         <p key={i} className="text-red-500 mt-2">
           {msg}
@@ -256,12 +259,11 @@ export function Documents() {
           {msg}
         </p>
       ))}
-
       {file && <p className="text-sm mt-2">Selected: {file.name}</p>}
 
       <h1 className="text-xl font-bold mb-4">My Documents</h1>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {myDocs.map((doc) => (
+        {[...myDocs].reverse().map((doc) => (
           <div key={doc.id} className="border p-2 rounded flex flex-col h-full">
             {doc.loading && (
               <p className="text-sm font-bold text-gray-500 animate-pulse">
@@ -327,7 +329,6 @@ export function Documents() {
           </div>
         ))}
       </div>
-
       {selectedSummary && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg max-w-lg">

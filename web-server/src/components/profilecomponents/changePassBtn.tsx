@@ -99,7 +99,8 @@ export function ChangePassBtn() {
 
               <button
                 onClick={() => setIsOpen(false)}
-                className="btn w-full mt-1"
+                type="button"
+                className="btn btn-error justify-self-start"
               >
                 Cancel
               </button>

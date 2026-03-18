@@ -16,6 +16,7 @@ import {
 
 import { useMyCoordinates } from "../hooks/useMyCoordinates";
 import { getDistanceKmRounded } from "../utils/distance";
+import homeBg from "../assets/home-bg.jpg";
 
 type HomeLoaderData = { users: ApiUserProfile[]; error?: string };
 
@@ -156,134 +157,193 @@ export const HomePage = () => {
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-center text-3xl font-semibold">
-          Welcome to CareNest!
-        </h1>
-        <p className="mt-3 text-center opacity-70">
-          CareNest helps you find people in your community who offer volunteer
-          support. On the homepage, you can browse member profiles, starting
-          with the people closest to you. Each profile shows basic information,
-          the services a person offers, and when they are usually available. You
-          can use the search filters to search by city, availability, and type
-          of help, such as helping with groceries. Click “View more” to see the
-          full profile, and click “Connect” if you would like to get in touch.
-          Your connections can then be managed on the "Contacts" page in the top-
-          right of the navigation bar.
-        </p>
+        <div className="mx-auto max-w-6xl rounded-2xl bg-[#E6D9B5] border border-[#B39474] p-6">
+          <h1 className="text-center text-3xl font-semibold">
+            Welcome to CareNest!
+          </h1>
+          <p className="mt-3 text-center opacity-70">
+            CareNest helps you find people in your community who offer volunteer
+            support. On the homepage, you can browse member profiles, starting
+            with the people closest to you. Each profile shows basic
+            information, the services a person offers, and when they are usually
+            available. You can use the search filters to search by city,
+            availability, and type of help, such as helping with groceries.
+            Click “View more” to see the full profile, and click “Connect” if
+            you would like to get in touch. Your connections can then be managed
+            on the "Contacts" page in the top- right of the navigation bar.
+          </p>
 
-        {data.error && (
-          <div className="alert alert-error mt-6" role="alert">
-            <span>{data.error}</span>
-          </div>
-        )}
-
-        <div className="mt-8">
-          {/* Row 1: Reset + Filters */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
-            {/* Reset (only as wide as text) */}
-
-            {/* City */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">City</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                value={cityQuery}
-                onChange={(e) => {
-                  setCityQuery(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Type a city..."
-                list="city-suggestions"
-              />
-              <datalist id="city-suggestions">
-                {matchingCityOptions.slice(0, 20).map((c) => (
-                  <option key={c} value={c} />
-                ))}
-              </datalist>
+          {data.error && (
+            <div className="alert alert-error mt-6" role="alert">
+              <span>{data.error}</span>
             </div>
+          )}
 
-            {/* Times available */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Times available</span>
-              </label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <select
-                  className="select select-bordered w-full"
-                  value={dayFilter}
+          <div className="mt-8">
+            {/* Row 1: Reset + Filters */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+              {/* Reset (only as wide as text) */}
+
+              {/* City */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">City</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  value={cityQuery}
                   onChange={(e) => {
-                    setDayFilter(e.target.value);
+                    setCityQuery(e.target.value);
                     setPage(1);
                   }}
-                >
-                  <option value="">Any day</option>
-                  {DAYS.map((d) => (
-                    <option key={d.key} value={d.key}>
-                      {d.label}
-                    </option>
+                  placeholder="Type a city..."
+                  list="city-suggestions"
+                />
+                <datalist id="city-suggestions">
+                  {matchingCityOptions.slice(0, 20).map((c) => (
+                    <option key={c} value={c} />
                   ))}
-                </select>
+                </datalist>
+              </div>
 
+              {/* Times available */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Times available</span>
+                </label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <select
+                    className="select select-bordered w-full"
+                    value={dayFilter}
+                    onChange={(e) => {
+                      setDayFilter(e.target.value);
+                      setPage(1);
+                    }}
+                  >
+                    <option value="">Any day</option>
+                    {DAYS.map((d) => (
+                      <option key={d.key} value={d.key}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    className="select select-bordered w-full"
+                    value={slotFilter}
+                    onChange={(e) => {
+                      setSlotFilter(e.target.value);
+                      setPage(1);
+                    }}
+                  >
+                    <option value="">Any time</option>
+                    {SLOTS.map((s) => (
+                      <option key={s.key} value={s.key}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Services */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Services</span>
+                </label>
                 <select
                   className="select select-bordered w-full"
-                  value={slotFilter}
+                  value={serviceFilter}
                   onChange={(e) => {
-                    setSlotFilter(e.target.value);
+                    setServiceFilter(e.target.value);
                     setPage(1);
                   }}
                 >
-                  <option value="">Any time</option>
-                  {SLOTS.map((s) => (
-                    <option key={s.key} value={s.key}>
-                      {s.label}
+                  <option value="">Any service</option>
+                  {SERVICE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
               </div>
+              <div className="flex justify-center md:justify-end">
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={resetFilters}
+                >
+                  Reset filters
+                </button>
+              </div>
             </div>
 
-            {/* Services */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Services</span>
-              </label>
-              <select
-                className="select select-bordered w-full"
-                value={serviceFilter}
-                onChange={(e) => {
-                  setServiceFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">Any service</option>
-                {SERVICE_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex justify-center md:justify-end">
-              <button
-                className="btn btn-primary"
-                type="button"
-                onClick={resetFilters}
-              >
-                Reset filters
-              </button>
+            {/* Row 2: Showing + Pagination (right) */}
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="opacity-70 text-center sm:text-left">
+                Showing{" "}
+                <span className="font-semibold">{pageUsers.length}</span> of{" "}
+                <span className="font-semibold">{filtered.length}</span> results
+              </div>
+              <div className="join justify-center sm:justify-end">
+                <div className="join">
+                  <button
+                    className="btn join-item"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={!canPrev}
+                    type="button"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    className="btn join-item btn-ghost pointer-events-none"
+                    type="button"
+                  >
+                    Page {currentPage} / {pageCount}
+                  </button>
+                  <button
+                    className="btn join-item"
+                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                    disabled={!canNext}
+                    type="button"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Row 2: Showing + Pagination (right) */}
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="opacity-70 text-center sm:text-left">
-              Showing <span className="font-semibold">{pageUsers.length}</span>{" "}
-              of <span className="font-semibold">{filtered.length}</span>{" "}
-              results
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+            {pageUsers.map((u) => {
+              const otherLat = u.latitude ?? null;
+              const otherLon = u.longitude ?? null;
+
+              const distanceKm =
+                myCoords &&
+                typeof otherLat === "number" &&
+                typeof otherLon === "number"
+                  ? getDistanceKmRounded(
+                      myCoords.lat,
+                      myCoords.lon,
+                      otherLat,
+                      otherLon,
+                    )
+                  : null;
+
+              return (
+                <ProfileCard key={u._id} user={u} distanceKm={distanceKm} />
+              );
+            })}
+          </div>
+
+          {filtered.length === 0 && !data.error && (
+            <div className="mt-10 text-center opacity-70">
+              No profiles match your filters.
             </div>
-            <div className="join justify-center sm:justify-end">
+          )}
+          <div className="mt-6 flex flex-col gap-4">
+            <div className="join justify-center">
               <div className="join">
                 <button
                   className="btn join-item"
@@ -309,61 +369,6 @@ export const HomePage = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-          {pageUsers.map((u) => {
-            const otherLat = u.latitude ?? null;
-            const otherLon = u.longitude ?? null;
-
-            const distanceKm =
-              myCoords &&
-              typeof otherLat === "number" &&
-              typeof otherLon === "number"
-                ? getDistanceKmRounded(
-                    myCoords.lat,
-                    myCoords.lon,
-                    otherLat,
-                    otherLon,
-                  )
-                : null;
-
-            return <ProfileCard key={u._id} user={u} distanceKm={distanceKm} />;
-          })}
-        </div>
-
-        {filtered.length === 0 && !data.error && (
-          <div className="mt-10 text-center opacity-70">
-            No profiles match your filters.
-          </div>
-        )}
-      </div>
-      <div className="mt-6 flex flex-col gap-4">
-        <div className="join justify-center">
-          <div className="join">
-            <button
-              className="btn join-item"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={!canPrev}
-              type="button"
-            >
-              Prev
-            </button>
-            <button
-              className="btn join-item btn-ghost pointer-events-none"
-              type="button"
-            >
-              Page {currentPage} / {pageCount}
-            </button>
-            <button
-              className="btn join-item"
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              disabled={!canNext}
-              type="button"
-            >
-              Next
-            </button>
           </div>
         </div>
       </div>

@@ -24,7 +24,7 @@ export default function LoginForm({
   };
   return (
     <div
-      className="flex min-h-screen items-center justify-center px-4 bg-cover bg-center"
+      className="flex flex-1 min-h-screen items-center justify-center px-4 bg-cover bg-center bg-fixed"
       style={{ backgroundImage: `url(${bg})` }}
     >
       <div className="w-full max-w-md">

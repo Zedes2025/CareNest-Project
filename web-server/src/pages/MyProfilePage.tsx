@@ -239,202 +239,206 @@ export const MyProfilePage = () => {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <div className="mx-auto w-full max-w-3xl">
-        {message && (
-          <div className="alert alert-info mb-6" role="status">
-            <span>{message}</span>
-          </div>
-        )}
+      <div className="mx-auto max-w-4xl rounded-2xl bg-[#E6D9B5] border border-[#B39474] p-12">
+        <div className="mx-auto w-full max-w-3xl">
+          {message && (
+            <div className="alert alert-info mb-6" role="status">
+              <span>{message}</span>
+            </div>
+          )}
 
-        {loading ? (
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <div className="flex items-center gap-3">
-                <span className="loading loading-ring loading-md" />
-                <span className="opacity-70">Loading profile...</span>
+          {loading ? (
+            <div className="card bg-base-100 shadow">
+              <div className="card-body">
+                <div className="flex items-center gap-3">
+                  <span className="loading loading-ring loading-md" />
+                  <span className="opacity-70">Loading profile...</span>
+                </div>
               </div>
             </div>
-          </div>
-        ) : mode === "view" ? (
-          profile ? (
-            <>
-              {!canSave && (
-                <div className="alert alert-warning mb-6" role="alert">
-                  <span>
-                    Your profile looks incomplete. Click “Edit” to finish it.
-                  </span>
+          ) : mode === "view" ? (
+            profile ? (
+              <>
+                {!canSave && (
+                  <div className="alert alert-warning mb-6" role="alert">
+                    <span>
+                      Your profile looks incomplete. Click “Edit” to finish it.
+                    </span>
+                  </div>
+                )}
+
+                <ProfileDetailCard user={profile}>
+                  <div className="w-full grid grid-cols-3 items-center gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-error justify-self-start"
+                      onClick={() => {
+                        setDeleteText("");
+                        setDeleteOpen(true);
+                      }}
+                    >
+                      Delete Profile
+                    </button>
+
+                    <Link
+                      to="/home"
+                      className="btn btn-outline justify-self-center"
+                    >
+                      Find people
+                    </Link>
+
+                    <button
+                      type="button"
+                      className="btn btn-primary justify-self-end"
+                      onClick={() => setMode("edit")}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </ProfileDetailCard>
+              </>
+            ) : (
+              <div className="card bg-base-100 shadow">
+                <div className="card-body">
+                  <h1 className="card-title text-2xl">My Profile</h1>
+                  <p className="opacity-70">Profile could not be loaded.</p>
+                  <div className="card-actions mt-4 justify-between w-full">
+                    <Link to="/home" className="btn btn-outline">
+                      Find people
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => setMode("edit")}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
-              )}
-
-              <ProfileDetailCard user={profile}>
-                <div className="w-full grid grid-cols-3 items-center gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-error justify-self-start"
-                    onClick={() => {
-                      setDeleteText("");
-                      setDeleteOpen(true);
-                    }}
-                  >
-                    Delete Profile
-                  </button>
-
-                  <Link
-                    to="/home"
-                    className="btn btn-outline justify-self-center"
-                  >
-                    Find people
-                  </Link>
-
-                  <button
-                    type="button"
-                    className="btn btn-primary justify-self-end"
-                    onClick={() => setMode("edit")}
-                  >
-                    Edit
-                  </button>
-                </div>
-              </ProfileDetailCard>
-            </>
+              </div>
+            )
           ) : (
             <div className="card bg-base-100 shadow">
               <div className="card-body">
-                <h1 className="card-title text-2xl">My Profile</h1>
-                <p className="opacity-70">Profile could not be loaded.</p>
-                <div className="card-actions mt-4 justify-between w-full">
-                  <Link to="/home" className="btn btn-outline">
-                    Find people
-                  </Link>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h1 className="card-title text-2xl">Edit Profile</h1>
+                  <ChangePassBtn />
+                </div>
+                <BasicInfoSection
+                  form={form}
+                  age={age}
+                  fieldErrors={fieldErrors}
+                  setField={setField}
+                />
+                <AboutSection
+                  form={form}
+                  fieldErrors={fieldErrors}
+                  setField={setField}
+                />
+                <LocationSection
+                  form={form}
+                  fieldErrors={fieldErrors}
+                  setField={setField}
+                />
+
+                <AvailabilitySection
+                  availability={form.availability}
+                  error={fieldErrors.availability}
+                  toggleSlot={toggleSlot}
+                />
+
+                <MultiSelectChips
+                  title="Services offered"
+                  options={SERVICE_OPTIONS}
+                  selected={form.servicesOffered}
+                  error={fieldErrors.servicesOffered}
+                  onToggle={(v) => toggleArrayValue("servicesOffered", v)}
+                />
+
+                <MultiSelectChips
+                  title="Interests"
+                  options={INTEREST_OPTIONS}
+                  selected={form.interests}
+                  onToggle={(v) => toggleArrayValue("interests", v)}
+                />
+
+                <div className="card-actions mt-8 justify-between">
                   <button
                     type="button"
-                    className="btn btn-primary"
-                    onClick={() => setMode("edit")}
+                    className="btn btn-outline"
+                    onClick={onCancelEdit}
+                    disabled={saving}
                   >
-                    Edit
+                    Cancel
+                  </button>
+
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    onClick={onSave}
+                    disabled={!canSave || saving}
+                  >
+                    {saving ? "Saving..." : "Save profile"}
                   </button>
                 </div>
               </div>
             </div>
-          )
-        ) : (
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h1 className="card-title text-2xl">Edit Profile</h1>
-              <ChangePassBtn />
-              <BasicInfoSection
-                form={form}
-                age={age}
-                fieldErrors={fieldErrors}
-                setField={setField}
-              />
-              <AboutSection
-                form={form}
-                fieldErrors={fieldErrors}
-                setField={setField}
-              />
-              <LocationSection
-                form={form}
-                fieldErrors={fieldErrors}
-                setField={setField}
+          )}
+
+          {/* Delete modal */}
+          <div className={`modal ${deleteOpen ? "modal-open" : ""}`}>
+            <div className="modal-box">
+              <h3 className="font-semibold text-lg">Delete profile</h3>
+              <p className="mt-2">
+                Do you really want to delete your profile? Type{" "}
+                <span className="font-mono">Delete</span> in the field below.
+              </p>
+
+              <input
+                className="input input-bordered w-full mt-4"
+                value={deleteText}
+                onChange={(e) => setDeleteText(e.target.value)}
+                placeholder='Type "Delete"'
+                disabled={deleting}
               />
 
-              <AvailabilitySection
-                availability={form.availability}
-                error={fieldErrors.availability}
-                toggleSlot={toggleSlot}
-              />
-
-              <MultiSelectChips
-                title="Services offered"
-                options={SERVICE_OPTIONS}
-                selected={form.servicesOffered}
-                error={fieldErrors.servicesOffered}
-                onToggle={(v) => toggleArrayValue("servicesOffered", v)}
-              />
-
-              <MultiSelectChips
-                title="Interests"
-                options={INTEREST_OPTIONS}
-                selected={form.interests}
-                onToggle={(v) => toggleArrayValue("interests", v)}
-              />
-
-              <div className="card-actions mt-8 justify-between">
+              <div className="modal-action">
                 <button
                   type="button"
                   className="btn btn-outline"
-                  onClick={onCancelEdit}
-                  disabled={saving}
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    setDeleteText("");
+                  }}
+                  disabled={deleting}
                 >
                   Cancel
                 </button>
 
                 <button
-                  className="btn btn-primary"
                   type="button"
-                  onClick={onSave}
-                  disabled={!canSave || saving}
+                  className="btn btn-error"
+                  onClick={onDelete}
+                  disabled={!canConfirmDelete || deleting}
                 >
-                  {saving ? "Saving..." : "Save profile"}
+                  {deleting ? "Deleting..." : "Confirm delete"}
                 </button>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Delete modal */}
-        <div className={`modal ${deleteOpen ? "modal-open" : ""}`}>
-          <div className="modal-box">
-            <h3 className="font-semibold text-lg">Delete profile</h3>
-            <p className="mt-2">
-              Do you really want to delete your profile? Type{" "}
-              <span className="font-mono">Delete</span> in the field below.
-            </p>
-
-            <input
-              className="input input-bordered w-full mt-4"
-              value={deleteText}
-              onChange={(e) => setDeleteText(e.target.value)}
-              placeholder='Type "Delete"'
-              disabled={deleting}
-            />
-
-            <div className="modal-action">
+            <div className="modal-backdrop">
               <button
                 type="button"
-                className="btn btn-outline"
+                aria-label="Close"
                 onClick={() => {
+                  if (deleting) return;
                   setDeleteOpen(false);
                   setDeleteText("");
                 }}
-                disabled={deleting}
               >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-error"
-                onClick={onDelete}
-                disabled={!canConfirmDelete || deleting}
-              >
-                {deleting ? "Deleting..." : "Confirm delete"}
+                close
               </button>
             </div>
-          </div>
-
-          <div className="modal-backdrop">
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={() => {
-                if (deleting) return;
-                setDeleteOpen(false);
-                setDeleteText("");
-              }}
-            >
-              close
-            </button>
           </div>
         </div>
       </div>

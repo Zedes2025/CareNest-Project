@@ -1,6 +1,6 @@
 import type { LoginProps } from "../../types";
 import { Link } from "react-router";
-import bg from "../../assets/auth-bg.jpg";
+import bg from "../../assets/auth-bg.png";
 
 interface LoginFormProps extends LoginProps {
   loading: boolean;

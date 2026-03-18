@@ -228,7 +228,12 @@ export function Documents() {
             </h1>
 
             <fieldset className="fieldset mt-6">
-              <legend className="fieldset-legend">Upload a file</legend>
+              <legend className="fieldset-legend">
+                Upload a file:
+                <span className="text-xs text-gray-500 ml-2 font-normal">
+                  (pdf, word and text files are supported)
+                </span>
+              </legend>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <input
@@ -272,7 +277,7 @@ export function Documents() {
             <h2 className="text-xl font-bold mt-8">My Documents</h2>
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
-              {myDocs.map((doc) => (
+              {[...myDocs].reverse().map((doc) => (
                 <div key={doc.id} className="card bg-base-100 shadow border">
                   <div className="card-body p-4">
                     {doc.loading && (

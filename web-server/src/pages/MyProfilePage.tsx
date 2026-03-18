@@ -319,8 +319,10 @@ export const MyProfilePage = () => {
         ) : (
           <div className="card bg-base-100 shadow">
             <div className="card-body">
-              <h1 className="card-title text-2xl">Edit Profile</h1>
-              <ChangePassBtn />
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h1 className="card-title text-2xl">Edit Profile</h1>
+                <ChangePassBtn />
+              </div>
               <BasicInfoSection
                 form={form}
                 age={age}

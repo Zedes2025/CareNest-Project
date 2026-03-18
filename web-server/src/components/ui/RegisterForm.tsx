@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { registerSchema } from "../../schemas";
 import { useMemo, useState } from "react";
-import bg from "../../assets/auth-bg.jpg";
+import bg from "../../assets/auth-bg.png";
 
 interface RegisterFormProps {
   onSubmit: (data: RegisterFormState) => void;
@@ -11,7 +11,11 @@ interface RegisterFormProps {
 //For error message
 type FieldErrors = Partial<Record<keyof RegisterFormState, string>>; // Record is to store dictionary data type with key and value.
 
-export default function RegisterForm({ onSubmit, loading = false, error = "" }: RegisterFormProps) {
+export default function RegisterForm({
+  onSubmit,
+  loading = false,
+  error = "",
+}: RegisterFormProps) {
   const [values, setValues] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",
@@ -25,7 +29,13 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
 
   //Makesure all fields are filled out
   const canSubmit = useMemo(() => {
-    return values.firstName.length > 0 && values.lastName.length > 0 && values.email.length > 0 && values.password.length > 0 && values.confirmPassword.length > 0;
+    return (
+      values.firstName.length > 0 &&
+      values.lastName.length > 0 &&
+      values.email.length > 0 &&
+      values.password.length > 0 &&
+      values.confirmPassword.length > 0
+    );
   }, [values]);
 
   //No more error message when user corrects input, onChange is a function that is used to handle dynamic field inputs
@@ -78,7 +88,10 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 bg-cover bg-center" style={{ backgroundImage: `url(${bg})` }}>
+    <div
+      className="flex flex-1 min-h-screen items-center justify-center px-4 py-10 bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: `url(${bg})` }}
+    >
       <div className="w-full max-w-md">
         <div className="card bg-base-100/85 backdrop-blur shadow-xl">
           <div className="card-body">
@@ -99,10 +112,19 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
                 <label className="label">
                   <span className="label-text">First name</span>
                 </label>
-                <input name="firstName" type="text" className="input input-bordered w-full" value={values.firstName} onChange={onChange} autoComplete="given-name" />
+                <input
+                  name="firstName"
+                  type="text"
+                  className="input input-bordered w-full"
+                  value={values.firstName}
+                  onChange={onChange}
+                  autoComplete="given-name"
+                />
                 {fieldErrors.firstName && (
                   <label className="label">
-                    <span className="label-text-alt text-error">{fieldErrors.firstName}</span>
+                    <span className="label-text-alt text-error">
+                      {fieldErrors.firstName}
+                    </span>
                   </label>
                 )}
               </div>
@@ -110,10 +132,19 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
                 <label className="label">
                   <span className="label-text">Last name</span>
                 </label>
-                <input name="lastName" type="text" className="input input-bordered w-full" value={values.lastName} onChange={onChange} autoComplete="given-name" />
+                <input
+                  name="lastName"
+                  type="text"
+                  className="input input-bordered w-full"
+                  value={values.lastName}
+                  onChange={onChange}
+                  autoComplete="given-name"
+                />
                 {fieldErrors.lastName && (
                   <label className="label">
-                    <span className="label-text-alt text-error">{fieldErrors.lastName}</span>
+                    <span className="label-text-alt text-error">
+                      {fieldErrors.lastName}
+                    </span>
                   </label>
                 )}
               </div>
@@ -122,10 +153,19 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
                 <label className="label">
                   <span className="label-text">Email</span>
                 </label>
-                <input name="email" type="email" className="input input-bordered w-full" value={values.email} onChange={onChange} autoComplete="email" />
+                <input
+                  name="email"
+                  type="email"
+                  className="input input-bordered w-full"
+                  value={values.email}
+                  onChange={onChange}
+                  autoComplete="email"
+                />
                 {fieldErrors.email && (
                   <label className="label">
-                    <span className="label-text-alt text-error">{fieldErrors.email}</span>
+                    <span className="label-text-alt text-error">
+                      {fieldErrors.email}
+                    </span>
                   </label>
                 )}
               </div>
@@ -134,10 +174,19 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
                 <label className="label">
                   <span className="label-text">Password</span>
                 </label>
-                <input name="password" type="password" className="input input-bordered w-full" value={values.password} onChange={onChange} autoComplete="new-password" />
+                <input
+                  name="password"
+                  type="password"
+                  className="input input-bordered w-full"
+                  value={values.password}
+                  onChange={onChange}
+                  autoComplete="new-password"
+                />
                 {fieldErrors.password && (
                   <label className="label">
-                    <span className="label-text-alt text-error">{fieldErrors.password}</span>
+                    <span className="label-text-alt text-error">
+                      {fieldErrors.password}
+                    </span>
                   </label>
                 )}
               </div>
@@ -146,16 +195,29 @@ export default function RegisterForm({ onSubmit, loading = false, error = "" }: 
                 <label className="label">
                   <span className="label-text">Confirm password</span>
                 </label>
-                <input name="confirmPassword" type="password" className="input input-bordered w-full" value={values.confirmPassword} onChange={onChange} autoComplete="new-password" />
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  className="input input-bordered w-full"
+                  value={values.confirmPassword}
+                  onChange={onChange}
+                  autoComplete="new-password"
+                />
                 {fieldErrors.confirmPassword && (
                   <label className="label">
-                    <span className="label-text-alt text-error">{fieldErrors.confirmPassword}</span>
+                    <span className="label-text-alt text-error">
+                      {fieldErrors.confirmPassword}
+                    </span>
                   </label>
                 )}
               </div>
 
               <div className="card-actions mt-2">
-                <button className="btn btn-primary w-full" type="submit" disabled={!canSubmit || loading}>
+                <button
+                  className="btn btn-primary w-full"
+                  type="submit"
+                  disabled={!canSubmit || loading}
+                >
                   {loading ? (
                     <>
                       <span className="loading loading-spinner loading-sm"></span>

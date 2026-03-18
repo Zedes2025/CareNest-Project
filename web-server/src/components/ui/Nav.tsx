@@ -25,7 +25,7 @@ export const Nav = () => {
         <img src={logo} alt="CareNest" className="h-14 w-auto" />
       </div>
 
-      <div className="navbar-center">{signedIn ? <span className="hidden sm:inline text-xl font-bold font-serif opacity-70">Welcome, {user?.firstName}</span> : <span className="hidden sm:inline text-xl font-bold font-serif opacity-70">Welcome!</span>}</div>
+      <div className="navbar-center">{signedIn ? <span className="hidden sm:inline text-xl font-bold font-serif opacity-70">Welcome, {user?.firstName}!</span> : <span className="hidden sm:inline text-xl font-bold font-serif opacity-70">Welcome!</span>}</div>
 
       <div className="navbar-end gap-2">
         {signedIn ? (

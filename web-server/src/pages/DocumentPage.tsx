@@ -216,133 +216,174 @@ export function Documents() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="flex flex-col gap-2 p-6 font-bold mb-4 card rounded-2xl w-full">
-        Doc Analyser Bot
-        <span className="text-sm font-normal text-gray-600">
-          Upload your documents and let our AI analyze them for you!
-        </span>
-      </h1>
-      <fieldset className="fieldset flex flex-row gap-4 mt-4">
-        <legend className="fieldset-legend">
-          Upload a file:
-          <span className="text-xs text-gray-500 ml-2 font-normal">
-            (pdf, word and text files are supported)
-          </span>
-        </legend>
-        <input
-          type="file"
-          className="file-input"
-          ref={fileInputRef}
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-        />
-        <button
-          className="btn btn-primary mt-2"
-          onClick={handleUpload}
-          disabled={!file}
-        >
-          Upload
-        </button>
-      </fieldset>
-      {uploadErr.fileName?.map((msg, i) => (
-        <p key={i} className="text-red-500 mt-2">
-          {msg}
-        </p>
-      ))}
-      {uploadErr.text?.map((msg, i) => (
-        <p key={i} className="text-red-500 mt-2">
-          {msg}
-        </p>
-      ))}
-      {uploadErr.general?.map((msg, i) => (
-        <p key={i} className="text-red-500 mt-2">
-          {msg}
-        </p>
-      ))}
-      {file && <p className="text-sm mt-2">Selected: {file.name}</p>}
+    <div className="flex-1 bg-cover bg-center bg-fixed">
+      <div className="container mx-auto px-4 py-10">
+        <div className="card bg-base-100 shadow">
+          <div className="card-body">
+            <h1 className="text-2xl font-bold">
+              Doc Analyser Bot
+              <span className="block mt-1 text-sm font-normal opacity-70">
+                Upload your documents and let our AI analyze them for you!
+              </span>
+            </h1>
 
-      <h1 className="text-xl font-bold mb-4">My Documents</h1>
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {[...myDocs].reverse().map((doc) => (
-          <div key={doc.id} className="border p-2 rounded flex flex-col h-full">
-            {doc.loading && (
-              <p className="text-sm font-bold text-gray-500 animate-pulse">
-                Analyzing...
-              </p>
-            )}
-            <div className="flex-1">
-              <p className="font-semibold">{doc.name}</p>
-              {doc.deadline && doc.deadline !== "null" && (
-                <p className="text-sm text-red-500">Deadline: {doc.deadline}</p>
-              )}
-              {doc.actionRequired && doc.actionRequired !== "null" && (
-                <p className="text-sm text-green-700">
-                  Action: {doc.actionRequired}
-                </p>
-              )}
-            </div>
+            <fieldset className="fieldset mt-6">
+              <legend className="fieldset-legend">Upload a file</legend>
 
-            <div className="mt-2">
-              <button
-                className="btn btn-sm btn-primary mt-1 p-2"
-                onClick={() => window.open(doc.file, "_blank")}
-              >
-                Open
-              </button>
-              <button
-                className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
-                disabled={!doc.summary}
-                onClick={() => setSelectedSummary(doc.summary || "")}
-              >
-                View Summary
-              </button>
-              <div className="inline-block bg-orange-200 rounded px-1 py-0 ml-0">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <input
+                  type="file"
+                  className="file-input w-full sm:max-w-xs"
+                  ref={fileInputRef}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                />
+
                 <button
-                  onClick={() => speakMessage(doc.summary || "")}
-                  className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
+                  className="btn btn-primary"
+                  onClick={handleUpload}
+                  disabled={!file}
+                  type="button"
                 >
-                  ▶️
-                </button>
-                <button
-                  onClick={() => stopPlayback()}
-                  className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
-                >
-                  ⏸️
-                </button>
-                <button
-                  onClick={() => resumePlayback()}
-                  className="inline-flex items-center justify-center h-8 text-lg opacity-70 hover:opacity-100 rounded"
-                >
-                  ⏯️
+                  Upload
                 </button>
               </div>
-              <button
-                className="btn btn-sm btn-active m-1 ml-2 p-2 hover:bg-gray-300"
-                onClick={() => handleDelete(doc.id!)}
-              >
-                Delete
-              </button>
+
+              {file && (
+                <p className="text-sm mt-2 opacity-70">Selected: {file.name}</p>
+              )}
+            </fieldset>
+
+            {uploadErr.fileName?.map((msg, i) => (
+              <p key={i} className="text-error mt-2">
+                {msg}
+              </p>
+            ))}
+            {uploadErr.text?.map((msg, i) => (
+              <p key={i} className="text-error mt-2">
+                {msg}
+              </p>
+            ))}
+            {uploadErr.general?.map((msg, i) => (
+              <p key={i} className="text-error mt-2">
+                {msg}
+              </p>
+            ))}
+
+            <h2 className="text-xl font-bold mt-8">My Documents</h2>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {myDocs.map((doc) => (
+                <div key={doc.id} className="card bg-base-100 shadow border">
+                  <div className="card-body p-4">
+                    {doc.loading && (
+                      <p className="text-sm font-bold opacity-70 animate-pulse">
+                        Analyzing...
+                      </p>
+                    )}
+
+                    <div className="flex-1">
+                      <p className="font-semibold">{doc.name}</p>
+
+                      {doc.deadline && doc.deadline !== "null" && (
+                        <p className="text-sm text-error mt-1">
+                          Deadline: {doc.deadline}
+                        </p>
+                      )}
+
+                      {doc.actionRequired && doc.actionRequired !== "null" && (
+                        <p className="text-sm mt-1">
+                          <span className="font-semibold">Action:</span>{" "}
+                          {doc.actionRequired}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => window.open(doc.file, "_blank")}
+                        type="button"
+                      >
+                        Open
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-outline"
+                        disabled={!doc.summary}
+                        onClick={() => setSelectedSummary(doc.summary || "")}
+                        type="button"
+                      >
+                        View Summary
+                      </button>
+
+                      <div className="inline-flex items-center gap-1 rounded-xl border border-[#B39474] px-2 py-1">
+                        <button
+                          onClick={() => speakMessage(doc.summary || "")}
+                          className="btn btn-ghost btn-xs"
+                          type="button"
+                          title="Play"
+                        >
+                          ▶️
+                        </button>
+                        <button
+                          onClick={() => stopPlayback()}
+                          className="btn btn-ghost btn-xs"
+                          type="button"
+                          title="Pause"
+                        >
+                          ⏸️
+                        </button>
+                        <button
+                          onClick={() => resumePlayback()}
+                          className="btn btn-ghost btn-xs"
+                          type="button"
+                          title="Resume"
+                        >
+                          ⏯️
+                        </button>
+                      </div>
+
+                      <button
+                        className="btn btn-sm btn-error"
+                        onClick={() => handleDelete(doc.id!)}
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    {doc.id && deleteErr[doc.id] && (
+                      <p className="text-error mt-2">{deleteErr[doc.id]}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            {doc.id && deleteErr[doc.id] && (
-              <p className="text-red-500 mt-1">{deleteErr[doc.id]}</p>
+
+            {selectedSummary && (
+              <div className="fixed inset-0 bg-black/40 flex items-center justify-center px-4">
+                <div className="card bg-base-100 shadow w-full max-w-lg">
+                  <div className="card-body">
+                    <h3 className="text-lg font-bold">Summary</h3>
+                    <p className="text-sm opacity-80 whitespace-pre-line">
+                      {selectedSummary}
+                    </p>
+                    <div className="card-actions justify-end mt-4">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => setSelectedSummary(null)}
+                        type="button"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-        ))}
-      </div>
-      {selectedSummary && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-lg">
-            <h2 className="text-lg font-bold mb-2">Summary</h2>
-            <p className="text-sm">{selectedSummary}</p>
-            <button
-              className="btn btn-sm btn-primary mt-4"
-              onClick={() => setSelectedSummary(null)}
-            >
-              Close
-            </button>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

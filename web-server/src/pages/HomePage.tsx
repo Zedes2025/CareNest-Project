@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLoaderData } from "react-router";
 
 import { getPublicUsers, type ApiUserProfile } from "../data";
@@ -71,6 +71,7 @@ export const HomePage = () => {
   );
   const [page, setPage] = useState(initial?.page ?? 1);
   const myCoords = useMyCoordinates();
+  const topRef = useRef<HTMLDivElement>(null);
 
   const PAGE_SIZE = 20;
 
@@ -156,6 +157,7 @@ export const HomePage = () => {
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="mx-auto max-w-6xl">
+        <div ref={topRef} className="scroll-mt-24" />
         <h1 className="text-center text-3xl font-semibold">
           Welcome to CareNest!
         </h1>
@@ -167,8 +169,8 @@ export const HomePage = () => {
           can use the search filters to search by city, availability, and type
           of help, such as helping with groceries. Click “View more” to see the
           full profile, and click “Connect” if you would like to get in touch.
-          Your connections can then be managed on the "Contacts" page in the top-
-          right of the navigation bar.
+          Your connections can then be managed on the "Contacts" page in the
+          top- right of the navigation bar.
         </p>
 
         {data.error && (
@@ -338,33 +340,27 @@ export const HomePage = () => {
             No profiles match your filters.
           </div>
         )}
-      </div>
-      <div className="mt-6 flex flex-col gap-4">
-        <div className="join justify-center">
-          <div className="join">
-            <button
-              className="btn join-item"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={!canPrev}
-              type="button"
-            >
-              Prev
-            </button>
-            <button
-              className="btn join-item btn-ghost pointer-events-none"
-              type="button"
-            >
-              Page {currentPage} / {pageCount}
-            </button>
-            <button
-              className="btn join-item"
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              disabled={!canNext}
-              type="button"
-            >
-              Next
-            </button>
-          </div>
+        <div className="mt-6 flex flex-col gap-4">
+          {canNext && (
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!canNext}
+                onClick={() => {
+                  setPage((p) => Math.min(pageCount, p + 1));
+                  requestAnimationFrame(() => {
+                    topRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  });
+                }}
+              >
+                Next page
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

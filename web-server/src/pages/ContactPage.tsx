@@ -114,11 +114,11 @@ export const ContactPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-10 h-full flex flex-col min-h-0">
+    <div className="container mx-auto px-4 py-4 h-[calc(100dvh-160px)] flex flex-col min-h-0">
       <section className="flex flex-col flex-1 min-h-0">
         <h1 className="text-2xl font-semibold">Notifications</h1>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_2fr] flex-1 min-h-200">
+        <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_2fr] flex-1 min-h-0">
           {/* LEFT */}
           <div className="card bg-base-100 shadow border h-full min-h-0">
             <div className="card-body p-4 h-full min-h-0 flex flex-col justify-start">
@@ -185,7 +185,7 @@ export const ContactPage = () => {
                     </button>
                   </div>
                   {/* The Actual Chat Window */} {/* // length of that chat window */}
-                  <div className="h-[calc(100vh-100px)]">
+                  <div className="flex-1 min-h-0">
                     <ChatWindow recipientId={selectedChat.id} />
                   </div>
                 </div>

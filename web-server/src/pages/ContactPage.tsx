@@ -118,7 +118,7 @@ export const ContactPage = () => {
       <section className="flex flex-col flex-1 min-h-0">
         <h1 className="text-2xl font-semibold">Notifications</h1>
 
-        <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_2fr] flex-1 min-h-0">
+        <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr_2fr] flex-1 min-h-0">
           {/* LEFT */}
           <div className="card bg-base-100 shadow border h-full min-h-0">
             <div className="card-body p-4 h-full min-h-0 flex flex-col justify-start">
@@ -164,8 +164,9 @@ export const ContactPage = () => {
                   Outgoing ({acceptedOutgoing.length})
                 </button>
               </div>
-              <h2 className="text-lg font-semibold">Accepted requests</h2>
-
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold">Accepted requests</h2>
+              </div>
               <div className="mt-3 flex-1 min-h-0 overflow-y-auto pr-1">
                 <div className="space-y-4">{renderList(acceptedToRender)}</div>
               </div>
